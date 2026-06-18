@@ -1271,14 +1271,25 @@ class ModderHubApp(ctk.CTk):
                 with zipfile.ZipFile(io.BytesIO(zip_data)) as z:
                     z.extractall(tools_dir)
                     
-                # Find .exe
+                # Find .exe or .py main script
                 exe_path = None
+                py_path = None
                 for root, _, files in os.walk(tools_dir):
                     for f in files:
                         if f.endswith(".exe"):
                             exe_path = os.path.join(root, f)
                             break
+                        elif f.endswith("_app.py") or f.endswith("main.py") or f.endswith(".py"):
+                            # Store the first python file found as fallback
+                            if not py_path:
+                                py_path = os.path.join(root, f)
+                            # If it's explicitly named like the tool, prefer it
+                            if tool_name.lower() in f.lower():
+                                py_path = os.path.join(root, f)
                     if exe_path: break
+                
+                if not exe_path and py_path:
+                    exe_path = py_path
                             
                 if exe_path:
                     tools_dict = self.config.setdefault("tools", {})
