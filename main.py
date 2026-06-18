@@ -25,6 +25,19 @@ import glob
 from PIL import Image
 import markdown
 import webbrowser
+import sys
+
+# --- THUB RUNTIME ENGINE ---
+# Allows THub.exe to run .py scripts using its bundled environment
+if len(sys.argv) > 1 and sys.argv[1].endswith(".py"):
+    script_path = os.path.abspath(sys.argv[1])
+    sys.argv.pop(1)
+    os.chdir(os.path.dirname(script_path))
+    import runpy
+    runpy.run_path(script_path, run_name="__main__")
+    sys.exit(0)
+# ---------------------------
+
 import tempfile
 import urllib.request
 import urllib.error
@@ -839,10 +852,15 @@ del "%~f0"
             
     def launch_script(self, path):
         import subprocess
-        if path.endswith(".py"):
-            subprocess.Popen(["python", path], creationflags=0x00000008, cwd=os.path.dirname(path))
-        else:
-            subprocess.Popen([path], creationflags=0x00000008, cwd=os.path.dirname(path))
+        import sys
+        try:
+            if path.endswith(".py"):
+                # Use our own THub.exe (sys.executable) to run the .py script!
+                subprocess.Popen([sys.executable, path], creationflags=0x00000008, cwd=os.path.dirname(path))
+            else:
+                subprocess.Popen([path], creationflags=0x00000008, cwd=os.path.dirname(path))
+        except Exception as e:
+            messagebox.showerror("Launch Error", f"ไม่สามารถเปิดโปรแกรมได้:\n{path}\n\nข้อผิดพลาด:\n{e}", parent=self)
 
     def check_single_flagship_update(self, item, parent_frame):
         try:
