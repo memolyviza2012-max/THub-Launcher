@@ -1,0 +1,15 @@
+{
+    "active_theme": "Monokai",
+    "projects": [
+        {
+            "name": "Marvels Guardians of the Galaxy",
+            "path": "E:\\Mod_Workspace\\Marvels_GotG",
+            "status": "Completed"
+        },
+        {
+            "name": "Deus Ex Mankind Divided",
+            "path": "E:\\Mod_Workspace\\DeusEx_MD",
+            "status": "Completed"
+        }
+    ]
+}

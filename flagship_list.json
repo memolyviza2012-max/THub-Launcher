@@ -1,0 +1,47 @@
+[
+  {
+    "id": "TStudio",
+    "name": "TStudio",
+    "desc": "เครื่องมือแปลภาษา AI แบบ Line-by-Line",
+    "repo": "memolyviza2012-max/TStudio",
+    "color": "#89b4fa",
+    "exe": "tstudio_app.py",
+    "icon": "assets/TStudio.png"
+  },
+  {
+    "id": "TRun",
+    "name": "TRun",
+    "desc": "ทดสอบรันเกมแบบ Batch",
+    "repo": "memolyviza2012-max/TRun",
+    "color": "#a6e3a1",
+    "exe": "trun_app.py",
+    "icon": "assets/TRun.png"
+  },
+  {
+    "id": "TPUA",
+    "name": "TPUA",
+    "desc": "จัดแจงและปรับแต่งฟอนต์ PUA",
+    "repo": "memolyviza2012-max/TPUA",
+    "color": "#cba6f7",
+    "exe": "tpua_app.py",
+    "icon": "assets/TPUA.png"
+  },
+  {
+    "id": "TGlyph",
+    "name": "TGlyph",
+    "desc": "สร้าง Texture ไฟล์ฟอนต์",
+    "repo": "memolyviza2012-max/TGlyph",
+    "color": "#fab387",
+    "exe": "tglyph_app.py",
+    "icon": "assets/TGlyph.png"
+  },
+  {
+    "id": "TVox",
+    "name": "TVox",
+    "desc": "เล่นวิดีโอ & แปลซับไตเติ้ล FMV",
+    "repo": "memolyviza2012-max/TVox",
+    "color": "#f38ba8",
+    "exe": "tvox_app.py",
+    "icon": "assets/TVox.png"
+  }
+]

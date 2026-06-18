@@ -1,0 +1,89 @@
+26: # â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
+27: # â•‘           PROJECT CONFIGURATION â€” GOTG SPECIFIC                 â•‘
+28: # â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+51: # â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+61: - Gamora = à¸à¸²à¹‚à¸¡à¸£à¹ˆà¸²
+62: - Drax = à¹à¸”à¸£à¹‡à¸à¸‹à¹Œ
+63: - Rocket = à¸£à¹‡à¸­à¸„à¹€à¸à¹‡à¸•
+64: - Groot = à¸à¸£à¸¹à¹‰à¸—
+65: - Mantis = à¹à¸¡à¸™à¸—à¸´à¸ª
+66: - Milano = à¸¢à¸²à¸™à¸¡à¸´à¸¥à¸²à¹‚à¸™à¹ˆ
+67: - Nova Corps = à¹‚à¸™à¸§à¸²à¸„à¸­à¸£à¹Œà¸›à¸ª
+68: - Lady Hellbender = à¹€à¸¥à¸”à¸µà¹‰à¹€à¸®à¸¥à¹€à¸šà¸™à¹€à¸”à¸­à¸£à¹Œ
+69: - Knowhere = à¹‚à¸™à¸§à¹Œà¹à¸§à¸£à¹Œ
+70: - Cosmo = à¸„à¸­à¸ªà¹‚à¸¡à¹ˆ
+71: - Universal Church of Truth = à¸„à¸£à¸´à¸ªà¸•à¸ˆà¸±à¸à¸£à¹à¸«à¹ˆà¸‡à¸ªà¸±à¸ˆà¸˜à¸£à¸£à¸¡à¸ªà¸²à¸à¸¥
+72: - Grand Unifier Raker = à¹à¸à¸£à¸™à¸”à¹Œà¸¢à¸¹à¸™à¸´à¸Ÿà¸²à¸¢à¹€à¸­à¸­à¸£à¹Œà¹€à¸£à¸à¹€à¸à¸­à¸£à¹Œ
+73: - Worldmind = à¹€à¸§à¸´à¸¥à¸”à¹Œà¸¡à¸²à¸¢à¸”à¹Œ
+74: - Flark = à¸Ÿà¸¥à¸²à¸£à¹Œà¸
+75: - Scut = à¸ªà¸„à¸±à¸—
+81: 1. Literal/Direct (à¹à¸›à¸¥à¸•à¸£à¸‡à¸•à¸±à¸§)
+82: 2. Casual/Slang (à¸ à¸²à¸©à¸²à¸žà¸¹à¸”/à¸ªà¹à¸¥à¸‡)
+83: 3. Polite/Formal (à¸ªà¸¸à¸ à¸²à¸ž/à¸—à¸²à¸‡à¸à¸²à¸£)
+88: - Gamora = à¸à¸²à¹‚à¸¡à¸£à¹ˆà¸²
+89: - Drax = à¹à¸”à¸£à¹‡à¸à¸‹à¹Œ
+90: - Rocket = à¸£à¹‡à¸­à¸„à¹€à¸à¹‡à¸•
+91: - Groot = à¸à¸£à¸¹à¹‰à¸—
+92: - Mantis = à¹à¸¡à¸™à¸—à¸´à¸ª
+93: - Milano = à¸¢à¸²à¸™à¸¡à¸´à¸¥à¸²à¹‚à¸™à¹ˆ
+94: - Nova Corps = à¹‚à¸™à¸§à¸²à¸„à¸­à¸£à¹Œà¸›à¸ª
+95: - Lady Hellbender = à¹€à¸¥à¸”à¸µà¹‰à¹€à¸®à¸¥à¹€à¸šà¸™à¹€à¸”à¸­à¸£à¹Œ
+96: - Knowhere = à¹‚à¸™à¸§à¹Œà¹à¸§à¸£à¹Œ
+97: - Cosmo = à¸„à¸­à¸ªà¹‚à¸¡à¹ˆ
+98: - Universal Church of Truth = à¸„à¸£à¸´à¸ªà¸•à¸ˆà¸±à¸à¸£à¹à¸«à¹ˆà¸‡à¸ªà¸±à¸ˆà¸˜à¸£à¸£à¸¡à¸ªà¸²à¸à¸¥
+99: - Grand Unifier Raker = à¹à¸à¸£à¸™à¸”à¹Œà¸¢à¸¹à¸™à¸´à¸Ÿà¸²à¸¢à¹€à¸­à¸­à¸£à¹Œà¹€à¸£à¸à¹€à¸à¸­à¸£à¹Œ
+100: - Worldmind = à¹€à¸§à¸´à¸¥à¸”à¹Œà¸¡à¸²à¸¢à¸”à¹Œ
+101: - Flark = à¸Ÿà¸¥à¸²à¸£à¹Œà¸
+102: - Scut = à¸ªà¸„à¸±à¸—
+147: self.setWindowTitle("âš™ï¸ Settings (API & Model)")
+157: btn_save = QPushButton("ðŸ’¾ Save Settings")
+190: self.setWindowTitle("âš™ï¸ Prompt Settings (à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸²à¸šà¸¸à¸„à¸¥à¸´à¸ AI)")
+222: btn_save = QPushButton("ðŸ’¾ Save Prompts")
+275: self.setWindowTitle("ðŸ“– Glossary Editor (à¸„à¸³à¸¨à¸±à¸žà¸—à¹Œà¸šà¸±à¸‡à¸„à¸±à¸š)")
+279: self.table.setHorizontalHeaderLabels(["Wrong Word (à¸„à¸³à¸œà¸´à¸”)", "Correct Word (à¸„à¸³à¸–à¸¹à¸)"])
+283: btn_add = QPushButton("âž• Add Row")
+285: btn_del = QPushButton("ðŸ—‘ Delete Row")
+287: btn_save = QPushButton("ðŸ’¾ Save Glossary")
+334: self.setWindowTitle("ðŸ” Find & Replace")
+375: self.setWindowTitle("ðŸŽ¯ Select Translation Style")
+379: layout.addWidget(QLabel("à¹€à¸¥à¸·à¸­à¸à¸ªà¹„à¸•à¸¥à¹Œà¸„à¸³à¹à¸›à¸¥à¸—à¸µà¹ˆà¸•à¹‰à¸­à¸‡à¸à¸²à¸£:"))
+385: labels = ["1ï¸âƒ£ à¸•à¸£à¸‡à¸•à¸±à¸§ (Literal)", "2ï¸âƒ£ à¸ à¸²à¸©à¸²à¸žà¸¹à¸”/à¸ªà¹à¸¥à¸‡ (Casual)", "3ï¸âƒ£ à¸ªà¸¸à¸ à¸²à¸ž/à¸—à¸²à¸‡à¸à¸²à¸£ (Formal)"]
+397: btn_ok = QPushButton("âœ… Use Selected")
+498: has_quote = bool(re.search(r'["â€œâ€][^"â€œâ€]+["â€œâ€]', src))
+516: self.setWindowTitle(f'Translation Studio — {GAME_NAME}')
+533: # â”€â”€ Top Bar â”€â”€
+536: self.search_input.setPlaceholderText('ðŸ” Search...')
+543: btn_fr = QPushButton('ðŸ” Find/Replace')
+548: self.filter_combo.addItems(['All Rows', 'ðŸ”´ Missing', 'ðŸŸ¢ Translated', 'ðŸ‘½ AI Hallucinations', 'ðŸ’¬ Quotes/Idioms'])
+553: btn_glos = QPushButton('ðŸ“– Glossary')
+557: btn_set = QPushButton('âš™ï¸ Settings')
+561: btn_save = QPushButton('ðŸ’¾ Save CSV (Ctrl+S)')
+566: # â”€â”€ NEW: Deploy Button â”€â”€
+567: btn_deploy = QPushButton('ðŸš€ Deploy to Game')
+575: # â”€â”€ Splitter â”€â”€
+592: # â”€â”€ Right Panel â”€â”€
+597: grp1 = QGroupBox("ðŸ‡¬ðŸ‡§ 1. Original Source")
+605: grp2 = QGroupBox("ðŸ¤– 2. AI Translation (Reference)")
+613: grp3 = QGroupBox("âœï¸ 3. My Translation (Edit Here)")
+616: btn_prompts = QPushButton('âš™ï¸ AI Prompts')
+622: btn_opt = QPushButton('ðŸŽ¯ Re-translate (3 Options)')
+627: btn_local = QPushButton('ðŸ–¥ï¸ Re-translate (Local AI)')
+632: btn_re = QPushButton('ðŸ¤– Re-translate (DeepSeek)')
+637: btn_special = QPushButton('âœ¨ à¹à¸›à¸¥à¸žà¸´à¹€à¸¨à¸©...')
+641: deepseek_menu = menu.addMenu("ðŸ§  DeepSeek AI")
+642: action_idiom_ds = deepseek_menu.addAction("à¹à¸›à¸¥à¹€à¸›à¹‡à¸™ à¸§à¸¥à¸µ/à¸ªà¸³à¸™à¸§à¸™ (Idiom)")
+643: action_poem_ds = deepseek_menu.addAction("à¹à¸›à¸¥à¹€à¸›à¹‡à¸™ à¸à¸¥à¸­à¸™ (Poem)")
+644: action_quote_ds = deepseek_menu.addAction("à¹à¸›à¸¥à¹€à¸›à¹‡à¸™ à¸„à¸³à¸žà¸¹à¸”à¸šà¸¸à¸„à¸„à¸¥à¸ªà¸³à¸„à¸±à¸ (Quote)")
+650: local_menu = menu.addMenu("ðŸ’» Local LLM")
+651: action_idiom_loc = local_menu.addAction("à¹à¸›à¸¥à¹€à¸›à¹‡à¸™ à¸§à¸¥à¸µ/à¸ªà¸³à¸™à¸§à¸™ (Idiom)")
+652: action_poem_loc = local_menu.addAction("à¹à¸›à¸¥à¹€à¸›à¹‡à¸™ à¸à¸¥à¸­à¸™ (Poem)")
+653: action_quote_loc = local_menu.addAction("à¹à¸›à¸¥à¹€à¸›à¹‡à¸™ à¸„à¸³à¸žà¸¹à¸”à¸šà¸¸à¸„à¸„à¸¥à¸ªà¸³à¸„à¸±à¸ (Quote)")
+662: btn_guess = QPushButton('ðŸ¤” à¹€à¸”à¸²à¸„à¸™à¸žà¸¹à¸” (AI)')
+665: action_guess_ds = guess_menu.addAction("ðŸ§  à¹€à¸”à¸²à¸”à¹‰à¸§à¸¢ DeepSeek")
+667: action_guess_loc = guess_menu.addAction("ðŸ’» à¹€à¸”à¸²à¸”à¹‰à¸§à¸¢ Local LLM")
+684: self.statusBar().showMessage('Ready â€” Configure PROJECT CONFIGURATION then load CSV.')
+699: self.statusBar().showMessage('âš ï¸ à¸à¸£à¸¸à¸“à¸²à¸•à¸±à¹‰à¸‡à¸„à¹ˆà¸² CSV_PATH à¹ƒà¸™ PROJECT CONFIGURATION à¸à¹ˆà¸­à¸™à¹ƒà¸Šà¹‰à¸‡à¸²à¸™')
+702: self.setWindowTitle(f'Translation Studio â€” {GAME_NAME}')
+793: mode_text = "Analyze the underlying meaning of this phrase carefully. It is likely an idiom or metaphor. Translate it into a natural-sounding, contextually appropriate Thai idiom or phrase (à¸§à¸¥à¸µ/à¸ªà¸³à¸™à¸§à¸™), rather than a literal word-for-word translation."
+795: mode_text = "This text is a poem, song, or rhythmic chant. Translate it into an elegant Thai poetic form (à¸à¸¥à¸­à¸™/à¸„à¸³à¸„à¸¥à¹‰à¸­à¸‡à¸ˆà¸­à¸‡) with appropriate rhyming and literary vocabulary, while preserving the original meaning."
+797: mode_text = "This text is a profound quote or proverb. Translate it into formal, philosophical, and impactful Thai language (à¸„à¸³à¸„à¸¡/à¸„à¸³à¸žà¸¹à¸”à¸šà¸¸à¸„à¸„à¸¥à¸ªà¸³à¸„à¸±à¸), similar to how a famous historical figure would speak."
