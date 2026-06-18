@@ -1303,8 +1303,12 @@ del "%~f0"
         # Add "Link Local" option
         link_frame = ctk.CTkFrame(dialog, fg_color="transparent")
         link_frame.pack(fill="x", pady=10, padx=20)
-        ctk.CTkLabel(link_frame, text="Or link a local file directly:", text_color="gray").pack(side="left")
-        ctk.CTkButton(link_frame, text="🔗 Link Local File", fg_color="#313244", hover_color="#45475a", command=lambda: self.link_local_flagship(tool_name, dialog)).pack(side="right")
+        
+        btn_github = ctk.CTkButton(link_frame, text="🌐 เปิดหน้าเว็บ GitHub", width=160, fg_color="#89b4fa", text_color="#1e1e2e", hover_color="#b4befe", command=lambda: webbrowser.open(f"https://github.com/{repo}/releases"))
+        btn_github.pack(side="left", padx=5)
+        
+        btn_link = ctk.CTkButton(link_frame, text="🔗 Link Local File", width=160, fg_color="#313244", hover_color="#45475a", command=lambda: self.link_local_flagship(tool_name, dialog))
+        btn_link.pack(side="right", padx=5)
         
         def fetch_releases():
             try:
@@ -1324,7 +1328,7 @@ del "%~f0"
         for widget in scroll.winfo_children():
             widget.destroy()
         if "403" in err:
-            err_msg = f"GitHub API Rate Limit Exceeded.\nPlease use 'Link Local File' below or try again later."
+            err_msg = f"โหลดข้อมูลจาก GitHub เกินขีดจำกัดชั่วคราว (Rate Limit)\n\nกรุณากดปุ่ม '🌐 เปิดหน้าเว็บ GitHub' เพื่อดาวน์โหลดไฟล์ด้วยตัวเอง\nจากนั้นกดปุ่ม '🔗 Link Local File' เพื่อเลือกไฟล์ที่โหลดมาครับ"
         else:
             err_msg = f"Failed to fetch:\n{err}"
         ctk.CTkLabel(scroll, text=err_msg, text_color="#f38ba8").pack(pady=20)
