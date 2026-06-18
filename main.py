@@ -783,10 +783,14 @@ del "%~f0"
         card = ctk.CTkFrame(parent, corner_radius=15)
         card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
         
-        tool_config = self.config.get("tools", {}).get(item["name"], {})
+        tool_config = self.config.get("tools", {}).get(item["id"], {})
         if isinstance(tool_config, dict):
-            exe_path = tool_config.get("path", "")
-            current_ver = tool_config.get("version", "")
+            if "active_version" in tool_config:
+                current_ver = tool_config.get("active_version", "")
+                exe_path = tool_config.get("versions", {}).get(current_ver, "")
+            else:
+                exe_path = tool_config.get("path", "")
+                current_ver = tool_config.get("version", "")
         else:
             exe_path = tool_config
             current_ver = ""
@@ -1381,7 +1385,7 @@ del "%~f0"
                     self.save_local_config()
                     
                 self.after(0, lambda: dl_window.destroy())
-                self.after(0, self.show_tool_library)
+                self.after(0, self.show_flagship)
                 self.after(0, lambda: messagebox.showinfo("Success", f"{tool_name} ({version_str}) installed successfully!", parent=self))
             except Exception as e:
                 self.after(0, lambda: progress.stop())
