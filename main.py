@@ -1233,6 +1233,10 @@ class ModderHubApp(ctk.CTk):
                 dl_url = "https://ghproxy.net/" + zip_asset["browser_download_url"]
                 btn_dl = ctk.CTkButton(row, text="📥 Download", width=100, fg_color="#a6e3a1", text_color="#1e1e2e", hover_color="#94e2d5", command=lambda url=dl_url, d=dialog, v=tag_name: self.download_and_extract(tool_name, url, v, d))
                 btn_dl.grid(row=0, column=1, padx=5, pady=5)
+            elif "zipball_url" in rel:
+                dl_url = "https://ghproxy.net/" + rel["zipball_url"]
+                btn_dl = ctk.CTkButton(row, text="📥 Download", width=100, fg_color="#a6e3a1", text_color="#1e1e2e", hover_color="#94e2d5", command=lambda url=dl_url, d=dialog, v=tag_name: self.download_and_extract(tool_name, url, v, d))
+                btn_dl.grid(row=0, column=1, padx=5, pady=5)
             else:
                 ctk.CTkLabel(row, text="No .zip found", text_color="gray").grid(row=0, column=1, padx=5, pady=5)
 
