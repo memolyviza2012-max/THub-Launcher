@@ -631,29 +631,102 @@ class ModderHubApp(ctk.CTk):
             messagebox.showerror("Error", f"ไม่พบโฟลเดอร์: {path}")
 
     def check_for_updates(self):
+        import threading
+        threading.Thread(target=self.check_for_updates_bg, daemon=True).start()
+
+    def check_for_updates_bg(self):
+        import urllib.request
+        import json
         try:
-            if os.path.exists(UPDATE_FILE_PATH):
-                with open(UPDATE_FILE_PATH, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
+            url = "https://api.github.com/repos/memolyviza2012-max/THub-Launcher/releases/latest"
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response:
+                if response.status == 200:
+                    data = json.loads(response.read().decode('utf-8'))
+                    tag_name = data.get("tag_name", "v0.0.0")
+                    latest_version = tag_name.replace("v", "")
+                    body = data.get("body", "ไม่มีข้อมูลอัปเดต")
                     
-                hub_info = data.get("modder_hub", {})
-                latest_version = hub_info.get("version", CURRENT_VERSION)
-                notes = hub_info.get("release_notes", "ไม่มีข้อมูลอัปเดต")
-                
-                if latest_version > CURRENT_VERSION:
-                    if hasattr(self, 'update_status_lbl') and self.update_status_lbl.winfo_exists():
-                        self.update_status_lbl.configure(text=f"มีเวอร์ชันใหม่: v{latest_version} พร้อมอัปเดต!", text_color="green")
-                    msg = f"มีอัปเดตเวอร์ชันใหม่ (v{latest_version}) บน NAS!\n\nรายละเอียด:\n{notes}\n\nคุณต้องการอัปเดตเลยหรือไม่?"
-                    if messagebox.askyesno("Update Available", msg, parent=self):
-                        messagebox.showinfo("Updating", "กำลังจำลองการอัปเดตจาก NAS...", parent=self)
-                else:
-                    if hasattr(self, 'update_status_lbl') and self.update_status_lbl.winfo_exists():
-                        self.update_status_lbl.configure(text=f"คุณใช้งานเวอร์ชันล่าสุดแล้ว (v{CURRENT_VERSION})", text_color="gray")
-            else:
-                if hasattr(self, 'update_status_lbl') and self.update_status_lbl.winfo_exists():
-                    self.update_status_lbl.configure(text="ไม่พบเซิร์ฟเวอร์ NAS หรือเครือข่ายออฟไลน์", text_color="orange")
+                    if latest_version > CURRENT_VERSION:
+                        # Find download url (look for .zip asset)
+                        assets = data.get("assets", [])
+                        zip_asset = next((a for a in assets if a["name"].endswith(".zip")), None)
+                        if zip_asset:
+                            dl_url = "https://ghproxy.net/" + zip_asset["browser_download_url"]
+                            self.after(0, self.prompt_update, latest_version, body, dl_url)
+                        else:
+                            self.after(0, self.update_status, f"มีเวอร์ชันใหม่ (v{latest_version}) แต่ไม่พบไฟล์ .zip", "orange")
+                    else:
+                        self.after(0, self.update_status, f"คุณใช้งานเวอร์ชันล่าสุดแล้ว (v{CURRENT_VERSION})", "gray")
         except Exception as e:
             print(f"Update check error: {e}")
+            self.after(0, self.update_status, "ไม่สามารถตรวจสอบอัปเดตได้ (เครือข่ายมีปัญหา)", "orange")
+
+    def update_status(self, text, color):
+        if hasattr(self, 'update_status_lbl') and self.update_status_lbl.winfo_exists():
+            self.update_status_lbl.configure(text=text, text_color=color)
+
+    def prompt_update(self, latest_version, notes, dl_url):
+        self.update_status(f"มีเวอร์ชันใหม่: v{latest_version} พร้อมอัปเดต!", "green")
+        msg = f"มีอัปเดตเวอร์ชันใหม่ (v{latest_version}) บน GitHub!\n\nรายละเอียด:\n{notes}\n\nคุณต้องการอัปเดตเลยหรือไม่? (โปรแกรมจะรีสตาร์ทตัวเอง)"
+        if messagebox.askyesno("Update Available", msg, parent=self):
+            import threading
+            threading.Thread(target=self.perform_self_update_bg, args=(dl_url,), daemon=True).start()
+
+    def perform_self_update_bg(self, dl_url):
+        self.after(0, lambda: messagebox.showinfo("Updating", "กำลังดาวน์โหลดอัปเดต... กรุณารอสักครู่ โปรแกรมจะปิดและรีสตาร์ทตัวเอง", parent=self))
+        import urllib.request
+        import zipfile
+        import io
+        import sys
+        import subprocess
+        
+        try:
+            req = urllib.request.Request(dl_url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response:
+                zip_data = response.read()
+                
+            temp_dir = os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__), "_temp_update")
+            os.makedirs(temp_dir, exist_ok=True)
+            
+            with zipfile.ZipFile(io.BytesIO(zip_data)) as z:
+                # Handle potential root folder inside zip (e.g. THub/THub.exe)
+                first_item = z.namelist()[0]
+                has_root_folder = '/' in first_item and first_item.split('/')[0] != ''
+                if has_root_folder:
+                    root_folder = first_item.split('/')[0] + '/'
+                else:
+                    root_folder = ""
+                    
+                for file_info in z.infolist():
+                    if root_folder and file_info.filename.startswith(root_folder):
+                        if not file_info.is_dir():
+                            file_info.filename = file_info.filename[len(root_folder):]
+                            z.extract(file_info, temp_dir)
+                    else:
+                        if not file_info.is_dir():
+                            z.extract(file_info, temp_dir)
+            
+            current_dir = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
+            exe_name = os.path.basename(sys.executable)
+            bat_path = os.path.join(current_dir, "update.bat")
+            
+            bat_content = f"""@echo off
+timeout /t 2 /nobreak >nul
+xcopy /s /e /y "{temp_dir}\\*" "{current_dir}\\"
+rmdir /s /q "{temp_dir}"
+start "" "{current_dir}\\{exe_name}"
+del "%~f0"
+"""
+            with open(bat_path, "w", encoding="utf-8") as f:
+                f.write(bat_content)
+                
+            subprocess.Popen([bat_path], shell=True)
+            self.after(500, self.destroy) # Close GUI and exit
+            
+        except Exception as e:
+            print(f"Self-update error: {e}")
+            self.after(0, lambda: messagebox.showerror("Update Failed", f"เกิดข้อผิดพลาดในการอัปเดต: {e}", parent=self))
 
     
     # --- 2. Flagship Products ---
