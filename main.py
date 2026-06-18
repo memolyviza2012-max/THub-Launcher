@@ -1271,18 +1271,40 @@ del "%~f0"
         self.save_local_config()
         self.show_tool_library()
 
+    def link_local_flagship(self, tool_name, dialog):
+        from tkinter import filedialog
+        path = filedialog.askopenfilename(title=f"Select {tool_name} Script/Exe", filetypes=[("Executable/Script", "*.py *.exe"), ("All Files", "*.*")])
+        if path:
+            tools_dict = self.config.setdefault("tools", {})
+            version_str = "local_linked"
+            tool_entry = tools_dict.setdefault(tool_name, {"active_version": version_str, "versions": {}})
+            tool_entry["versions"][version_str] = path
+            tool_entry["active_version"] = version_str
+            self.save_local_config()
+            
+            if dialog:
+                dialog.destroy()
+            self.show_flagship()
+            messagebox.showinfo("Success", f"{tool_name} linked successfully!", parent=self)
+
     def show_github_versions(self, tool_name, repo):
         # Build Version Selector Dialog
         dialog = ctk.CTkToplevel(self)
         dialog.title(f"Download {tool_name} from GitHub")
-        dialog.geometry("500x350")
+        dialog.geometry("500x420")
         dialog.transient(self)
         dialog.grab_set()
         
-        ctk.CTkLabel(dialog, text=f"☁️ Fetching releases for {repo}...", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=20)
+        ctk.CTkLabel(dialog, text=f"☁️ Fetching releases for {repo}...", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=(20, 5))
         
         scroll = ctk.CTkScrollableFrame(dialog, width=450, height=200)
         scroll.pack(pady=10)
+        
+        # Add "Link Local" option
+        link_frame = ctk.CTkFrame(dialog, fg_color="transparent")
+        link_frame.pack(fill="x", pady=10, padx=20)
+        ctk.CTkLabel(link_frame, text="Or link a local file directly:", text_color="gray").pack(side="left")
+        ctk.CTkButton(link_frame, text="🔗 Link Local File", fg_color="#313244", hover_color="#45475a", command=lambda: self.link_local_flagship(tool_name, dialog)).pack(side="right")
         
         def fetch_releases():
             try:
@@ -1301,7 +1323,11 @@ del "%~f0"
     def render_releases_error(self, scroll, err):
         for widget in scroll.winfo_children():
             widget.destroy()
-        ctk.CTkLabel(scroll, text=f"Failed to fetch:\n{err}", text_color="#f38ba8").pack(pady=20)
+        if "403" in err:
+            err_msg = f"GitHub API Rate Limit Exceeded.\nPlease use 'Link Local File' below or try again later."
+        else:
+            err_msg = f"Failed to fetch:\n{err}"
+        ctk.CTkLabel(scroll, text=err_msg, text_color="#f38ba8").pack(pady=20)
 
     def render_releases(self, dialog, scroll, tool_name, releases):
         for widget in scroll.winfo_children():
