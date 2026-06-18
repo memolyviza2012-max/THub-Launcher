@@ -32,7 +32,7 @@ import zipfile
 import io
 
 # Constants
-CURRENT_VERSION = "1.0.0"
+CURRENT_VERSION = "1.0.1"
 UPDATE_FILE_PATH = os.path.join(os.path.dirname(__file__), "updates.json")
 CONFIG_FILE = "hub_config.json"
 KNOWLEDGE_DIR = os.path.join(os.path.dirname(__file__), "Modding-Knowledge")
@@ -253,12 +253,7 @@ class ModderHubApp(ctk.CTk):
             self.projects_frame.bind("<Configure>", self.on_projects_resize)
             self._rearrange_project_cards()
 
-        # News / Update Card (Moved to bottom)
-        update_card = ctk.CTkFrame(self.main_frame, corner_radius=10)
-        update_card.pack(fill="x", padx=30, pady=(10, 20))
-        
-        self.update_status_lbl = ctk.CTkLabel(update_card, text="กำลังซิงโครไนซ์ข้อมูลกับ GitHub...", font=ctk.CTkFont(size=14))
-        self.update_status_lbl.pack(side="left", padx=20, pady=10)
+        # Update card removed per user request
 
     def on_projects_resize(self, event):
         usable_width = event.width - 20
