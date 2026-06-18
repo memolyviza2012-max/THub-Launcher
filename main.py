@@ -669,7 +669,15 @@ class ModderHubApp(ctk.CTk):
             threading.Thread(target=self.perform_self_update_bg, args=(dl_url,), daemon=True).start()
 
     def perform_self_update_bg(self, dl_url):
-        self.after(0, lambda: messagebox.showinfo("Updating", "กำลังดาวน์โหลดอัปเดต... กรุณารอสักครู่ โปรแกรมจะปิดและรีสตาร์ทตัวเอง", parent=self))
+        def show_updating_window():
+            upd_win = ctk.CTkToplevel(self)
+            upd_win.title("Updating")
+            upd_win.geometry("400x150")
+            upd_win.transient(self)
+            upd_win.grab_set()
+            ctk.CTkLabel(upd_win, text="กำลังดาวน์โหลดอัปเดต...\nโปรแกรมจะปิดและเปิดใหม่โดยอัตโนมัติเมื่อเสร็จสิ้น", font=ctk.CTkFont(size=14)).pack(pady=40)
+            
+        self.after(0, show_updating_window)
         import urllib.request
         import zipfile
         import io
