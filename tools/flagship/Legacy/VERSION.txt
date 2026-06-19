@@ -1,0 +1,6 @@
+Translation Studio Template
+Version: 1.0.0
+Release Date: 2026-06-09
+
+Changelog:
+- v1.0.0 : Initial release — Studio UI + Batch AI Script + README

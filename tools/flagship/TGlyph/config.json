@@ -1,0 +1,21 @@
+{
+    "default_language": "en",
+    "window_width": 1600,
+    "window_height": 900,
+    "default_font_size": 42,
+    "supersampling_factor": 3,
+    "atlas_width": 4096,
+    "atlas_height": 4096,
+    "atlas_padding": 2,
+    "quality_threshold_ok": 85,
+    "quality_threshold_warn": 70,
+    "max_undo_history": 50,
+    "last_font_path": "E:\\Mod_Workspace\\Tool\\1_ThaiFont\\Font_origin\\Kanit",
+    "last_project_path": "",
+    "last_export_path": "E:/Mod_Workspace/DL2_mod_workspace/Font_Development/Export_PPFS/Kanit",
+    "default_export_profile": "dying_light_2",
+    "preview_bg_color": "#1e1e2e",
+    "preview_text_color": "#ffffff",
+    "external_mapping_path": "E:\\Mod_Workspace\\Tool\\1_ThaiFont\\fonts_main\\ThaiFont_Completed from Noonetranslator\\Mapping.json",
+    "external_charset_path": "E:\\Mod_Workspace\\Tool\\1_ThaiFont\\fonts_main\\ThaiFont_Completed from Noonetranslator\\message.txt"
+}

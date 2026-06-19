@@ -1,0 +1,10 @@
+{
+    "id": "flagship.tpua",
+    "name": "TPUA: Universal PUA Hybrid Converter",
+    "version": "1.1.0",
+    "description": "Text encoding/decoding and Font Generator for PUA ecosystem.",
+    "author": "THub",
+    "main": "tpua_app.py",
+    "executable": "run_tpua.bat",
+    "type": "flagship_tool"
+}
