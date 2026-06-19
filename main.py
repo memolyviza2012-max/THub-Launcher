@@ -32,9 +32,21 @@ import sys
 if len(sys.argv) > 1 and sys.argv[1].endswith(".py"):
     script_path = os.path.abspath(sys.argv[1])
     sys.argv.pop(1)
-    os.chdir(os.path.dirname(script_path))
+    
+    script_dir = os.path.dirname(script_path)
+    if script_dir not in sys.path:
+        sys.path.insert(0, script_dir)
+        
     import runpy
-    runpy.run_path(script_path, run_name="__main__")
+    try:
+        runpy.run_path(script_path, run_name="__main__")
+    except SystemExit as e:
+        sys.exit(e.code)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        import tkinter.messagebox
+        tkinter.messagebox.showerror("Runtime Error", f"Failed to run script:\n{e}")
     sys.exit(0)
 # ---------------------------
 
@@ -43,9 +55,36 @@ import urllib.request
 import urllib.error
 import zipfile
 import io
+import tkinter as tk
+
+class ToolTip:
+    def __init__(self, widget, text):
+        self.widget = widget
+        self.text = text
+        self.tw = None
+        self.widget.bind("<Enter>", self.enter)
+        self.widget.bind("<Leave>", self.leave)
+
+    def enter(self, event=None):
+        if self.tw: return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x += self.widget.winfo_rootx() + 25
+        y += self.widget.winfo_rooty() + 25
+        self.tw = tk.Toplevel(self.widget)
+        self.tw.wm_overrideredirect(True)
+        self.tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(self.tw, text=self.text, justify='left',
+                       background="#1e1e2e", foreground="#cdd6f4", relief='solid', borderwidth=1,
+                       font=("Segoe UI", 12))
+        label.pack(ipadx=6, ipady=3)
+
+    def leave(self, event=None):
+        if self.tw:
+            self.tw.destroy()
+            self.tw = None
 
 # Constants
-CURRENT_VERSION = "1.0.1"
+CURRENT_VERSION = "1.0.0"
 UPDATE_FILE_PATH = os.path.join(os.path.dirname(__file__), "updates.json")
 CONFIG_FILE = "hub_config.json"
 KNOWLEDGE_DIR = os.path.join(os.path.dirname(__file__), "Modding-Knowledge")
@@ -144,8 +183,10 @@ class ModderHubApp(ctk.CTk):
         
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"], command=self.change_appearance_mode)
         self.appearance_mode_optionemenu.set("Dark")
-        self.appearance_mode_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
+        self.appearance_mode_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 10))
         
+        self.update_status_lbl = ctk.CTkLabel(self.sidebar_frame, text="กำลังตรวจสอบอัปเดต...", text_color="gray", font=ctk.CTkFont(size=12))
+        self.update_status_lbl.grid(row=9, column=0, padx=20, pady=(0, 20))
 
         # ====== MAIN FRAME ======
         self.main_frame = ctk.CTkFrame(self, corner_radius=10)
@@ -195,13 +236,60 @@ class ModderHubApp(ctk.CTk):
         lbl_title = ctk.CTkLabel(header_frame, text="Project Dashboard", font=ctk.CTkFont(size=28, weight="bold"), anchor="w")
         lbl_title.pack(side="left")
         
+        btn_help = ctk.CTkButton(header_frame, text="❓", width=30, fg_color="transparent", text_color="#f9e2af", hover_color="#313244", font=ctk.CTkFont(size=20), command=self.show_dashboard_help)
+        btn_help.pack(side="left", padx=(5, 0))
+        ToolTip(btn_help, "คู่มือใช้งาน")
+        
         self.search_var = ctk.StringVar()
         self.search_var.trace_add("write", lambda *args: self._rearrange_project_cards())
         search_entry = ctk.CTkEntry(header_frame, textvariable=self.search_var, placeholder_text="🔍 ค้นหาโปรเจกต์...", width=200)
-        search_entry.pack(side="left", padx=20)
+        search_entry.pack(side="left", padx=(20, 0))
         
         lbl_desc = ctk.CTkLabel(self.main_frame, text="ยินดีต้อนรับสู่ THub Launcher ศูนย์รวมเครื่องมือแปลเกมที่ดีที่สุด", font=ctk.CTkFont(size=14), text_color="gray")
         lbl_desc.pack(anchor="w", padx=30, pady=(0, 20))
+
+    def show_dashboard_help(self):
+        help_win = ctk.CTkToplevel(self)
+        help_win.title("วิธีใช้งาน Dashboard")
+        help_win.geometry("600x500")
+        help_win.transient(self)
+        help_win.grab_set()
+        
+        ctk.CTkLabel(help_win, text="คู่มือการใช้งาน Project Dashboard", font=ctk.CTkFont(size=22, weight="bold"), text_color="#89b4fa").pack(pady=(20, 10))
+        
+        scroll = ctk.CTkScrollableFrame(help_win, fg_color="transparent")
+        scroll.pack(fill="both", expand=True, padx=20, pady=10)
+        
+        help_text = """
+1. เพิ่มโปรเจกต์ใหม่ (+ New Project):
+   • สำหรับสร้างโฟลเดอร์โปรเจกต์งานแปลเกมใหม่ ระบบจะให้คุณเลือกที่เก็บไฟล์ และตั้งชื่อโปรเจกต์
+
+2. นำเข้าโปรเจกต์ (📥 Import Project):
+   • หากคุณมีโฟลเดอร์โปรเจกต์งานแปลเก่าอยู่แล้ว สามารถกดนำเข้าเพื่อให้แสดงบน Dashboard ได้ทันที
+
+3. ค้นหาโปรเจกต์ (🔍):
+   • พิมพ์ชื่อโปรเจกต์เพื่อกรองค้นหาอย่างรวดเร็ว
+
+4. การจัดการโปรเจกต์ (ปุ่มบนการ์ด):
+   • ⚙️ ตั้งค่า: เลือกโฟลเดอร์สำหรับเก็บไฟล์แปลโดยเฉพาะ
+   • ✏️ แก้ไขชื่อ: เปลี่ยนชื่อโปรเจกต์ที่แสดงบนหน้าจอ
+   • 🗑️ ลบ: ลบโปรเจกต์ออกจาก Dashboard (โฟลเดอร์และไฟล์จริงจะไม่ถูกลบ)
+
+5. ปุ่ม Action (ในตารางไฟล์):
+   • ↻ สแกนไฟล์: ตรวจสอบและค้นหาไฟล์ข้อความ (Text/JSON/XML) ภายในโปรเจกต์
+   • ℹ️ ดูรายละเอียด: แสดงประวัติว่ามีไฟล์อะไรที่สแกนเจอหรือเกิดข้อผิดพลาดบ้าง
+   • 📂 เปิดโฟลเดอร์: เปิดหน้าต่าง Windows Explorer ไปยังที่เก็บโปรเจกต์
+
+6. การส่งโปรเจกต์ไปเปิดในเครื่องมือแปล:
+   • เมื่อคุณมีโปรเจกต์แล้ว สามารถไปที่เมนู 'Tool Library' 
+   • เลือกโปรแกรมที่ต้องการ และเปลี่ยนช่อง 'พ่วงโปรเจกต์: ไม่มี' ให้เป็นชื่อโปรเจกต์ของคุณ 
+   • จากนั้นกด 🚀 Launch ระบบจะส่งโปรเจกต์ไปเปิดในโปรแกรมแปลนั้นๆ โดยตรง!
+"""
+        lbl_content = ctk.CTkLabel(scroll, text=help_text.strip(), font=ctk.CTkFont(size=14), justify="left", anchor="w", wraplength=520)
+        lbl_content.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        btn_close = ctk.CTkButton(help_win, text="เข้าใจแล้ว", fg_color="#a6e3a1", text_color="#1e1e2e", hover_color="#94e2d5", font=ctk.CTkFont(weight="bold"), command=help_win.destroy)
+        btn_close.pack(pady=20)
 
         # Active Projects Grid
         self.projects_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
@@ -753,131 +841,140 @@ del "%~f0"
         lbl_title.pack(anchor="w", padx=30, pady=(20, 10))
         
         # Grid for cards
-        grid_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
-        grid_frame.pack(fill="both", expand=True, padx=30, pady=10)
-        grid_frame.grid_columnconfigure((0, 1), weight=1)
+        self.flagship_grid_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
+        self.flagship_grid_frame.pack(fill="both", expand=True, padx=30, pady=10)
+        
+        self.flagship_cards = []
+        self.current_flagship_cols = 0
+        self.main_frame.bind("<Configure>", self._on_flagship_grid_resize, add="+")
 
         # Loading message
-        self._lbl_flagship_loading = ctk.CTkLabel(grid_frame, text="☁️ กำลังซิงค์ข้อมูล Cloud Registry...", text_color="gray", font=ctk.CTkFont(size=14))
-        self._lbl_flagship_loading.grid(row=0, column=0, columnspan=2, pady=50)
+        self._lbl_flagship_loading = ctk.CTkLabel(self.flagship_grid_frame, text="☁️ กำลังซิงค์ข้อมูล Cloud Registry...", text_color="gray", font=ctk.CTkFont(size=14))
+        self._lbl_flagship_loading.grid(row=0, column=0, pady=50)
 
         # Start thread to fetch JSON
         import threading
-        threading.Thread(target=self.fetch_flagship_registry_bg, args=(grid_frame,), daemon=True).start()
+        threading.Thread(target=self.fetch_flagship_registry_bg, args=(self.flagship_grid_frame,), daemon=True).start()
 
     def fetch_flagship_registry_bg(self, parent_frame):
-        import urllib.request
-        import json
-        
-        # This will be replaced with real GitHub Raw URL later
-        registry_url = "https://raw.githubusercontent.com/memolyviza2012-max/THub-Launcher/main/flagship_list.json"
-        
-        try:
-            req = urllib.request.Request(registry_url, headers={'User-Agent': 'ModderHubApp'})
-            with urllib.request.urlopen(req) as response:
-                registry_data = json.loads(response.read().decode())
-        except Exception as e:
-            # Fallback to default
-            registry_data = [
-                {"id": "TStudio", "name": "TStudio", "desc": "เครื่องมือแปลภาษา AI", "repo": "memolyviza2012-max/TStudio", "color": "#89b4fa", "exe": "tstudio_app.py", "icon": "assets/TStudio.png"},
-                {"id": "TRun", "name": "TRun", "desc": "ทดสอบเกม Batch", "repo": "memolyviza2012-max/TRun", "color": "#a6e3a1", "exe": "trun_app.py", "icon": "assets/TRun.png"},
-                {"id": "TPUA", "name": "TPUA", "desc": "จัดแจง & ปรับฟอนต์ PUA", "repo": "memolyviza2012-max/TPUA", "color": "#cba6f7", "exe": "tpua_app.py", "icon": "assets/TPUA.png"},
-                {"id": "TGlyph", "name": "TGlyph", "desc": "สร้าง Texture ฟอนต์", "repo": "memolyviza2012-max/TGlyph", "color": "#fab387", "exe": "tglyph_app.py", "icon": "assets/TGlyph.png"},
-                {"id": "TVox", "name": "TVox", "desc": "เล่นวิดีโอ & แปลซับไตเติ้ล", "repo": "memolyviza2012-max/TVox", "color": "#f38ba8", "exe": "tvox_app.py", "icon": "assets/TVox.png"}
-            ]
+        registry_data = [
+            {"id": "TStudio", "name": "TStudio", "desc": "สุดยอดเครื่องมือแปลภาษาด้วย AI\n(วิเคราะห์บริบท & แก้ไขแบบ Line-by-Line)\nรองรับการทำงานกับไฟล์ Localization หลายรูปแบบ", "color": "#89b4fa", "exe": "tstudio_app.py", "icon": "assets/TStudio.png"},
+            {"id": "TRun", "name": "TRun", "desc": "เครื่องมือแปลภาษาแบบ Batch อัตโนมัติ\n(รองรับไฟล์ขนาดใหญ่และปริมาณมหาศาล)\nแปลทั้งโปรเจกต์ได้อย่างรวดเร็วในคลิกเดียว", "color": "#a6e3a1", "exe": "trun_app.py", "icon": "assets/TRun.png"},
+            {"id": "TPUA", "name": "TPUA", "desc": "เครื่องมือจัดการอักขระพิเศษภาษาไทย\n(เข้ารหัส/ถอดรหัส PUA แบบ Drag & Drop)\nแก้ปัญหาสระลอย/จม ในเอนจิ้นเกมต่างๆ", "color": "#cba6f7", "exe": "tpua_app.py", "icon": "assets/TPUA.png"},
+            {"id": "TGlyph", "name": "TGlyph", "desc": "เครื่องมือสร้าง Texture ฟอนต์\n(Generate Texture และแผนที่ตัวอักษร)\nสำหรับดัดแปลงฟอนต์ Bitmap ในเกม", "color": "#fab387", "exe": "tglyph_app.py", "icon": "assets/TGlyph.png"},
+            {"id": "TVox", "name": "TVox", "desc": "เครื่องมือจัดการ FMV และซับไตเติ้ล\n(วิดีโอเพลเยอร์ & ดึงคลื่นเสียง Waveform)\nออกแบบมาเพื่อการแปลวิดีโอคัทซีนโดยเฉพาะ", "color": "#f38ba8", "exe": "tvox_app.py", "icon": "assets/TVox.png"}
+        ]
             
         self.after(0, lambda: self.render_flagship_cards(parent_frame, registry_data))
+
+    def _on_flagship_grid_resize(self, event=None):
+        if not hasattr(self, 'flagship_cards') or not self.flagship_cards:
+            return
+            
+        # We bind to main_frame, so we check flagship_grid_frame width
+        if not self.flagship_grid_frame.winfo_exists():
+            return
+            
+        width = self.flagship_grid_frame.winfo_width()
+        if width <= 1: 
+            width = 800  # Fallback width if not rendered yet
+        
+        # Determine number of columns based on width (min width per card ~ 320px)
+        cols = max(1, width // 320)
+        
+        if cols != self.current_flagship_cols:
+            self.current_flagship_cols = cols
+            self._rearrange_flagship_cards()
+
+    def _rearrange_flagship_cards(self):
+        # Reset column weights
+        for i in range(10):  # Clear old weights
+            self.flagship_grid_frame.grid_columnconfigure(i, weight=0)
+            
+        for i in range(self.current_flagship_cols):
+            self.flagship_grid_frame.grid_columnconfigure(i, weight=1)
+            
+        row, col = 0, 0
+        for card in self.flagship_cards:
+            card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
+            col += 1
+            if col >= self.current_flagship_cols:
+                col = 0
+                row += 1
 
     def render_flagship_cards(self, parent_frame, registry_data):
         if hasattr(self, "_lbl_flagship_loading"):
             self._lbl_flagship_loading.destroy()
             
-        row, col = 0, 0
+        self.flagship_cards = []
         for item in registry_data:
-            self.build_flagship_card(parent_frame, row, col, item)
-            col += 1
-            if col > 1:
-                col = 0
-                row += 1
-
-    def build_flagship_card(self, parent, row, col, item):
-        card = ctk.CTkFrame(parent, corner_radius=15)
-        card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
-        
-        tool_config = self.config.get("tools", {}).get(item["id"], {})
-        if isinstance(tool_config, dict):
-            if "active_version" in tool_config:
-                current_ver = tool_config.get("active_version", "")
-                exe_path = tool_config.get("versions", {}).get(current_ver, "")
-            else:
-                exe_path = tool_config.get("path", "")
-                current_ver = tool_config.get("version", "")
-        else:
-            exe_path = tool_config
-            current_ver = ""
+            card = self.create_flagship_card(parent_frame, item)
+            self.flagship_cards.append(card)
             
-        is_installed = os.path.exists(exe_path) if exe_path else False
+        # Force an initial layout pass
+        self.current_flagship_cols = 0 # Force update
+        self._on_flagship_grid_resize()
+
+    def create_flagship_card(self, parent, item):
+        card = ctk.CTkFrame(parent, corner_radius=15)
+        card.grid_columnconfigure(0, weight=1)
         
-        # Save version in flagship_versions for quick access
-        if current_ver:
-            self.config.setdefault("flagship_versions", {})[item["id"]] = current_ver
+        exe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "tools", "flagship", item["id"], item["exe"]))
         
+        icon_btn = None
+        orig_img = None
         if item.get("icon"):
             try:
                 full_logo = os.path.join(os.path.dirname(__file__), item["icon"])
                 if os.path.exists(full_logo):
-                    img = ctk.CTkImage(light_image=Image.open(full_logo), size=(80, 80))
-                    ctk.CTkLabel(card, text="", image=img).pack(pady=(20, 0))
+                    orig_img = ctk.CTkImage(light_image=Image.open(full_logo), size=(80, 80))
+                    # Use a Button instead of a Label so it's clickable!
+                    icon_btn = ctk.CTkButton(card, text="", image=orig_img, fg_color="transparent", hover_color="#313244", width=80, height=80)
+                    icon_btn.grid(row=0, column=0, pady=(20, 0))
             except: pass
             
-        ctk.CTkLabel(card, text=item["name"], font=ctk.CTkFont(size=20, weight="bold")).pack(pady=(15, 5))
-        ctk.CTkLabel(card, text=item["desc"], text_color="gray").pack(pady=(5, 10))
+        ctk.CTkLabel(card, text=item["name"], font=ctk.CTkFont(size=20, weight="bold")).grid(row=1, column=0, pady=(15, 5))
+        ctk.CTkLabel(card, text=item["desc"], text_color="gray", justify="center").grid(row=2, column=0, pady=(5, 10))
         
         action_frame = ctk.CTkFrame(card, fg_color="transparent")
-        action_frame.pack(pady=(0, 20))
+        action_frame.grid(row=3, column=0, pady=(0, 20))
         
-        if is_installed:
-            btn_action = ctk.CTkButton(action_frame, text="🚀 เปิดโปรแกรม", fg_color=item["color"], text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"))
-            btn_action.configure(command=lambda e=exe_path: self.launch_script(e))
-            btn_action.pack(side="left", padx=5)
-            
-            # Start background thread to check update
-            import threading
-            threading.Thread(target=self.check_single_flagship_update, args=(item, action_frame), daemon=True).start()
+        btn_action = ctk.CTkButton(action_frame, text="🚀 เปิดโปรแกรม", fg_color=item["color"], text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"))
+        btn_action.pack(side="left", padx=5)
+        
+        if icon_btn:
+            # Bind the icon button to launch the script with loading animation
+            icon_btn.configure(cursor="hand2", command=lambda e=exe_path, b=icon_btn, i=orig_img: self.launch_script_with_loading(e, b, i))
+            btn_action.configure(command=lambda e=exe_path, b=icon_btn, i=orig_img: self.launch_script_with_loading(e, b, i))
         else:
-            btn_action = ctk.CTkButton(action_frame, text="📥 ดาวน์โหลด", fg_color="#313244", hover_color="#45475a", font=ctk.CTkFont(weight="bold"))
-            # For show_github_versions, pass the ID so it installs to tools/<ID>
-            btn_action.configure(command=lambda: self.show_github_versions(item["id"], item["repo"]))
-            btn_action.pack(side="left", padx=5)
+            btn_action.configure(command=lambda e=exe_path: self.launch_script(e))
             
+        return card
+            
+    def launch_script_with_loading(self, path, icon_btn, orig_img):
+        # Show loading state
+        icon_btn.configure(image="", text="⏳\nกำลังโหลด...", font=ctk.CTkFont(size=16, weight="bold"))
+        self.update()
+        
+        # Give UI a tiny bit of time to render the loading state before blocking
+        self.after(50, lambda: self._execute_launch(path, icon_btn, orig_img))
+
+    def _execute_launch(self, path, icon_btn, orig_img):
+        self.launch_script(path)
+        # Revert UI state back to the original icon after a short delay
+        self.after(800, lambda: icon_btn.configure(image=orig_img, text=""))
+
     def launch_script(self, path):
         import subprocess
         import sys
         try:
             if path.endswith(".py"):
                 # Use our own THub.exe (sys.executable) to run the .py script!
-                subprocess.Popen([sys.executable, path], creationflags=0x00000008, cwd=os.path.dirname(path))
+                subprocess.Popen([sys.executable, path], creationflags=0x00000008, cwd=os.path.dirname(path), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
-                subprocess.Popen([path], creationflags=0x00000008, cwd=os.path.dirname(path))
+                subprocess.Popen([path], creationflags=0x00000008, cwd=os.path.dirname(path), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             messagebox.showerror("Launch Error", f"ไม่สามารถเปิดโปรแกรมได้:\n{path}\n\nข้อผิดพลาด:\n{e}", parent=self)
-
-    def check_single_flagship_update(self, item, parent_frame):
-        try:
-            url = f"https://api.github.com/repos/{item['repo']}/releases/latest"
-            import urllib.request, json
-            req = urllib.request.Request(url, headers={'User-Agent': 'ModderHubApp'})
-            with urllib.request.urlopen(req) as response:
-                data = json.loads(response.read().decode())
-                latest_tag = data.get("tag_name")
-                
-                # Retrieve saved version. If not saved, we assume it's out of date to force the button (or user can just ignore it)
-                installed_ver = self.config.setdefault("flagship_versions", {}).get(item["id"], "")
-                
-                if latest_tag and latest_tag != installed_ver:
-                    self.after(0, lambda: self.show_flagship_update_btn(parent_frame, item, latest_tag))
-        except Exception as e:
-            pass
 
     def show_flagship_update_btn(self, parent_frame, item, latest_tag):
         btn_upd = ctk.CTkButton(parent_frame, text=f"🔴 อัปเดต ({latest_tag})", fg_color="#f38ba8", hover_color="#eba0ac", text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"))
@@ -1271,184 +1368,6 @@ del "%~f0"
         self.save_local_config()
         self.show_tool_library()
 
-    def link_local_flagship(self, tool_name, dialog):
-        from tkinter import filedialog
-        path = filedialog.askopenfilename(title=f"Select {tool_name} Script/Exe", filetypes=[("Executable/Script", "*.py *.exe"), ("All Files", "*.*")])
-        if path:
-            tools_dict = self.config.setdefault("tools", {})
-            version_str = "local_linked"
-            tool_entry = tools_dict.setdefault(tool_name, {"active_version": version_str, "versions": {}})
-            tool_entry["versions"][version_str] = path
-            tool_entry["active_version"] = version_str
-            self.save_local_config()
-            
-            if dialog:
-                dialog.destroy()
-            self.show_flagship()
-            messagebox.showinfo("Success", f"{tool_name} linked successfully!", parent=self)
-
-    def show_github_versions(self, tool_name, repo):
-        # Build Version Selector Dialog
-        dialog = ctk.CTkToplevel(self)
-        dialog.title(f"Download {tool_name} from GitHub")
-        dialog.geometry("500x420")
-        dialog.transient(self)
-        dialog.grab_set()
-        
-        ctk.CTkLabel(dialog, text=f"☁️ Fetching releases for {repo}...", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=(20, 5))
-        
-        scroll = ctk.CTkScrollableFrame(dialog, width=450, height=200)
-        scroll.pack(pady=10)
-        
-        # Add "Link Local" option
-        link_frame = ctk.CTkFrame(dialog, fg_color="transparent")
-        link_frame.pack(fill="x", pady=10, padx=20)
-        
-        btn_github = ctk.CTkButton(link_frame, text="🌐 เปิดหน้าเว็บ GitHub", width=160, fg_color="#89b4fa", text_color="#1e1e2e", hover_color="#b4befe", command=lambda: webbrowser.open(f"https://github.com/{repo}/releases"))
-        btn_github.pack(side="left", padx=5)
-        
-        btn_link = ctk.CTkButton(link_frame, text="🔗 Link Local File", width=160, fg_color="#313244", hover_color="#45475a", command=lambda: self.link_local_flagship(tool_name, dialog))
-        btn_link.pack(side="right", padx=5)
-        
-        def fetch_releases():
-            try:
-                url = f"https://api.github.com/repos/{repo}/releases"
-                req = urllib.request.Request(url, headers={'User-Agent': 'ModderHubApp'})
-                with urllib.request.urlopen(req) as response:
-                    data = json.loads(response.read().decode())
-                
-                # Update UI in main thread
-                self.after(0, lambda: self.render_releases(dialog, scroll, tool_name, data))
-            except Exception as e:
-                self.after(0, lambda e=e: self.render_releases_error(scroll, str(e)))
-                
-        threading.Thread(target=fetch_releases, daemon=True).start()
-
-    def render_releases_error(self, scroll, err):
-        for widget in scroll.winfo_children():
-            widget.destroy()
-        if "403" in err:
-            err_msg = f"โหลดข้อมูลจาก GitHub เกินขีดจำกัดชั่วคราว (Rate Limit)\n\nกรุณากดปุ่ม '🌐 เปิดหน้าเว็บ GitHub' เพื่อดาวน์โหลดไฟล์ด้วยตัวเอง\nจากนั้นกดปุ่ม '🔗 Link Local File' เพื่อเลือกไฟล์ที่โหลดมาครับ"
-        else:
-            err_msg = f"Failed to fetch:\n{err}"
-        ctk.CTkLabel(scroll, text=err_msg, text_color="#f38ba8").pack(pady=20)
-
-    def render_releases(self, dialog, scroll, tool_name, releases):
-        for widget in scroll.winfo_children():
-            widget.destroy()
-            
-        if not releases:
-            ctk.CTkLabel(scroll, text="No releases found.").pack(pady=20)
-            return
-            
-        for rel in releases:
-            tag_name = rel.get("tag_name", "Unknown")
-            is_pre = rel.get("prerelease", False)
-            assets = rel.get("assets", [])
-            
-            row = ctk.CTkFrame(scroll, fg_color="transparent")
-            row.pack(fill="x", pady=2)
-            row.grid_columnconfigure(0, weight=1)
-            
-            lbl_text = f"{tag_name}" + (" (Pre-release)" if is_pre else " (Stable)")
-            ctk.CTkLabel(row, text=lbl_text, font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=0, column=0, padx=10, pady=5)
-            
-            # Find a zip asset
-            zip_asset = next((a for a in assets if a["name"].endswith(".zip")), None)
-            
-            if zip_asset:
-                # Use GHProxy mirror to speed up downloads in Asia/Thailand
-                dl_url = "https://ghproxy.net/" + zip_asset["browser_download_url"]
-                btn_dl = ctk.CTkButton(row, text="📥 Download", width=100, fg_color="#a6e3a1", text_color="#1e1e2e", hover_color="#94e2d5", command=lambda url=dl_url, d=dialog, v=tag_name: self.download_and_extract(tool_name, url, v, d))
-                btn_dl.grid(row=0, column=1, padx=5, pady=5)
-            elif "zipball_url" in rel:
-                dl_url = rel["zipball_url"]
-                btn_dl = ctk.CTkButton(row, text="📥 Download", width=100, fg_color="#a6e3a1", text_color="#1e1e2e", hover_color="#94e2d5", command=lambda url=dl_url, d=dialog, v=tag_name: self.download_and_extract(tool_name, url, v, d))
-                btn_dl.grid(row=0, column=1, padx=5, pady=5)
-            else:
-                ctk.CTkLabel(row, text="No .zip found", text_color="gray").grid(row=0, column=1, padx=5, pady=5)
-
-    def download_and_extract_direct(self, tool_name, download_url):
-        self.download_and_extract(tool_name, download_url, "latest", None)
-
-    def download_and_extract(self, tool_name, download_url, version_str, dialog):
-        if dialog:
-            dialog.destroy()
-        
-        dl_window = ctk.CTkToplevel(self)
-        dl_window.title(f"Downloading {tool_name}")
-        dl_window.geometry("400x150")
-        dl_window.transient(self)
-        dl_window.grab_set()
-        
-        lbl_status = ctk.CTkLabel(dl_window, text=f"Downloading {version_str}...", font=ctk.CTkFont(size=16))
-        lbl_status.pack(pady=20)
-        
-        progress = ctk.CTkProgressBar(dl_window, width=300)
-        progress.pack(pady=10)
-        progress.set(0)
-        progress.start()
-        
-        def run_dl():
-            try:
-                tools_dir = os.path.join(os.path.dirname(__file__), "Tools", tool_name.replace(" ", "_"), version_str)
-                os.makedirs(tools_dir, exist_ok=True)
-                
-                req = urllib.request.Request(download_url, headers={'User-Agent': 'ModderHubApp'})
-                with urllib.request.urlopen(req) as response:
-                    zip_data = response.read()
-                    
-                self.after(0, lambda: lbl_status.configure(text="Extracting..."))
-                
-                with zipfile.ZipFile(io.BytesIO(zip_data)) as z:
-                    z.extractall(tools_dir)
-                    
-                # Find .exe or .py main script
-                exe_path = None
-                py_path = None
-                for root, _, files in os.walk(tools_dir):
-                    for f in files:
-                        if f.endswith(".exe"):
-                            exe_path = os.path.join(root, f)
-                            break
-                        elif f.endswith("_app.py") or f.endswith("main.py") or f.endswith(".py"):
-                            # Store the first python file found as fallback
-                            if not py_path:
-                                py_path = os.path.join(root, f)
-                            # If it's explicitly named like the tool, prefer it
-                            if tool_name.lower() in f.lower():
-                                py_path = os.path.join(root, f)
-                    if exe_path: break
-                
-                if not exe_path and py_path:
-                    exe_path = py_path
-                            
-                if exe_path:
-                    tools_dict = self.config.setdefault("tools", {})
-                    
-                    # Convert to new format if it's old string format
-                    if not isinstance(tools_dict.get(tool_name, {}), dict):
-                        old_val = tools_dict.get(tool_name, "")
-                        tools_dict[tool_name] = {
-                            "active_version": "custom",
-                            "versions": {"custom": old_val} if old_val else {}
-                        }
-                        
-                    tool_entry = tools_dict.setdefault(tool_name, {"active_version": version_str, "versions": {}})
-                    tool_entry["versions"][version_str] = exe_path
-                    tool_entry["active_version"] = version_str
-                    
-                    self.save_local_config()
-                    
-                self.after(0, lambda: dl_window.destroy())
-                self.after(0, self.show_flagship)
-                self.after(0, lambda: messagebox.showinfo("Success", f"{tool_name} ({version_str}) installed successfully!", parent=self))
-            except Exception as e:
-                self.after(0, lambda: progress.stop())
-                self.after(0, lambda e=e: lbl_status.configure(text=f"Error: {str(e)}", text_color="#f38ba8"))
-                
-        threading.Thread(target=run_dl, daemon=True).start()
-
     def link_tool(self, tool_name):
         tools_dict = self.config.setdefault("tools", {})
         filepath = filedialog.askopenfilename(title=f"Select executable for {tool_name}", filetypes=[("Executable Files", "*.exe"), ("Batch Files", "*.bat"), ("All Files", "*.*")])
@@ -1695,13 +1614,10 @@ del "%~f0"
         info_frame = ctk.CTkFrame(content_frame, fg_color="transparent")
         info_frame.pack(pady=10)
         
-        ctk.CTkLabel(info_frame, text="Version:", font=ctk.CTkFont(weight="bold", size=14)).grid(row=0, column=0, sticky="e", padx=10, pady=5)
-        ctk.CTkLabel(info_frame, text="1.0.0 (Beta)", font=ctk.CTkFont(size=14)).grid(row=0, column=1, sticky="w", padx=10, pady=5)
-        
-        ctk.CTkLabel(info_frame, text="License:", font=ctk.CTkFont(weight="bold", size=14)).grid(row=1, column=0, sticky="e", padx=10, pady=5)
+        ctk.CTkLabel(info_frame, text="License:", font=ctk.CTkFont(weight="bold", size=14)).grid(row=0, column=0, sticky="e", padx=10, pady=5)
         
         btn_license = ctk.CTkButton(info_frame, text="Open Source (GPL License)", fg_color="transparent", text_color="#89b4fa", hover_color="#313244", command=lambda: webbrowser.open("https://www.gnu.org/licenses/gpl-3.0.html"))
-        btn_license.grid(row=1, column=1, sticky="w", padx=10, pady=5)
+        btn_license.grid(row=0, column=1, sticky="w", padx=10, pady=5)
         
         # Additional Links (Website & Donate)
         btn_website = ctk.CTkButton(content_frame, text="🌐 Official Website", fg_color="#11111b", border_width=1, border_color="#89dceb", text_color="#89dceb", hover_color="#313244", font=ctk.CTkFont(size=14, weight="bold"), command=lambda: webbrowser.open("https://nodnuattranslator.vercel.app/"))
