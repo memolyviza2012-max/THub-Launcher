@@ -770,14 +770,33 @@ class ModderHubApp(ctk.CTk):
             threading.Thread(target=self.perform_self_update_bg, args=(dl_url,), daemon=True).start()
 
     def perform_self_update_bg(self, dl_url):
+        upd_win = None
+        lbl_status = None
+        prog_bar = None
+        
         def show_updating_window():
+            nonlocal upd_win, lbl_status, prog_bar
             upd_win = ctk.CTkToplevel(self)
             upd_win.title("Updating")
-            upd_win.geometry("400x150")
+            upd_win.geometry("400x200")
             upd_win.transient(self)
             upd_win.grab_set()
-            ctk.CTkLabel(upd_win, text="กำลังดาวน์โหลดอัปเดต...\nโปรแกรมจะปิดและเปิดใหม่โดยอัตโนมัติเมื่อเสร็จสิ้น", font=ctk.CTkFont(size=14)).pack(pady=40)
             
+            ctk.CTkLabel(upd_win, text="กำลังดาวน์โหลดอัปเดต...", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=(20, 10))
+            prog_bar = ctk.CTkProgressBar(upd_win, width=300, progress_color="#a6e3a1")
+            prog_bar.pack(pady=10)
+            prog_bar.set(0)
+            
+            lbl_status = ctk.CTkLabel(upd_win, text="0%", font=ctk.CTkFont(size=14, weight="bold"), text_color="#a6e3a1")
+            lbl_status.pack(pady=(0, 10))
+            
+            ctk.CTkLabel(upd_win, text="โปรแกรมจะปิดและเปิดใหม่โดยอัตโนมัติเมื่อเสร็จสิ้น", font=ctk.CTkFont(size=12), text_color="gray").pack(pady=(10, 20))
+            
+        def update_progress(pct):
+            if prog_bar and lbl_status:
+                prog_bar.set(pct / 100.0)
+                lbl_status.configure(text=f"{int(pct)}%")
+                
         self.after(0, show_updating_window)
         import urllib.request
         import zipfile
@@ -788,8 +807,24 @@ class ModderHubApp(ctk.CTk):
         try:
             req = urllib.request.Request(dl_url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req) as response:
-                zip_data = response.read()
+                total_size = response.getheader('Content-Length')
+                total_size = int(total_size) if total_size else None
                 
+                downloaded = 0
+                zip_data = bytearray()
+                chunk_size = 8192
+                
+                while True:
+                    chunk = response.read(chunk_size)
+                    if not chunk:
+                        break
+                    zip_data.extend(chunk)
+                    downloaded += len(chunk)
+                    
+                    if total_size:
+                        pct = (downloaded / total_size) * 100
+                        self.after(0, update_progress, pct)
+                        
             temp_dir = os.path.join(os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__), "_temp_update")
             os.makedirs(temp_dir, exist_ok=True)
             
