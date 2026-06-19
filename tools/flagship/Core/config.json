@@ -1,0 +1,10 @@
+{
+    "google_key": "",
+    "anthropic_key": "",
+    "deepseek_key": "",
+    "openai_key": "",
+    "api_key": "",
+    "model": "custom-local-llm",
+    "provider": "Local LLM",
+    "local_url": "http://localhost:1234/v1/chat/completions"
+}

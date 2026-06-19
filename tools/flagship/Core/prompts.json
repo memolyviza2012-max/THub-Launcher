@@ -1,0 +1,11 @@
+{
+    "active_preset": "Default",
+    "presets": {
+        "Default": {
+            "single": "",
+            "opt": "",
+            "batch": "",
+            "glossary": {}
+        }
+    }
+}
