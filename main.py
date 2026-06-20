@@ -248,49 +248,6 @@ class ModderHubApp(ctk.CTk):
         lbl_desc = ctk.CTkLabel(self.main_frame, text="ยินดีต้อนรับสู่ THub Launcher ศูนย์รวมเครื่องมือแปลเกมที่ดีที่สุด", font=ctk.CTkFont(size=14), text_color="gray")
         lbl_desc.pack(anchor="w", padx=30, pady=(0, 20))
 
-    def show_dashboard_help(self):
-        help_win = ctk.CTkToplevel(self)
-        help_win.title("วิธีใช้งาน Dashboard")
-        help_win.geometry("600x500")
-        help_win.transient(self)
-        help_win.grab_set()
-        
-        ctk.CTkLabel(help_win, text="คู่มือการใช้งาน Project Dashboard", font=ctk.CTkFont(size=22, weight="bold"), text_color="#89b4fa").pack(pady=(20, 10))
-        
-        scroll = ctk.CTkScrollableFrame(help_win, fg_color="transparent")
-        scroll.pack(fill="both", expand=True, padx=20, pady=10)
-        
-        help_text = """
-1. เพิ่มโปรเจกต์ใหม่ (+ New Project):
-   • สำหรับสร้างโฟลเดอร์โปรเจกต์งานแปลเกมใหม่ ระบบจะให้คุณเลือกที่เก็บไฟล์ และตั้งชื่อโปรเจกต์
-
-2. นำเข้าโปรเจกต์ (📥 Import Project):
-   • หากคุณมีโฟลเดอร์โปรเจกต์งานแปลเก่าอยู่แล้ว สามารถกดนำเข้าเพื่อให้แสดงบน Dashboard ได้ทันที
-
-3. ค้นหาโปรเจกต์ (🔍):
-   • พิมพ์ชื่อโปรเจกต์เพื่อกรองค้นหาอย่างรวดเร็ว
-
-4. การจัดการโปรเจกต์ (ปุ่มบนการ์ด):
-   • ⚙️ ตั้งค่า: เลือกโฟลเดอร์สำหรับเก็บไฟล์แปลโดยเฉพาะ
-   • ✏️ แก้ไขชื่อ: เปลี่ยนชื่อโปรเจกต์ที่แสดงบนหน้าจอ
-   • 🗑️ ลบ: ลบโปรเจกต์ออกจาก Dashboard (โฟลเดอร์และไฟล์จริงจะไม่ถูกลบ)
-
-5. ปุ่ม Action (ในตารางไฟล์):
-   • ↻ สแกนไฟล์: ตรวจสอบและค้นหาไฟล์ข้อความ (Text/JSON/XML) ภายในโปรเจกต์
-   • ℹ️ ดูรายละเอียด: แสดงประวัติว่ามีไฟล์อะไรที่สแกนเจอหรือเกิดข้อผิดพลาดบ้าง
-   • 📂 เปิดโฟลเดอร์: เปิดหน้าต่าง Windows Explorer ไปยังที่เก็บโปรเจกต์
-
-6. การส่งโปรเจกต์ไปเปิดในเครื่องมือแปล:
-   • เมื่อคุณมีโปรเจกต์แล้ว สามารถไปที่เมนู 'Tool Library' 
-   • เลือกโปรแกรมที่ต้องการ และเปลี่ยนช่อง 'พ่วงโปรเจกต์: ไม่มี' ให้เป็นชื่อโปรเจกต์ของคุณ 
-   • จากนั้นกด 🚀 Launch ระบบจะส่งโปรเจกต์ไปเปิดในโปรแกรมแปลนั้นๆ โดยตรง!
-"""
-        lbl_content = ctk.CTkLabel(scroll, text=help_text.strip(), font=ctk.CTkFont(size=14), justify="left", anchor="w", wraplength=520)
-        lbl_content.pack(fill="both", expand=True, padx=10, pady=10)
-        
-        btn_close = ctk.CTkButton(help_win, text="เข้าใจแล้ว", fg_color="#a6e3a1", text_color="#1e1e2e", hover_color="#94e2d5", font=ctk.CTkFont(weight="bold"), command=help_win.destroy)
-        btn_close.pack(pady=20)
-
         # Active Projects Grid
         self.projects_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
         self.projects_frame.pack(fill="both", expand=True, padx=20, pady=(0, 10))
@@ -354,6 +311,49 @@ class ModderHubApp(ctk.CTk):
             self.projects_frame.bind("<Configure>", self.on_projects_resize)
             self._rearrange_project_cards()
 
+    def show_dashboard_help(self):
+        help_win = ctk.CTkToplevel(self)
+        help_win.title("วิธีใช้งาน Dashboard")
+        help_win.geometry("600x500")
+        help_win.transient(self)
+        help_win.grab_set()
+        
+        ctk.CTkLabel(help_win, text="คู่มือการใช้งาน Project Dashboard", font=ctk.CTkFont(size=22, weight="bold"), text_color="#89b4fa").pack(pady=(20, 10))
+        
+        scroll = ctk.CTkScrollableFrame(help_win, fg_color="transparent")
+        scroll.pack(fill="both", expand=True, padx=20, pady=10)
+        
+        help_text = """
+1. เพิ่มโปรเจกต์ใหม่ (+ New Project):
+   • สำหรับสร้างโฟลเดอร์โปรเจกต์งานแปลเกมใหม่ ระบบจะให้คุณเลือกที่เก็บไฟล์ และตั้งชื่อโปรเจกต์
+
+2. นำเข้าโปรเจกต์ (📥 Import Project):
+   • หากคุณมีโฟลเดอร์โปรเจกต์งานแปลเก่าอยู่แล้ว สามารถกดนำเข้าเพื่อให้แสดงบน Dashboard ได้ทันที
+
+3. ค้นหาโปรเจกต์ (🔍):
+   • พิมพ์ชื่อโปรเจกต์เพื่อกรองค้นหาอย่างรวดเร็ว
+
+4. การจัดการโปรเจกต์ (ปุ่มบนการ์ด):
+   • ⚙️ ตั้งค่า: เลือกโฟลเดอร์สำหรับเก็บไฟล์แปลโดยเฉพาะ
+   • ✏️ แก้ไขชื่อ: เปลี่ยนชื่อโปรเจกต์ที่แสดงบนหน้าจอ
+   • 🗑️ ลบ: ลบโปรเจกต์ออกจาก Dashboard (โฟลเดอร์และไฟล์จริงจะไม่ถูกลบ)
+
+5. ปุ่ม Action (ในตารางไฟล์):
+   • ↻ สแกนไฟล์: ตรวจสอบและค้นหาไฟล์ข้อความ (Text/JSON/XML) ภายในโปรเจกต์
+   • ℹ️ ดูรายละเอียด: แสดงประวัติว่ามีไฟล์อะไรที่สแกนเจอหรือเกิดข้อผิดพลาดบ้าง
+   • 📂 เปิดโฟลเดอร์: เปิดหน้าต่าง Windows Explorer ไปยังที่เก็บโปรเจกต์
+
+6. การส่งโปรเจกต์ไปเปิดในเครื่องมือแปล:
+   • เมื่อคุณมีโปรเจกต์แล้ว สามารถไปที่เมนู 'Tool Library' 
+   • เลือกโปรแกรมที่ต้องการ และเปลี่ยนช่อง 'พ่วงโปรเจกต์: ไม่มี' ให้เป็นชื่อโปรเจกต์ของคุณ 
+   • จากนั้นกด 🚀 Launch ระบบจะส่งโปรเจกต์ไปเปิดในโปรแกรมแปลนั้นๆ โดยตรง!
+"""
+        lbl_content = ctk.CTkLabel(scroll, text=help_text.strip(), font=ctk.CTkFont(size=14), justify="left", anchor="w", wraplength=520)
+        lbl_content.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        btn_close = ctk.CTkButton(help_win, text="เข้าใจแล้ว", fg_color="#a6e3a1", text_color="#1e1e2e", hover_color="#94e2d5", font=ctk.CTkFont(weight="bold"), command=help_win.destroy)
+        btn_close.pack(pady=20)
+
         # Update card removed per user request
 
     def on_projects_resize(self, event):
@@ -403,7 +403,38 @@ class ModderHubApp(ctk.CTk):
                 os.makedirs(os.path.join(project_path, "02_Translation_Workspace"))
                 os.makedirs(os.path.join(project_path, "03_Font_and_UI"))
                 os.makedirs(os.path.join(project_path, "04_Packed_Mod"))
+                os.makedirs(os.path.join(project_path, "05_Scripts_and_Tools"))
+                os.makedirs(os.path.join(project_path, "06_Releases"))
                 
+                # Create thub_project.json
+                project_meta = {
+                    "project_name": game_name,
+                    "version": "1.0.0",
+                    "author": "NodNuatTranslator",
+                    "game_path": "",
+                    "notes": "บันทึกข้อมูลเพิ่มเติมเกี่ยวกับโปรเจกต์นี้..."
+                }
+                with open(os.path.join(project_path, "thub_project.json"), "w", encoding="utf-8") as f:
+                    json.dump(project_meta, f, indent=4, ensure_ascii=False)
+                    
+                # Create README.md
+                readme_content = f"""# 📁 โปรเจกต์แปลเกม: {game_name}
+ยินดีต้อนรับสู่พื้นที่ทำงานแปลเกมผ่านระบบ THub Workspace!
+
+## โครงสร้างโฟลเดอร์ทำงาน (Workspace Structure)
+- **`01_Original_Backup`**: โฟลเดอร์สำหรับเก็บไฟล์ข้อความต้นฉบับดั้งเดิมของเกม (เช่น ภาษาอังกฤษ) เพื่อใช้สำรองข้อมูล
+- **`02_Translation_Workspace`**: โฟลเดอร์สำหรับทำไฟล์แปลภาษาไทย (.csv, .xlsx, .json) เพื่อเปิดในโปรแกรม TStudio
+- **`03_Font_and_UI`**: โฟลเดอร์สำหรับเก็บไฟล์ฟอนต์, แผ่นภาพ Texture (Atlas), พิกัดฟอนต์ (.fnt/.xml), และตัวแมปปิ้งสระ PUA
+- **`04_Packed_Mod`**: โฟลเดอร์ทดสอบที่จัดวางโครงสร้างตัวม็อดไว้พร้อมสำหรับการนำไปยัดหรือติดตั้งทับลงเกมจริง
+- **`05_Scripts_and_Tools`**: โฟลเดอร์สำหรับเก็บสคริปต์เฉพาะกิจ (เช่น สคริปต์แยกคำแปล, สคริปต์แพ็กกลับ) หรือโปรแกรมแกะไฟล์เฉพาะเกม
+- **`06_Releases`**: โฟลเดอร์สำหรับเก็บไฟล์บิลด์สำเร็จรูปสุดท้าย (.zip, .rar) สำหรับนำไปแจกจ่ายให้ผู้ใช้หรือผู้ทดสอบ
+
+---
+*จัดระบบการจัดการโดย THub Launcher*
+"""
+                with open(os.path.join(project_path, "README.md"), "w", encoding="utf-8") as f:
+                    f.write(readme_content)
+
                 self.config.setdefault("projects", []).append({
                     "name": game_name,
                     "path": project_path,
@@ -435,7 +466,42 @@ class ModderHubApp(ctk.CTk):
             os.makedirs(os.path.join(folder_path, "02_Translation_Workspace"), exist_ok=True)
             os.makedirs(os.path.join(folder_path, "03_Font_and_UI"), exist_ok=True)
             os.makedirs(os.path.join(folder_path, "04_Packed_Mod"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "05_Scripts_and_Tools"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "06_Releases"), exist_ok=True)
             
+            # Create thub_project.json if missing
+            json_path = os.path.join(folder_path, "thub_project.json")
+            if not os.path.exists(json_path):
+                project_meta = {
+                    "project_name": project_name,
+                    "version": "1.0.0",
+                    "author": "NodNuatTranslator",
+                    "game_path": "",
+                    "notes": "บันทึกข้อมูลเพิ่มเติมเกี่ยวกับโปรเจกต์นี้..."
+                }
+                with open(json_path, "w", encoding="utf-8") as f:
+                    json.dump(project_meta, f, indent=4, ensure_ascii=False)
+                    
+            # Create README.md if missing
+            readme_path = os.path.join(folder_path, "README.md")
+            if not os.path.exists(readme_path):
+                readme_content = f"""# 📁 โปรเจกต์แปลเกม: {project_name}
+ยินดีต้อนรับสู่พื้นที่ทำงานแปลเกมผ่านระบบ THub Workspace!
+
+## โครงสร้างโฟลเดอร์ทำงาน (Workspace Structure)
+- **`01_Original_Backup`**: โฟลเดอร์สำหรับเก็บไฟล์ข้อความต้นฉบับดั้งเดิมของเกม (เช่น ภาษาอังกฤษ) เพื่อใช้สำรองข้อมูล
+- **`02_Translation_Workspace`**: โฟลเดอร์สำหรับทำไฟล์แปลภาษาไทย (.csv, .xlsx, .json) เพื่อเปิดในโปรแกรม TStudio
+- **`03_Font_and_UI`**: โฟลเดอร์สำหรับเก็บไฟล์ฟอนต์, แผ่นภาพ Texture (Atlas), พิกัดฟอนต์ (.fnt/.xml), และตัวแมปปิ้งสระ PUA
+- **`04_Packed_Mod`**: โฟลเดอร์ทดสอบที่จัดวางโครงสร้างตัวม็อดไว้พร้อมสำหรับการนำไปยัดหรือติดตั้งทับลงเกมจริง
+- **`05_Scripts_and_Tools`**: โฟลเดอร์สำหรับเก็บสคริปต์เฉพาะกิจ (เช่น สคริปต์แยกคำแปล, สคริปต์แพ็กกลับ) หรือโปรแกรมแกะไฟล์เฉพาะเกม
+- **`06_Releases`**: โฟลเดอร์สำหรับเก็บไฟล์บิลด์สำเร็จรูปสุดท้าย (.zip, .rar) สำหรับนำไปแจกจ่ายให้ผู้ใช้หรือผู้ทดสอบ
+
+---
+*จัดระบบการจัดการโดย THub Launcher*
+"""
+                with open(readme_path, "w", encoding="utf-8") as f:
+                    f.write(readme_content)
+
             self.config.setdefault("projects", []).append({
                 "name": project_name,
                 "path": folder_path,
