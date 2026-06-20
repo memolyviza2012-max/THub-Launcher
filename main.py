@@ -83,6 +83,178 @@ class ToolTip:
             self.tw.destroy()
             self.tw = None
 
+class ProjectWizardWindow(ctk.CTkToplevel):
+    def __init__(self, parent, is_import_mode=False, initial_path=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.is_import_mode = is_import_mode
+        self.initial_path = initial_path
+        self.result = None
+        
+        self.title("📥 นำเข้าโปรเจกต์" if is_import_mode else "🚀 สร้างโปรเจกต์ใหม่")
+        self.geometry("650x620")
+        self.resizable(False, False)
+        self.transient(parent)
+        self.grab_set()
+        
+        # Center the window relative to parent
+        self.update_idletasks()
+        parent_x = parent.winfo_rootx()
+        parent_y = parent.winfo_rooty()
+        parent_w = parent.winfo_width()
+        parent_h = parent.winfo_height()
+        x = parent_x + (parent_w - 650) // 2
+        y = parent_y + (parent_h - 620) // 2
+        self.geometry(f"+{x}+{y}")
+        
+        # Title Label
+        lbl_title = ctk.CTkLabel(self, text="ตั้งค่ารายละเอียดโปรเจกต์" if is_import_mode else "สร้างโปรเจกต์แปลเกมใหม่", font=ctk.CTkFont(size=22, weight="bold"), text_color="#cba6f7")
+        lbl_title.pack(pady=(20, 15))
+        
+        # Main form frame
+        form_frame = ctk.CTkFrame(self, fg_color="transparent")
+        form_frame.pack(fill="both", expand=True, padx=40)
+        
+        # Grid config
+        form_frame.columnconfigure(0, weight=1)
+        form_frame.columnconfigure(1, weight=3)
+        form_frame.columnconfigure(2, weight=0)
+        
+        row = 0
+        
+        # 1. Project Name
+        ctk.CTkLabel(form_frame, text="ชื่อโปรเจกต์ / เกม *:", font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
+        self.ent_name = ctk.CTkEntry(form_frame, placeholder_text="เช่น Dead Island 2 (ภาษาอังกฤษต้นฉบับ)")
+        self.ent_name.grid(row=row, column=1, columnspan=2, sticky="ew", pady=10)
+        if is_import_mode and initial_path:
+            self.ent_name.insert(0, os.path.basename(initial_path))
+        row += 1
+        
+        # 2. Developer / Author
+        ctk.CTkLabel(form_frame, text="ผู้พัฒนา / ผู้แปล:", font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
+        self.ent_author = ctk.CTkEntry(form_frame, placeholder_text="ชื่อทีมแปล / ผู้แปลหลัก [เว้นว่างได้]")
+        self.ent_author.grid(row=row, column=1, columnspan=2, sticky="ew", pady=10)
+        row += 1
+        
+        # 3. Contributors
+        ctk.CTkLabel(form_frame, text="ผู้ร่วมแปล / ทีมงาน:", font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
+        self.ent_contributors = ctk.CTkEntry(form_frame, placeholder_text="ชื่อสมาชิกคนอื่นๆ [เว้นว่างได้]")
+        self.ent_contributors.grid(row=row, column=1, columnspan=2, sticky="ew", pady=10)
+        row += 1
+        
+        # 4. Project Link
+        ctk.CTkLabel(form_frame, text="ลิงก์โปรเจกต์ / GitHub:", font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
+        self.ent_link = ctk.CTkEntry(form_frame, placeholder_text="เช่น ลิงก์เพจเฟซบุ๊ก หรือลิงก์ Git [เว้นว่างได้]")
+        self.ent_link.grid(row=row, column=1, columnspan=2, sticky="ew", pady=10)
+        row += 1
+        
+        # 5. Workspace Path
+        ctk.CTkLabel(form_frame, text="ตำแหน่งโปรเจกต์ *:", font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
+        self.ent_path = ctk.CTkEntry(form_frame, placeholder_text="เลือกโฟลเดอร์สำหรับสร้างพื้นที่ทำงาน...")
+        self.ent_path.grid(row=row, column=1, sticky="ew", pady=10, padx=(0, 10))
+        if is_import_mode and initial_path:
+            self.ent_path.insert(0, initial_path)
+            self.ent_path.configure(state="disabled")
+            
+        self.btn_browse_path = ctk.CTkButton(form_frame, text="📂 เลือก", width=80, fg_color="#313244", hover_color="#45475a", command=self.browse_workspace)
+        self.btn_browse_path.grid(row=row, column=2, sticky="ew", pady=10)
+        if is_import_mode:
+            self.btn_browse_path.configure(state="disabled")
+        row += 1
+        
+        # 6. Auto-Import Original Files
+        self.lbl_import_files = ctk.CTkLabel(form_frame, text="ไฟล์ต้นฉบับจะแบ็คอัป:", font=ctk.CTkFont(weight="bold"), anchor="w")
+        self.lbl_import_files.grid(row=row, column=0, sticky="w", pady=10)
+        self.ent_files = ctk.CTkEntry(form_frame, placeholder_text="เลือกไฟล์ภาษาดั้งเดิม (เช่น .txt, .csv) [ข้ามได้]")
+        self.ent_files.grid(row=row, column=1, sticky="ew", pady=10, padx=(0, 10))
+        
+        self.btn_browse_files = ctk.CTkButton(form_frame, text="📄 เลือก", width=80, fg_color="#313244", hover_color="#45475a", command=self.browse_original_files)
+        self.btn_browse_files.grid(row=row, column=2, sticky="ew", pady=10)
+        
+        if is_import_mode:
+            self.lbl_import_files.grid_forget()
+            self.ent_files.grid_forget()
+            self.btn_browse_files.grid_forget()
+        row += 1
+        
+        # 7. Notes
+        ctk.CTkLabel(form_frame, text="คำอธิบาย / บันทึกย่อ:", font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
+        self.ent_notes = ctk.CTkEntry(form_frame, placeholder_text="เช่น รายละเอียดเกี่ยวกับวิธีแกะฟอนต์ ข้อมูลสเปกต่างๆ [เว้นว่างได้]")
+        self.ent_notes.grid(row=row, column=1, columnspan=2, sticky="ew", pady=10)
+        row += 1
+        
+        # Setup shortcut bindings to guarantee copy-paste
+        for entry in [self.ent_name, self.ent_author, self.ent_contributors, self.ent_link, self.ent_path, self.ent_files, self.ent_notes]:
+            self.bind_common_shortcuts(entry)
+            
+        # Action buttons
+        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        btn_frame.pack(fill="x", side="bottom", pady=25)
+        
+        btn_cancel = ctk.CTkButton(btn_frame, text="❌ ยกเลิก", fg_color="#f38ba8", hover_color="#eba0ac", text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"), command=self.destroy)
+        btn_cancel.pack(side="right", padx=(10, 40))
+        
+        btn_create = ctk.CTkButton(btn_frame, text="🚀 นำเข้าโปรเจกต์" if is_import_mode else "🚀 สร้างโปรเจกต์", fg_color="#a6e3a1", hover_color="#94e2d5", text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"), command=self.on_submit)
+        btn_create.pack(side="right")
+        
+    def bind_common_shortcuts(self, entry):
+        def select_all(event):
+            entry.select_range(0, 'end')
+            entry.icursor('end')
+            return 'break'
+        entry.bind("<Control-Key-a>", select_all)
+        entry.bind("<Control-Key-A>", select_all)
+        
+    def browse_workspace(self):
+        folder = filedialog.askdirectory(title="เลือกโฟลเดอร์สำหรับสร้างพื้นที่ทำงาน (Workspace)")
+        if folder:
+            proj_name = self.ent_name.get().strip().replace(" ", "_")
+            if proj_name:
+                target_path = os.path.join(folder, proj_name)
+            else:
+                target_path = folder
+            self.ent_path.delete(0, 'end')
+            self.ent_path.insert(0, target_path)
+            
+    def browse_original_files(self):
+        files = filedialog.askopenfilenames(title="เลือกไฟล์ภาษาดั้งเดิมเพื่อเก็บใน 01_Original_Backup", filetypes=[("Translation Files", "*.txt *.csv *.json *.xml *.xlsx"), ("All Files", "*.*")])
+        if files:
+            self.ent_files.delete(0, 'end')
+            self.ent_files.insert(0, "; ".join(files))
+            
+    def on_submit(self):
+        name = self.ent_name.get().strip()
+        author = self.ent_author.get().strip()
+        contributors = self.ent_contributors.get().strip()
+        link = self.ent_link.get().strip()
+        
+        if self.is_import_mode:
+            path = self.initial_path
+        else:
+            path = self.ent_path.get().strip()
+            
+        files_str = self.ent_files.get().strip()
+        files = [f.strip() for f in files_str.split("; ") if f.strip()] if files_str else []
+        notes = self.ent_notes.get().strip()
+        
+        if not name:
+            messagebox.showerror("Error", "กรุณากรอกชื่อโปรเจกต์", parent=self)
+            return
+        if not path:
+            messagebox.showerror("Error", "กรุณาเลือกโฟลเดอร์สำหรับทำโปรเจกต์", parent=self)
+            return
+            
+        self.result = {
+            "name": name,
+            "author": author,
+            "contributors": contributors,
+            "link": link,
+            "path": path,
+            "original_files": files,
+            "notes": notes
+        }
+        self.destroy()
+
 # Constants
 CURRENT_VERSION = "1.0.2"
 UPDATE_FILE_PATH = os.path.join(os.path.dirname(__file__), "updates.json")
@@ -399,52 +571,64 @@ class ModderHubApp(ctk.CTk):
             w.grid(row=row, column=col, padx=10, pady=10, sticky="nw")
 
     def add_new_project_wizard(self):
-        dialog = ctk.CTkInputDialog(text="กรอกชื่อเกม (Game Name):", title="New Project")
-        game_name = dialog.get_input()
+        wizard = ProjectWizardWindow(self, is_import_mode=False)
+        self.wait_window(wizard)
         
-        if game_name:
-            game_name = game_name.strip()
-            if not game_name:
-                return
-                
-            author_dialog = ctk.CTkInputDialog(text="กรอกชื่อผู้พัฒนา / ทีมแปล (Developer Name) [เว้นว่างได้]:", title="Developer Name")
-            author_name = author_dialog.get_input()
-            if author_name is None:
-                return
-            author_name = author_name.strip()
+        if not wizard.result:
+            return
             
-            base_path = filedialog.askdirectory(title=f"เลือกโฟลเดอร์สำหรับสร้างโปรเจกต์: {game_name}")
-            if not base_path:
+        res = wizard.result
+        game_name = res["name"]
+        project_path = res["path"]
+        
+        if os.path.exists(project_path):
+            # Check if already registered
+            for p in self.config.get("projects", []):
+                if p.get("path") == project_path:
+                    messagebox.showerror("Error", f"พื้นที่ทำงานนี้มีการลงทะเบียนในระบบอยู่แล้วครับ:\n{project_path}")
+                    return
+            if not messagebox.askyesno("Folder Exists", f"มีโฟลเดอร์อยู่แล้วที่พาธ:\n{project_path}\n\nคุณต้องการสร้างโปรเจกต์ทับในโฟลเดอร์นี้หรือไม่?"):
                 return
                 
-            project_path = os.path.join(base_path, game_name.replace(" ", "_"))
-            if os.path.exists(project_path):
-                messagebox.showerror("Error", f"มีโปรเจกต์ชื่อนี้อยู่แล้ว:\n{project_path}")
-                return
+        try:
+            os.makedirs(os.path.join(project_path, "01_Original_Backup"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "02_Translation_Workspace"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "03_Font_and_UI"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "04_Packed_Mod"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "05_Scripts_and_Tools"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "06_Releases"), exist_ok=True)
+            
+            # Copy original files to 01_Original_Backup if selected
+            if res["original_files"]:
+                import shutil
+                backup_dir = os.path.join(project_path, "01_Original_Backup")
+                for file_path in res["original_files"]:
+                    if os.path.exists(file_path):
+                        shutil.copy2(file_path, backup_dir)
+            
+            # Create thub_project.json
+            project_meta = {
+                "project_name": game_name,
+                "version": "1.0.0",
+                "author": res["author"],
+                "contributors": res["contributors"],
+                "project_link": res["link"],
+                "game_path": "",
+                "notes": res["notes"]
+            }
+            with open(os.path.join(project_path, "thub_project.json"), "w", encoding="utf-8") as f:
+                json.dump(project_meta, f, indent=4, ensure_ascii=False)
                 
-            try:
-                os.makedirs(project_path)
-                os.makedirs(os.path.join(project_path, "01_Original_Backup"))
-                os.makedirs(os.path.join(project_path, "02_Translation_Workspace"))
-                os.makedirs(os.path.join(project_path, "03_Font_and_UI"))
-                os.makedirs(os.path.join(project_path, "04_Packed_Mod"))
-                os.makedirs(os.path.join(project_path, "05_Scripts_and_Tools"))
-                os.makedirs(os.path.join(project_path, "06_Releases"))
-                
-                # Create thub_project.json
-                project_meta = {
-                    "project_name": game_name,
-                    "version": "1.0.0",
-                    "author": author_name,
-                    "game_path": "",
-                    "notes": "บันทึกข้อมูลเพิ่มเติมเกี่ยวกับโปรเจกต์นี้..."
-                }
-                with open(os.path.join(project_path, "thub_project.json"), "w", encoding="utf-8") as f:
-                    json.dump(project_meta, f, indent=4, ensure_ascii=False)
-                    
-                # Create README.md
-                readme_content = f"""# 📁 โปรเจกต์แปลเกม: {game_name}
+            # Create README.md
+            readme_content = f"""# 📁 โปรเจกต์แปลเกม: {game_name}
 ยินดีต้อนรับสู่พื้นที่ทำงานแปลเกมผ่านระบบ THub Workspace!
+
+## รายละเอียดโปรเจกต์ (Project Details)
+- **ชื่อโปรเจกต์ / เกม**: {game_name}
+- **ผู้พัฒนา / ทีมแปล**: {res["author"] if res["author"] else "-"}
+- **ทีมงาน / ผู้ร่วมแปล**: {res["contributors"] if res["contributors"] else "-"}
+- **ลิงก์โปรเจกต์ / GitHub**: {res["link"] if res["link"] else "-"}
+- **บันทึกย่อ**: {res["notes"] if res["notes"] else "-"}
 
 ## โครงสร้างโฟลเดอร์ทำงาน (Workspace Structure)
 - **`01_Original_Backup`**: โฟลเดอร์สำหรับเก็บไฟล์ข้อความต้นฉบับดั้งเดิมของเกม (เช่น ภาษาอังกฤษ) เพื่อใช้สำรองข้อมูล
@@ -457,20 +641,20 @@ class ModderHubApp(ctk.CTk):
 ---
 *จัดระบบการจัดการโดย THub Launcher*
 """
-                with open(os.path.join(project_path, "README.md"), "w", encoding="utf-8") as f:
-                    f.write(readme_content)
+            with open(os.path.join(project_path, "README.md"), "w", encoding="utf-8") as f:
+                f.write(readme_content.strip())
 
-                self.config.setdefault("projects", []).append({
-                    "name": game_name,
-                    "path": project_path,
-                    "translation_folders": ["02_Translation_Workspace"],
-                    "status": "In Progress"
-                })
-                self.save_local_config()
-                self.show_home()
-                messagebox.showinfo("Success", f"สร้างโปรเจกต์ {game_name} สำเร็จ!\nโครงสร้างโฟลเดอร์พร้อมใช้งานแล้ว")
-            except Exception as e:
-                messagebox.showerror("Error", f"สร้างโปรเจกต์ล้มเหลว: {e}")
+            self.config.setdefault("projects", []).append({
+                "name": game_name,
+                "path": project_path,
+                "translation_folders": ["02_Translation_Workspace"],
+                "status": "In Progress"
+            })
+            self.save_local_config()
+            self.show_home()
+            messagebox.showinfo("Success", f"สร้างโปรเจกต์ {game_name} สำเร็จ!\nโครงสร้างโฟลเดอร์พร้อมใช้งานแล้ว")
+        except Exception as e:
+            messagebox.showerror("Error", f"สร้างโปรเจกต์ล้มเหลว: {e}")
 
     def import_project_wizard(self):
         folder_path = filedialog.askdirectory(title="Select Project Folder to Import")
@@ -485,40 +669,62 @@ class ModderHubApp(ctk.CTk):
                 messagebox.showinfo("Info", "โปรเจกต์นี้อยู่ในระบบแล้วครับ!")
                 return
                 
-        try:
-            # Create standard folders if they don't exist, WITHOUT touching existing files
-            os.makedirs(os.path.join(folder_path, "01_Original_Backup"), exist_ok=True)
-            os.makedirs(os.path.join(folder_path, "02_Translation_Workspace"), exist_ok=True)
-            os.makedirs(os.path.join(folder_path, "03_Font_and_UI"), exist_ok=True)
-            os.makedirs(os.path.join(folder_path, "04_Packed_Mod"), exist_ok=True)
-            os.makedirs(os.path.join(folder_path, "05_Scripts_and_Tools"), exist_ok=True)
-            os.makedirs(os.path.join(folder_path, "06_Releases"), exist_ok=True)
+    def import_project_wizard(self):
+        folder_path = filedialog.askdirectory(title="Select Project Folder to Import")
+        if not folder_path:
+            return
             
-            # Create thub_project.json if missing
-            json_path = os.path.join(folder_path, "thub_project.json")
-            if not os.path.exists(json_path):
-                author_dialog = ctk.CTkInputDialog(text="กรอกชื่อผู้พัฒนา / ทีมแปล (Developer Name) [เว้นว่างได้]:", title="Developer Name")
-                author_name = author_dialog.get_input()
-                if author_name is None:
-                    author_name = ""
-                else:
-                    author_name = author_name.strip()
-                    
+        for p in self.config.get("projects", []):
+            if p.get("path") == folder_path:
+                messagebox.showinfo("Info", "โปรเจกต์นี้อยู่ในระบบแล้วครับ!")
+                return
+                
+        json_path = os.path.join(folder_path, "thub_project.json")
+        project_name = os.path.basename(folder_path)
+        author_name = ""
+        
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+                    project_name = meta.get("project_name", project_name)
+                    author_name = meta.get("author", "")
+            except Exception:
+                pass
+        else:
+            wizard = ProjectWizardWindow(self, is_import_mode=True, initial_path=folder_path)
+            self.wait_window(wizard)
+            if not wizard.result:
+                return
+                
+            res = wizard.result
+            project_name = res["name"]
+            author_name = res["author"]
+            
+            try:
                 project_meta = {
                     "project_name": project_name,
                     "version": "1.0.0",
                     "author": author_name,
+                    "contributors": res["contributors"],
+                    "project_link": res["link"],
                     "game_path": "",
-                    "notes": "บันทึกข้อมูลเพิ่มเติมเกี่ยวกับโปรเจกต์นี้..."
+                    "notes": res["notes"]
                 }
                 with open(json_path, "w", encoding="utf-8") as f:
                     json.dump(project_meta, f, indent=4, ensure_ascii=False)
                     
-            # Create README.md if missing
-            readme_path = os.path.join(folder_path, "README.md")
-            if not os.path.exists(readme_path):
-                readme_content = f"""# 📁 โปรเจกต์แปลเกม: {project_name}
+                readme_path = os.path.join(folder_path, "README.md")
+                if not os.path.exists(readme_path):
+                    readme_content = f"""# 📁 โปรเจกต์แปลเกม: {project_name}
 ยินดีต้อนรับสู่พื้นที่ทำงานแปลเกมผ่านระบบ THub Workspace!
+
+## รายละเอียดโปรเจกต์ (Project Details)
+- **ชื่อโปรเจกต์ / เกม**: {project_name}
+- **ผู้พัฒนา / ทีมแปล**: {author_name if author_name else "-"}
+- **ทีมงาน / ผู้ร่วมแปล**: {res["contributors"] if res["contributors"] else "-"}
+- **ลิงก์โปรเจกต์ / GitHub**: {res["link"] if res["link"] else "-"}
+- **บันทึกย่อ**: {res["notes"] if res["notes"] else "-"}
 
 ## โครงสร้างโฟลเดอร์ทำงาน (Workspace Structure)
 - **`01_Original_Backup`**: โฟลเดอร์สำหรับเก็บไฟล์ข้อความต้นฉบับดั้งเดิมของเกม (เช่น ภาษาอังกฤษ) เพื่อใช้สำรองข้อมูล
@@ -531,9 +737,20 @@ class ModderHubApp(ctk.CTk):
 ---
 *จัดระบบการจัดการโดย THub Launcher*
 """
-                with open(readme_path, "w", encoding="utf-8") as f:
-                    f.write(readme_content)
+                    with open(readme_path, "w", encoding="utf-8") as f:
+                        f.write(readme_content.strip())
+            except Exception as e:
+                messagebox.showerror("Error", f"สร้างไฟล์ตั้งค่าล้มเหลว: {e}")
+                return
 
+        try:
+            os.makedirs(os.path.join(folder_path, "01_Original_Backup"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "02_Translation_Workspace"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "03_Font_and_UI"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "04_Packed_Mod"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "05_Scripts_and_Tools"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "06_Releases"), exist_ok=True)
+            
             self.config.setdefault("projects", []).append({
                 "name": project_name,
                 "path": folder_path,
@@ -541,7 +758,7 @@ class ModderHubApp(ctk.CTk):
             })
             self.save_local_config()
             self.show_home()
-            messagebox.showinfo("Success", f"นำเข้าโปรเจกต์ {project_name} สำเร็จ!\nระบบได้สร้างโฟลเดอร์มาตรฐานเสริมให้แล้ว (ไฟล์เก่าของคุณยังอยู่ครบครับ)")
+            messagebox.showinfo("Success", f"นำเข้าโปรเจกต์ {project_name} สำเร็จ!\nระบบได้ตรวจสอบและสร้างโฟลเดอร์มาตรฐานที่ยังขาดให้เรียบร้อยแล้ว")
         except Exception as e:
             messagebox.showerror("Error", f"นำเข้าโปรเจกต์ล้มเหลว: {e}")
 
