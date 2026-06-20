@@ -2,6 +2,7 @@
   <img src="https://img.icons8.com/color/96/000000/launch.png" alt="THub Logo" width="100"/>
   <h1>🚀 THub Launcher : The Flagship Suite</h1>
   <p><b>Ultimate Game Modding & Localization Environment</b></p>
+   <p><b>โปรแกรมนี้ยังเป็นช่วง Beta อยู่นะครับ</b></p>
   
   [![Version](https://img.shields.io/badge/Version-1.0.1-blue.svg?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg?style=for-the-badge)](#)
