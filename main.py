@@ -260,6 +260,17 @@ class ModderHubApp(ctk.CTk):
             ctk.CTkLabel(self.projects_frame, text="ยังไม่มีโปรเจกต์ กด + New Project เพื่อเริ่มต้น!", text_color="gray").grid(row=0, column=0, pady=50)
         else:
             for i, proj in enumerate(projects):
+                proj_path = proj.get("path", "")
+                author_name = ""
+                meta_path = os.path.join(proj_path, "thub_project.json")
+                if os.path.exists(meta_path):
+                    try:
+                        with open(meta_path, "r", encoding="utf-8") as f:
+                            local_meta = json.load(f)
+                            author_name = local_meta.get("author", "").strip()
+                    except Exception:
+                        pass
+
                 card = ctk.CTkFrame(self.projects_frame, width=440, height=210, corner_radius=10, fg_color="#1e1e2e", border_width=1, border_color="#45475a")
                 card.pack_propagate(False)
                 self.project_card_widgets.append((card, proj))
@@ -278,7 +289,11 @@ class ModderHubApp(ctk.CTk):
                 btn_del.pack(side="right", padx=(5, 0))
                 
                 name_lbl = ctk.CTkLabel(card_top, text=proj.get("name", "Unknown"), font=ctk.CTkFont(size=18, weight="bold"), text_color="#cba6f7", anchor="w")
-                name_lbl.pack(side="left", fill="x", expand=True)
+                name_lbl.pack(side="left")
+                
+                if author_name:
+                    author_lbl = ctk.CTkLabel(card_top, text=f"  by {author_name}", font=ctk.CTkFont(size=12, slant="italic"), text_color="#a6adc8", anchor="w")
+                    author_lbl.pack(side="left", padx=(5, 0), pady=(4, 0))
                 
                 path_lbl = ctk.CTkLabel(card, text=proj.get("path", ""), font=ctk.CTkFont(size=12), text_color="gray", anchor="w")
                 path_lbl.pack(fill="x", padx=15, pady=0)
@@ -388,6 +403,16 @@ class ModderHubApp(ctk.CTk):
         game_name = dialog.get_input()
         
         if game_name:
+            game_name = game_name.strip()
+            if not game_name:
+                return
+                
+            author_dialog = ctk.CTkInputDialog(text="กรอกชื่อผู้พัฒนา / ทีมแปล (Developer Name) [เว้นว่างได้]:", title="Developer Name")
+            author_name = author_dialog.get_input()
+            if author_name is None:
+                return
+            author_name = author_name.strip()
+            
             base_path = filedialog.askdirectory(title=f"เลือกโฟลเดอร์สำหรับสร้างโปรเจกต์: {game_name}")
             if not base_path:
                 return
@@ -410,7 +435,7 @@ class ModderHubApp(ctk.CTk):
                 project_meta = {
                     "project_name": game_name,
                     "version": "1.0.0",
-                    "author": "NodNuatTranslator",
+                    "author": author_name,
                     "game_path": "",
                     "notes": "บันทึกข้อมูลเพิ่มเติมเกี่ยวกับโปรเจกต์นี้..."
                 }
@@ -472,10 +497,17 @@ class ModderHubApp(ctk.CTk):
             # Create thub_project.json if missing
             json_path = os.path.join(folder_path, "thub_project.json")
             if not os.path.exists(json_path):
+                author_dialog = ctk.CTkInputDialog(text="กรอกชื่อผู้พัฒนา / ทีมแปล (Developer Name) [เว้นว่างได้]:", title="Developer Name")
+                author_name = author_dialog.get_input()
+                if author_name is None:
+                    author_name = ""
+                else:
+                    author_name = author_name.strip()
+                    
                 project_meta = {
                     "project_name": project_name,
                     "version": "1.0.0",
-                    "author": "NodNuatTranslator",
+                    "author": author_name,
                     "game_path": "",
                     "notes": "บันทึกข้อมูลเพิ่มเติมเกี่ยวกับโปรเจกต์นี้..."
                 }
