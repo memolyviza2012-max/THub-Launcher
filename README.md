@@ -3,7 +3,7 @@
   <h1>🚀 THub Launcher : The Flagship Suite</h1>
   <p><b>Ultimate Game Modding & Localization Environment</b></p>
   
-  [![Version](https://img.shields.io/badge/Version-1.0.1-blue.svg?style=for-the-badge)](#)
+  [![Version](https://img.shields.io/badge/Version-1.0.2-blue.svg?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg?style=for-the-badge)](#)
   [![Python](https://img.shields.io/badge/Built_with-Python_3.11-yellow.svg?style=for-the-badge)](#)
 </div>

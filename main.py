@@ -84,7 +84,7 @@ class ToolTip:
             self.tw = None
 
 # Constants
-CURRENT_VERSION = "1.0.1"
+CURRENT_VERSION = "1.0.2"
 UPDATE_FILE_PATH = os.path.join(os.path.dirname(__file__), "updates.json")
 CONFIG_FILE = "hub_config.json"
 KNOWLEDGE_DIR = os.path.join(os.path.dirname(__file__), "Modding-Knowledge")
