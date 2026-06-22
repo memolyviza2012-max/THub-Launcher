@@ -1,10 +1,10 @@
 <div align="center">
-  <img src="https://img.icons8.com/color/96/000000/launch.png" alt="THub Logo" width="100"/>
+  <img src="https://i.postimg.cc/HLncmbbK/THub-logo-game-mods-202606162214.jpg" alt="THub Logo" width="100"/>
   <h1>🚀 THub Launcher : The Flagship Suite</h1>
   <p><b>Ultimate Game Modding & Localization Environment</b></p>
    <p><b>โปรแกรมนี้ยังเป็นช่วง Beta อยู่นะครับ</b></p>
   
-  [![Version](https://img.shields.io/badge/Version-1.0.2-blue.svg?style=for-the-badge)](#)
+  [![Version](https://img.shields.io/badge/Version-1.0.4-blue.svg?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg?style=for-the-badge)](#)
   [![Python](https://img.shields.io/badge/Built_with-Python_3.11-yellow.svg?style=for-the-badge)](#)
 </div>
