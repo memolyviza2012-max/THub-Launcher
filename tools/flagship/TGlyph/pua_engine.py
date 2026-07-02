@@ -46,12 +46,16 @@ from typing import Union
 PUA_BASE: int = 0xF000
 """Base codepoint for the Private Use Area mappings (U+F000)."""
 
-CONSONANT_STRIDE: int = 47
+CONSONANT_STRIDE: Final[int] = 47
 """Slots reserved per modifier block.
 
 The Noonetranslator mapping uses 47 as the stride even though there are
 only 46 consonants; the extra slot (index 46) is left unused in every block.
 """
+
+# The offset used when mapping standard standalone Thai characters into the PUA.
+# 0xD200 + 0x0E00 = 0xE000, so U+0E01 becomes U+E001.
+FULL_PUA_OFFSET: Final[int] = 0xD200
 
 THAI_CONSONANTS: list[str] = [chr(cp) for cp in range(0x0E01, 0x0E2F)]
 """All 46 Thai consonant codepoints (ก–ฮ), U+0E01 … U+0E2E.
@@ -176,6 +180,11 @@ def _build_reverse_lookup() -> dict[int, str]:
         for con_idx, consonant in enumerate(THAI_CONSONANTS):
             code = PUA_BASE + block_idx * CONSONANT_STRIDE + con_idx
             table[code] = consonant + suffix
+    
+    # Also add the reverse lookup for Full PUA standalone characters
+    for cp in range(0x0E01, 0x0E5C):
+        table[cp + FULL_PUA_OFFSET] = chr(cp)
+
     return table
 
 
@@ -183,40 +192,16 @@ def _build_reverse_lookup() -> dict[int, str]:
 #  Public API                                                                  #
 # =========================================================================== #
 
-def generate_full_mapping() -> dict[str, Union[str, list[str]]]:
-    """Generate the complete PUA mapping for all consonant + modifier combos.
+def generate_full_mapping(full_pua_mode: bool = False) -> dict[str, Union[str, list[str]]]:
+    """Generate the full PUA mapping dictionary.
 
-    Iterates over every combination of 46 consonants × 48 modifier blocks
-    and computes the PUA codepoint using the formula::
-
-        code = 0xF000 + block_index * 47 + consonant_index
+    Args:
+        full_pua_mode: If True, also includes mapping for standalone
+            Thai characters shifted into the PUA.
 
     Returns:
-        A dictionary keyed by the Thai character combination string.
-
-        * **Non-contextual entries** — value is a hex string:
-          ``{"กั": "F000", ...}``
-        * **Contextual entries** (blocks containing ำ) — value is a two-
-          element list ``[pua_hex, "0E32"]``, where ``0E32`` is sara aa (า):
-          ``{"กำ": ["F263", "0E32"], ...}``
-
-    Examples::
-
-        >>> m = generate_full_mapping()
-        >>> m["กั"]          # block 0, consonant 0 → 0xF000
-        'F000'
-        >>> m["ขั"]          # block 0, consonant 1 → 0xF001
-        'F001'
-        >>> m["กิ"]          # block 1, consonant 0 → 0xF02F
-        'F02F'
-        >>> m["กำ"]          # block 13, contextual
-        ['F263', '0E32']
-        >>> m["กั่"]         # block 14, consonant 0 → 0xF292
-        'F292'
-        >>> m["ก่ำ"]         # block 44, contextual
-        ['F814', '0E32']
-        >>> len(m)
-        2208
+        Dictionary mapping Thai strings to their PUA codepoint hex string
+        (or a list of strings if contextual).
     """
     mapping: dict[str, Union[str, list[str]]] = {}
 
@@ -227,9 +212,18 @@ def generate_full_mapping() -> dict[str, Union[str, list[str]]]:
             hex_str = f"{code:04X}"
 
             if contextual:
-                mapping[key] = [hex_str, f"{SARA_AA:04X}"]
+                if full_pua_mode:
+                    mapping[key] = [hex_str, f"{SARA_AA + FULL_PUA_OFFSET:04X}"]
+                else:
+                    mapping[key] = [hex_str, f"{SARA_AA:04X}"]
             else:
                 mapping[key] = hex_str
+
+    if full_pua_mode:
+        for cp in range(0x0E01, 0x0E5C):
+            char = chr(cp)
+            # Standalone mappings
+            mapping[char] = f"{cp + FULL_PUA_OFFSET:04X}"
 
     return mapping
 
@@ -308,31 +302,21 @@ def merge_mappings(
     return merged
 
 
-def get_all_pua_codepoints() -> list[int]:
-    """Return a sorted list of every PUA codepoint used by the mapping.
+def get_all_pua_codepoints(full_pua_mode: bool = False) -> list[int]:
+    """Return a list of all assigned PUA integer codepoints.
 
-    The returned list contains one entry per consonant × block combination
-    (46 consonants × 48 blocks = 2 208 codepoints).
-
-    Returns:
-        Sorted list of integer codepoints in the Private Use Area
-        (U+F000 … U+F8CE).
-
-    Examples::
-
-        >>> pts = get_all_pua_codepoints()
-        >>> hex(pts[0])
-        '0xf000'
-        >>> hex(pts[-1])
-        '0xf8ce'
-        >>> len(pts)
-        2208
+    If full_pua_mode is True, also includes the standalone Thai characters
+    shifted into the U+E001 - U+E05B range.
     """
-    codepoints: list[int] = []
+    codes = []
+    
+    if full_pua_mode:
+        codes.extend(cp + FULL_PUA_OFFSET for cp in range(0x0E01, 0x0E5C))
+        
     for block_idx in range(len(MODIFIER_BLOCKS)):
         for con_idx in range(len(THAI_CONSONANTS)):
-            codepoints.append(PUA_BASE + block_idx * CONSONANT_STRIDE + con_idx)
-    return sorted(codepoints)
+            codes.append(PUA_BASE + block_idx * CONSONANT_STRIDE + con_idx)
+    return sorted(codes)
 
 
 def get_combo_for_pua(pua_code: int) -> str:

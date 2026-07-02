@@ -1,0 +1,4 @@
+Line 1265: self.fill_empty_cb = QCheckBox("เติมลงในช่องว่างของ Base Image (ถ้ามี)")
+Line 1271: self.autofit_cb = QCheckBox("ลดขนาด Cell อัตโนมัติเพื่อให้พอดีกรอบ Base Image")
+Line 1277: self.full_pua_cb = QCheckBox("เปิดใช้งานโหมด Full PUA (ย้ายอักษรเดี่ยวลง PUA)")
+Line 1448: credit_label = QLabel("หน๊ด หนวด translator")

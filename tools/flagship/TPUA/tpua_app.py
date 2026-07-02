@@ -1,3 +1,4 @@
+from i18n_helper import _
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Core')))
@@ -19,6 +20,11 @@ try:
     from tpua_font import TPUAFontEngine
 except ImportError:
     TPUAFontEngine = None
+
+try:
+    from legacy_font_engine import LegacyFontEngine
+except ImportError:
+    LegacyFontEngine = None
 
 DARK_SS = """
 QMainWindow, QWidget, QDialog { background: #1e1e2e; color: #cdd6f4; }
@@ -68,7 +74,7 @@ class TPUAApp(QMainWindow):
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('flagship.tpua.app.1.0')
         except:
             pass
-        self.setWindowTitle("TPUA: Universal PUA Hybrid Converter")
+        self.setWindowTitle(_("app_title"))
         self.resize(750, 550)
         self.setStyleSheet(DARK_SS)
         
@@ -80,6 +86,10 @@ class TPUAApp(QMainWindow):
         self.font_engine = None
         if TPUAFontEngine:
             self.font_engine = TPUAFontEngine()
+            
+        self.legacy_engine = None
+        if LegacyFontEngine:
+            self.legacy_engine = LegacyFontEngine()
             
         # Try to load default mapping if available
         self.default_mapping_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Core', 'Mapping.json'))
@@ -102,12 +112,17 @@ class TPUAApp(QMainWindow):
         # --- TAB 1: Text Converter ---
         self.tab_text = QWidget()
         self.init_text_tab()
-        self.tabs.addTab(self.tab_text, "Text Converter")
+        self.tabs.addTab(self.tab_text, _("tab_text_converter"))
         
         # --- TAB 2: Font Generator ---
         self.tab_font = QWidget()
         self.init_font_tab()
-        self.tabs.addTab(self.tab_font, "Font Generator")
+        self.tabs.addTab(self.tab_font, _("tab_font_generator"))
+        
+        # --- TAB 3: Legacy F700 Font ---
+        self.tab_legacy = QWidget()
+        self.init_legacy_tab()
+        self.tabs.addTab(self.tab_legacy, _("tab_legacy_font") if hasattr(sys.modules[__name__], '_') else "F700 Legacy Font")
         
         # Log Window (Shared)
         self.txt_log = QTextEdit()
@@ -118,21 +133,24 @@ class TPUAApp(QMainWindow):
         if self.engine:
             self.log(f"TPUA Engine Loaded. Standard Map: {len(self.engine.standard)} | Contextual: {len(self.engine.contextual)}", "#a6e3a1")
         if self.font_engine:
-            self.log("TPUA Font Engine Loaded.", "#a6e3a1")
+            self.log(_("log_font_engine_loaded"), "#a6e3a1")
             if self.font_engine.mapping:
                 self.log(f"Default Font Mapping loaded: {len(self.font_engine.mapping)} entries.", "#89b4fa")
+        if self.legacy_engine:
+            self.log("Legacy F700 Font Engine Loaded.", "#a6e3a1")
 
     def init_text_tab(self):
         layout = QVBoxLayout(self.tab_text)
         
         # File Group
-        grp_file = QGroupBox("File Selection")
+        grp_file = QGroupBox(_("grp_file_selection"))
         l_file = QVBoxLayout(grp_file)
         
         h_in = QHBoxLayout()
         self.txt_input = QLineEdit()
-        self.txt_input.setPlaceholderText("Select Input File (.txt, .csv, .json)...")
-        btn_in = QPushButton("Browse")
+        self.txt_input.setPlaceholderText(_("placeholder_input_file"))
+        btn_in = QPushButton(_("btn_browse"))
+        btn_in.setToolTip(_("tooltip_in"))
         btn_in.clicked.connect(self.browse_input)
         h_in.addWidget(self.txt_input)
         h_in.addWidget(btn_in)
@@ -140,8 +158,9 @@ class TPUAApp(QMainWindow):
         
         h_out = QHBoxLayout()
         self.txt_output = QLineEdit()
-        self.txt_output.setPlaceholderText("Select Output File...")
-        btn_out = QPushButton("Browse")
+        self.txt_output.setPlaceholderText(_("placeholder_output_file"))
+        btn_out = QPushButton(_("btn_browse"))
+        btn_out.setToolTip(_("tooltip_out"))
         btn_out.clicked.connect(self.browse_output)
         h_out.addWidget(self.txt_output)
         h_out.addWidget(btn_out)
@@ -150,15 +169,17 @@ class TPUAApp(QMainWindow):
         layout.addWidget(grp_file)
         
         # Action Group
-        grp_action = QGroupBox("Action")
+        grp_action = QGroupBox(_("grp_action"))
         l_action = QHBoxLayout(grp_action)
         
-        self.btn_encode = QPushButton("Encode (Thai -> PUA)")
+        self.btn_encode = QPushButton(_("btn_encode"))
+        self.btn_encode.setToolTip(_("tooltip_encode"))
         self.btn_encode.setStyleSheet("background: #cba6f7; color: #1e1e2e; font-size: 14px;")
         self.btn_encode.clicked.connect(self.encode_file)
         if not self.engine: self.btn_encode.setEnabled(False)
         
-        self.btn_decode = QPushButton("Decode (PUA -> Thai)")
+        self.btn_decode = QPushButton(_("btn_decode"))
+        self.btn_decode.setToolTip(_("tooltip_decode"))
         self.btn_decode.setStyleSheet("background: #a6e3a1; color: #1e1e2e; font-size: 14px;")
         self.btn_decode.clicked.connect(self.decode_file)
         if not self.engine: self.btn_decode.setEnabled(False)
@@ -172,17 +193,18 @@ class TPUAApp(QMainWindow):
         layout = QVBoxLayout(self.tab_font)
         
         # File Group
-        grp_file = QGroupBox("Font Settings")
+        grp_file = QGroupBox(_("grp_font_settings"))
         l_file = QVBoxLayout(grp_file)
         
         # Mapping file
         h_map = QHBoxLayout()
         self.txt_font_map = QLineEdit()
-        self.txt_font_map.setPlaceholderText("Select Mapping.json (Optional, defaults to Noonetranslator map)")
+        self.txt_font_map.setPlaceholderText(_("placeholder_font_map"))
         if self.font_engine and self.font_engine.mapping:
             self.txt_font_map.setText(self.default_mapping_path)
             
-        btn_map = QPushButton("Browse")
+        btn_map = QPushButton(_("btn_browse"))
+        btn_map.setToolTip(_("tooltip_map"))
         btn_map.clicked.connect(self.browse_font_map)
         h_map.addWidget(self.txt_font_map)
         h_map.addWidget(btn_map)
@@ -191,8 +213,9 @@ class TPUAApp(QMainWindow):
         # Source Font
         h_in = QHBoxLayout()
         self.txt_font_in = QLineEdit()
-        self.txt_font_in.setPlaceholderText("Select Source Font File (.ttf)...")
-        btn_in = QPushButton("Browse")
+        self.txt_font_in.setPlaceholderText(_("placeholder_font_in"))
+        btn_in = QPushButton(_("btn_browse"))
+        btn_in.setToolTip(_("tooltip_in"))
         btn_in.clicked.connect(self.browse_font_in)
         h_in.addWidget(self.txt_font_in)
         h_in.addWidget(btn_in)
@@ -201,8 +224,9 @@ class TPUAApp(QMainWindow):
         # Output Font
         h_out = QHBoxLayout()
         self.txt_font_out = QLineEdit()
-        self.txt_font_out.setPlaceholderText("Select Output File...")
-        btn_out = QPushButton("Browse")
+        self.txt_font_out.setPlaceholderText(_("placeholder_output_file"))
+        btn_out = QPushButton(_("btn_browse"))
+        btn_out.setToolTip(_("tooltip_out"))
         btn_out.clicked.connect(self.browse_font_out)
         h_out.addWidget(self.txt_font_out)
         h_out.addWidget(btn_out)
@@ -211,15 +235,16 @@ class TPUAApp(QMainWindow):
         layout.addWidget(grp_file)
         
         # Action Group
-        grp_action = QGroupBox("Action")
+        grp_action = QGroupBox(_("grp_action"))
         l_action = QHBoxLayout(grp_action)
         
-        self.btn_generate_font = QPushButton("Generate PUA Fonts")
+        self.btn_generate_font = QPushButton(_("btn_generate_font"))
+        self.btn_generate_font.setToolTip(_("tooltip_generate_font"))
         self.btn_generate_font.setStyleSheet("background: #f38ba8; color: #1e1e2e; font-size: 14px;")
         self.btn_generate_font.clicked.connect(self.generate_font)
         if not self.font_engine:
             self.btn_generate_font.setEnabled(False)
-            self.btn_generate_font.setText("Font Engine Not Available (Missing fontTools)")
+            self.btn_generate_font.setText(_("btn_font_engine_unavailable"))
             
         l_action.addWidget(self.btn_generate_font)
         layout.addWidget(grp_action)
@@ -230,7 +255,7 @@ class TPUAApp(QMainWindow):
 
     # --- TEXT CONVERTER METHODS ---
     def browse_input(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select Input File", "", "All Files (*.*)")
+        path, _ext = QFileDialog.getOpenFileName(self, _("dialog_select_input"), "", "All Files (*.*)")
         if path:
             self.txt_input.setText(path)
             if not self.txt_output.text():
@@ -238,14 +263,14 @@ class TPUAApp(QMainWindow):
                 self.txt_output.setText(f"{base}_pua{ext}")
                 
     def browse_output(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Select Output File", "", "All Files (*.*)")
+        path, _ext = QFileDialog.getSaveFileName(self, _("dialog_select_output"), "", "All Files (*.*)")
         if path:
             self.txt_output.setText(path)
 
     def read_file(self):
         path = self.txt_input.text()
         if not path or not os.path.exists(path):
-            QMessageBox.warning(self, "Error", "Input file not found!")
+            QMessageBox.warning(self, _("msg_error_title"), _("msg_input_not_found"))
             return None
         try:
             with open(path, 'r', encoding='utf-8-sig') as f:
@@ -255,10 +280,10 @@ class TPUAApp(QMainWindow):
                 with open(path, 'r', encoding='utf-8') as f:
                     return f.read()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Cannot read file:\n{e}")
+                QMessageBox.critical(self, _("msg_error_title"), f"Cannot read file:\n{e}")
                 return None
         except OSError as e:
-            QMessageBox.critical(self, "Error", f"Could not read file:\n{e}")
+            QMessageBox.critical(self, _("msg_error_title"), f"Could not read file:\n{e}")
             return None
 
     def save_file(self, content):
@@ -267,7 +292,7 @@ class TPUAApp(QMainWindow):
         try:
             with open(path, 'w', encoding='utf-8-sig') as f:
                 f.write(content)
-            self.log(f"Saved to: {path}", "#a6e3a1")
+            self.log(_("log_saved_to"), "#a6e3a1")
             return True
         except Exception as e:
             self.log(f"Error saving: {e}", "#f38ba8")
@@ -282,7 +307,7 @@ class TPUAApp(QMainWindow):
         if not self.engine: return
         text = self.read_file()
         if text is None: return
-        self.log("Encoding Thai to PUA... Please wait...", "#89b4fa")
+        self.log(_("log_encoding"), "#89b4fa")
         self._set_buttons_enabled(False)
         def run_encode():
             original_pua = sum(1 for c in text if 0xF000 <= ord(c) <= 0xF8FF)
@@ -295,7 +320,7 @@ class TPUAApp(QMainWindow):
             self.save_file(encoded)
             self._set_buttons_enabled(True)
         def on_error(err):
-            self.log(f"Error encoding: {err}", "#f38ba8")
+            self.log(_("log_error_encoding"), "#f38ba8")
             self._set_buttons_enabled(True)
         worker = Worker(run_encode)
         worker.signals.finished.connect(on_success)
@@ -306,7 +331,7 @@ class TPUAApp(QMainWindow):
         if not self.engine: return
         text = self.read_file()
         if text is None: return
-        self.log("Decoding PUA to Thai... Please wait...", "#cba6f7")
+        self.log(_("log_decoding"), "#cba6f7")
         self._set_buttons_enabled(False)
         def run_decode():
             original_pua = sum(1 for c in text if 0xF000 <= ord(c) <= 0xF8FF)
@@ -319,7 +344,7 @@ class TPUAApp(QMainWindow):
             self.save_file(decoded)
             self._set_buttons_enabled(True)
         def on_error(err):
-            self.log(f"Error decoding: {err}", "#f38ba8")
+            self.log(_("log_error_decoding"), "#f38ba8")
             self._set_buttons_enabled(True)
         worker = Worker(run_decode)
         worker.signals.finished.connect(on_success)
@@ -328,17 +353,17 @@ class TPUAApp(QMainWindow):
 
     # --- FONT GENERATOR METHODS ---
     def browse_font_map(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select Mapping.json", "", "JSON Files (*.json);;All Files (*.*)")
+        path, _ext = QFileDialog.getOpenFileName(self, _("dialog_select_mapping"), "", "JSON Files (*.json);;All Files (*.*)")
         if path:
             self.txt_font_map.setText(path)
             try:
                 self.font_engine.load_mapping(path)
                 self.log(f"Custom Font Mapping loaded: {len(self.font_engine.mapping)} entries.", "#89b4fa")
             except Exception as e:
-                QMessageBox.critical(self, "Error", str(e))
+                QMessageBox.critical(self, _("msg_error_title"), str(e))
 
     def browse_font_in(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select Source Font File", "", "Font Files (*.ttf *.otf);;All Files (*.*)")
+        path, _ext = QFileDialog.getOpenFileName(self, _("dialog_select_font_in"), "", "Font Files (*.ttf *.otf);;All Files (*.*)")
         if path:
             self.txt_font_in.setText(path)
             if not self.txt_font_out.text():
@@ -346,7 +371,7 @@ class TPUAApp(QMainWindow):
                 self.txt_font_out.setText(f"{base}_PUA{ext}")
 
     def browse_font_out(self):
-        path, _ = QFileDialog.getSaveFileName(self, "Select Output Font File", "", "Font Files (*.ttf *.otf);;All Files (*.*)")
+        path, _ext = QFileDialog.getSaveFileName(self, _("dialog_select_font_out"), "", "Font Files (*.ttf *.otf);;All Files (*.*)")
         if path:
             self.txt_font_out.setText(path)
 
@@ -358,14 +383,14 @@ class TPUAApp(QMainWindow):
         out_path = self.txt_font_out.text()
         
         if not os.path.exists(in_path):
-            QMessageBox.warning(self, "Error", "Source font file not found.")
+            QMessageBox.warning(self, _("msg_error_title"), _("msg_source_font_not_found"))
             return
             
         if not out_path:
-            QMessageBox.warning(self, "Error", "Please specify an output path.")
+            QMessageBox.warning(self, _("msg_error_title"), _("msg_no_output_path"))
             return
 
-        self.log("Starting Font PUA Generation... Please wait...", "#f38ba8")
+        self.log(_("log_font_gen_start"), "#f38ba8")
         self._set_buttons_enabled(False)
         
         def run_generate(callback=None):
@@ -375,12 +400,153 @@ class TPUAApp(QMainWindow):
             self.log(msg, "#89b4fa")
             
         def on_success(res):
-            self.log("Font Generation Completed Successfully!", "#a6e3a1")
+            self.log(_("log_font_gen_done"), "#a6e3a1")
             self._set_buttons_enabled(True)
             
         def on_error(err):
-            self.log(f"Error generating font: {err}", "#f38ba8")
+            self.log(_("log_error_font_gen"), "#f38ba8")
             self._set_buttons_enabled(True)
+            
+        worker = Worker(run_generate)
+        worker.signals.progress.connect(on_progress)
+        worker.signals.finished.connect(on_success)
+        worker.signals.error.connect(on_error)
+        QThreadPool.globalInstance().start(worker)
+
+    # --- LEGACY FONT (F700) METHODS ---
+    def init_legacy_tab(self):
+        layout = QVBoxLayout(self.tab_legacy)
+        
+        # Info Group
+        h_info = QHBoxLayout()
+        btn_info = QPushButton("❓ What is this tool?")
+        btn_info.setStyleSheet("background: #f9e2af; color: #1e1e2e; font-size: 14px;")
+        btn_info.clicked.connect(self.show_legacy_info)
+        h_info.addWidget(btn_info)
+        layout.addLayout(h_info)
+
+        # File Group
+        grp_file = QGroupBox("Legacy Font Settings")
+        l_file = QVBoxLayout(grp_file)
+        
+        h_in = QHBoxLayout()
+        self.txt_legacy_in = QLineEdit()
+        self.txt_legacy_in.setPlaceholderText("Select Standard Source Font (.ttf)...")
+        btn_in = QPushButton(_("btn_browse"))
+        btn_in.clicked.connect(self.browse_legacy_in)
+        h_in.addWidget(self.txt_legacy_in)
+        h_in.addWidget(btn_in)
+        l_file.addLayout(h_in)
+        
+        h_out = QHBoxLayout()
+        self.txt_legacy_out = QLineEdit()
+        self.txt_legacy_out.setPlaceholderText("Select Output Font File...")
+        btn_out = QPushButton(_("btn_browse"))
+        btn_out.clicked.connect(self.browse_legacy_out)
+        h_out.addWidget(self.txt_legacy_out)
+        h_out.addWidget(btn_out)
+        l_file.addLayout(h_out)
+        layout.addWidget(grp_file)
+
+        # Offsets Group
+        grp_off = QGroupBox("Coordinate Offsets (Units)")
+        l_off = QHBoxLayout(grp_off)
+        
+        l_off.addWidget(QLabel("Y Raise (0=Auto):"))
+        self.num_y_raise = QLineEdit("0")
+        l_off.addWidget(self.num_y_raise)
+        
+        l_off.addWidget(QLabel("X Left:"))
+        self.num_x_left = QLineEdit("-150")
+        l_off.addWidget(self.num_x_left)
+        
+        l_off.addWidget(QLabel("Y Down:"))
+        self.num_y_down = QLineEdit("-100")
+        l_off.addWidget(self.num_y_down)
+        
+        layout.addWidget(grp_off)
+        
+        # Action Group
+        grp_action = QGroupBox(_("grp_action"))
+        l_action = QHBoxLayout(grp_action)
+        
+        self.btn_gen_legacy = QPushButton("Generate Legacy F700 Font")
+        self.btn_gen_legacy.setStyleSheet("background: #f38ba8; color: #1e1e2e; font-size: 14px;")
+        self.btn_gen_legacy.clicked.connect(self.generate_legacy_font)
+        if not self.legacy_engine:
+            self.btn_gen_legacy.setEnabled(False)
+            self.btn_gen_legacy.setText("Legacy Engine Not Available")
+            
+        l_action.addWidget(self.btn_gen_legacy)
+        layout.addWidget(grp_action)
+        layout.addStretch()
+
+    def show_legacy_info(self):
+        msg = QMessageBox(self)
+        msg.setWindowTitle("About Legacy F700 Font Generator")
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setText(
+            "<b>What is this tool?</b><br><br>"
+            "This tool takes a standard Thai font and creates an additional 33 characters mapped to the "
+            "<b>MacThai/Microsoft PUA standard (U+F700 - U+F71A)</b>.<br><br>"
+            "<b>What does it do?</b><br>"
+            "1. It clones standard vowels and tone marks.<br>"
+            "2. It shifts them based on the offset parameters you provide (e.g. shifts Mai Ek UP by 250 units, or LEFT by -150 units).<br>"
+            "3. It sets their width to 0 (Zero-width combining marks).<br><br>"
+            "<b>When to use this?</b><br>"
+            "Use this if you are modding a Unity game that already has a TextMeshPro Thai fixer script installed. "
+            "These scripts expect the font to have F700 characters. If your game doesn't have such a script, use the standard TPUA Font Generator instead."
+        )
+        msg.exec()
+
+    def browse_legacy_in(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Select Standard Font", "", "Font Files (*.ttf *.otf);;All Files (*.*)")
+        if path:
+            self.txt_legacy_in.setText(path)
+            if not self.txt_legacy_out.text():
+                base, ext = os.path.splitext(path)
+                self.txt_legacy_out.setText(f"{base}_F700{ext}")
+
+    def browse_legacy_out(self):
+        path, _ = QFileDialog.getSaveFileName(self, "Save F700 Font", "", "Font Files (*.ttf *.otf);;All Files (*.*)")
+        if path:
+            self.txt_legacy_out.setText(path)
+
+    def generate_legacy_font(self):
+        if not self.legacy_engine: return
+        in_path = self.txt_legacy_in.text()
+        out_path = self.txt_legacy_out.text()
+        if not os.path.exists(in_path):
+            QMessageBox.warning(self, "Error", "Input font not found!")
+            return
+        
+        try:
+            y_r = int(self.num_y_raise.text())
+            x_l = int(self.num_x_left.text())
+            y_d = int(self.num_y_down.text())
+        except ValueError:
+            QMessageBox.warning(self, "Error", "Offsets must be integers.")
+            return
+
+        self.log("Starting Legacy F700 Generation... Please wait...", "#f38ba8")
+        self._set_buttons_enabled(False)
+        self.btn_gen_legacy.setEnabled(False)
+        
+        def run_generate(callback=None):
+            return self.legacy_engine.process_font(in_path, out_path, y_r, x_l, y_d, callback=callback)
+            
+        def on_progress(msg):
+            self.log(msg, "#89b4fa")
+            
+        def on_success(res):
+            self.log("Legacy Font Generation Completed!", "#a6e3a1")
+            self._set_buttons_enabled(True)
+            self.btn_gen_legacy.setEnabled(True)
+            
+        def on_error(err):
+            self.log(f"Error generating legacy font: {err}", "#f38ba8")
+            self._set_buttons_enabled(True)
+            self.btn_gen_legacy.setEnabled(True)
             
         worker = Worker(run_generate)
         worker.signals.progress.connect(on_progress)

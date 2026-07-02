@@ -62,7 +62,7 @@ except ImportError:
 _SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(_SCRIPT_DIR))
 
-from i18n import I18n, PRESET_TEXTS
+from i18n import I18n, PRESET_TEXTS, _
 import pua_engine
 import font_renderer
 import atlas_packer
@@ -644,6 +644,7 @@ class ExportDialog(QDialog):
         self.profile_combo.addItem(self._i18n.t("profile_dl2"), "dying_light_2")
         self.profile_combo.addItem(self._i18n.t("profile_bmfont"), "bmfont")
         self.profile_combo.addItem(self._i18n.t("profile_json"), "json_atlas")
+        self.profile_combo.addItem(self._i18n.t("profile_unity_tmp") if self._i18n.t("profile_unity_tmp") != "profile_unity_tmp" else "Unity TextMeshPro JSON", "unity_tmp")
         form.addRow(self._i18n.t("export_profile") + ":", self.profile_combo)
 
         # Output path
@@ -651,6 +652,7 @@ class ExportDialog(QDialog):
         self.path_edit = QLineEdit(self._config.get("last_export_path", ""))
         self.path_edit.setMinimumWidth(280)
         btn_browse = QPushButton(self._i18n.t("export_browse"))
+        btn_browse.setToolTip(_("tooltip_browse"))
         btn_browse.clicked.connect(self._browse_output)
         path_row.addWidget(self.path_edit)
         path_row.addWidget(btn_browse)
@@ -665,11 +667,13 @@ class ExportDialog(QDialog):
         btn_box = QHBoxLayout()
         btn_box.addStretch()
         self.btn_export = QPushButton(self._i18n.t("export_start"))
+        self.btn_export.setToolTip(_("tooltip_export"))
         self.btn_export.setStyleSheet(
             f"background-color: {Mocha.BLUE}; color: {Mocha.BG}; font-weight: bold;"
         )
         self.btn_export.clicked.connect(self.accept)
         btn_cancel = QPushButton(self._i18n.t("export_cancel"))
+        btn_cancel.setToolTip(_("tooltip_cancel"))
         btn_cancel.clicked.connect(self.reject)
         btn_box.addWidget(btn_cancel)
         btn_box.addWidget(self.btn_export)
@@ -709,7 +713,7 @@ class StartupDialog(QDialog):
 
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("TGlyph — Setup")
+        self.setWindowTitle(_("startup_title"))
         self.setMinimumSize(520, 380)
         self.setStyleSheet(
             f"QDialog {{ background-color: {Mocha.BG}; color: {Mocha.TEXT}; }}"
@@ -724,7 +728,7 @@ class StartupDialog(QDialog):
         layout.setSpacing(14)
 
         # Title label
-        title = QLabel("TGlyph — Setup")
+        title = QLabel(_("startup_title"))
         title.setStyleSheet(
             f"font-size: 18px; font-weight: bold; color: {Mocha.BLUE};"
         )
@@ -742,23 +746,25 @@ class StartupDialog(QDialog):
         self._font_edit.setReadOnly(True)
         self._font_edit.setPlaceholderText("Select a .ttf or .otf font file…")
         self._font_edit.setMinimumWidth(300)
-        btn_font = QPushButton("Browse")
+        btn_font = QPushButton(_("startup_browse"))
+        btn_font.setToolTip(_("tooltip_font"))
         btn_font.clicked.connect(self._browse_font)
         font_row.addWidget(self._font_edit)
         font_row.addWidget(btn_font)
-        form.addRow("Font File:", font_row)
+        form.addRow(_("startup_font_label"), font_row)
 
         # ── Base Image row (Optional) ─────────────────────────────────
         base_row = QHBoxLayout()
         self._base_edit = QLineEdit()
         self._base_edit.setReadOnly(True)
-        self._base_edit.setPlaceholderText("Leave empty for blank atlas")
+        self._base_edit.setPlaceholderText(_("startup_base_placeholder"))
         self._base_edit.setMinimumWidth(300)
-        btn_base = QPushButton("Browse")
+        btn_base = QPushButton(_("startup_browse"))
+        btn_base.setToolTip(_("tooltip_base"))
         btn_base.clicked.connect(self._browse_base_image)
         base_row.addWidget(self._base_edit)
         base_row.addWidget(btn_base)
-        form.addRow("Base Image (Optional):", base_row)
+        form.addRow(_("startup_base_label"), base_row)
 
         # ── Cell Size Preset row ──────────────────────────────────────
         self._size_combo = QComboBox()
@@ -766,7 +772,7 @@ class StartupDialog(QDialog):
             self._size_combo.addItem(label, value)
         self._size_combo.setCurrentIndex(0)
         self._size_combo.currentIndexChanged.connect(self._on_preset_changed)
-        form.addRow("Cell Size Preset:", self._size_combo)
+        form.addRow(_("startup_size_label"), self._size_combo)
 
         # ── Custom Size row (only active for "Custom...") ─────────────
         self._custom_spin = QSpinBox()
@@ -774,13 +780,14 @@ class StartupDialog(QDialog):
         self._custom_spin.setValue(32)
         self._custom_spin.setSuffix(" px")
         self._custom_spin.setEnabled(False)
-        form.addRow("Custom Cell Size:", self._custom_spin)
+        form.addRow(_("startup_custom_label"), self._custom_spin)
 
         layout.addLayout(form)
         layout.addStretch()
 
         # ── Start button ──────────────────────────────────────────────
         self._btn_start = QPushButton("▶  Start")
+        self._btn_start.setToolTip(_("tooltip__start"))
         self._btn_start.setMinimumHeight(40)
         self._btn_start.setStyleSheet(
             f"QPushButton {{"
@@ -795,7 +802,7 @@ class StartupDialog(QDialog):
     # ── Slots ─────────────────────────────────────────────────────────
 
     def _browse_font(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(
+        path, _ext = QFileDialog.getOpenFileName(
             self, "Select Font File", "",
             "Font Files (*.ttf *.otf);;All Files (*)",
         )
@@ -803,7 +810,7 @@ class StartupDialog(QDialog):
             self._font_edit.setText(path)
 
     def _browse_base_image(self) -> None:
-        path, _ = QFileDialog.getOpenFileName(
+        path, _ext = QFileDialog.getOpenFileName(
             self, "Select Base Image", "",
             "PNG Images (*.png);;All Files (*)",
         )
@@ -817,14 +824,14 @@ class StartupDialog(QDialog):
     def _on_start(self) -> None:
         if not self._font_edit.text().strip():
             QMessageBox.warning(
-                self, "Font Required",
-                "Please select a font file before starting.",
+                self, _("startup_font_required_title"),
+                _("startup_font_required_msg"),
             )
             return
         font_path = self._font_edit.text().strip()
         if not os.path.isfile(font_path):
             QMessageBox.warning(
-                self, "File Not Found",
+                self, _("startup_file_not_found_title"),
                 f"The selected font file does not exist:\n{font_path}",
             )
             return
@@ -941,28 +948,33 @@ class TGlyphApp(QMainWindow):
         self.addToolBar(tb)
 
         self.act_load_font = QAction(self._i18n.t("load_font"), self)
+        self.act_load_font.setToolTip(_("tooltip_act_load_font"))
         self.act_load_font.triggered.connect(self._on_load_font)
         tb.addAction(self.act_load_font)
 
         tb.addSeparator()
 
         self.act_load_project = QAction(self._i18n.t("load_project"), self)
+        self.act_load_project.setToolTip(_("tooltip_act_load_project"))
         self.act_load_project.triggered.connect(self._on_load_project)
         tb.addAction(self.act_load_project)
 
         self.act_save_project = QAction(self._i18n.t("save_project"), self)
+        self.act_save_project.setToolTip(_("tooltip_act_save_project"))
         self.act_save_project.triggered.connect(self._on_save_project)
         tb.addAction(self.act_save_project)
 
         tb.addSeparator()
 
         self.act_export = QAction(self._i18n.t("export"), self)
+        self.act_export.setToolTip(_("tooltip_act_export"))
         self.act_export.triggered.connect(self._on_export)
         tb.addAction(self.act_export)
 
         tb.addSeparator()
 
         self.act_lang = QAction(self._i18n.t("language"), self)
+        self.act_lang.setToolTip(_("tooltip_act_lang"))
         self.act_lang.triggered.connect(self._on_toggle_language)
         tb.addAction(self.act_lang)
 
@@ -1138,16 +1150,19 @@ class TGlyphApp(QMainWindow):
         atlas_header.addStretch()
 
         self.btn_zoom_in = QPushButton(self._i18n.t("zoom_in"))
+        self.btn_zoom_in.setToolTip(_("tooltip_zoom_in"))
         self.btn_zoom_in.setFixedWidth(40)
         self.btn_zoom_in.clicked.connect(self._on_zoom_in)
         atlas_header.addWidget(self.btn_zoom_in)
 
         self.btn_zoom_out = QPushButton(self._i18n.t("zoom_out"))
+        self.btn_zoom_out.setToolTip(_("tooltip_zoom_out"))
         self.btn_zoom_out.setFixedWidth(40)
         self.btn_zoom_out.clicked.connect(self._on_zoom_out)
         atlas_header.addWidget(self.btn_zoom_out)
 
         self.btn_zoom_fit = QPushButton(self._i18n.t("zoom_fit"))
+        self.btn_zoom_fit.setToolTip(_("tooltip_zoom_fit"))
         self.btn_zoom_fit.setFixedWidth(50)
         self.btn_zoom_fit.clicked.connect(self._on_zoom_fit)
         atlas_header.addWidget(self.btn_zoom_fit)
@@ -1179,6 +1194,7 @@ class TGlyphApp(QMainWindow):
         presets = self._i18n.get_presets()
         for key, (label, text) in presets.items():
             btn = QPushButton(label)
+            btn.setToolTip(_("tooltip_btn"))
             btn.setFixedHeight(26)
             btn.setStyleSheet(f"font-size: 11px; padding: 2px 8px;")
             btn.clicked.connect(lambda checked, t=text: self.preview_input.setText(t))
@@ -1205,19 +1221,19 @@ class TGlyphApp(QMainWindow):
         layout.addWidget(self.lbl_adjust_title)
 
         # ── Character Info ──
-        info_group = QGroupBox("Character Info")
+        info_group = QGroupBox(_("group_char_info"))
         info_layout = QFormLayout(info_group)
         self.lbl_info_char = QLabel("—")
         self.lbl_info_char.setStyleSheet(f"font-size: 28px; color: {Mocha.BLUE};")
-        info_layout.addRow("Char:", self.lbl_info_char)
+        info_layout.addRow(_("label_char"), self.lbl_info_char)
         self.lbl_info_unicode = QLabel("—")
-        info_layout.addRow("Unicode:", self.lbl_info_unicode)
+        info_layout.addRow(_("label_unicode"), self.lbl_info_unicode)
         self.lbl_info_category = QLabel("—")
-        info_layout.addRow("Category:", self.lbl_info_category)
+        info_layout.addRow(_("label_category"), self.lbl_info_category)
         layout.addWidget(info_group)
 
         # ── Glyph Preview Canvas ──
-        preview_group = QGroupBox("Glyph Preview")
+        preview_group = QGroupBox(_("group_glyph_preview"))
         pv_layout = QVBoxLayout(preview_group)
         self.glyph_preview_canvas = QLabel()
         self.glyph_preview_canvas.setFixedSize(240, 200)
@@ -1230,13 +1246,13 @@ class TGlyphApp(QMainWindow):
         layout.addWidget(preview_group)
 
         # ── Font Size / Generate Controls ──
-        gen_group = QGroupBox("Font Size & Generate")
+        gen_group = QGroupBox(_("group_font_size"))
         gen_layout = QVBoxLayout(gen_group)
         gen_layout.setSpacing(6)
 
         # Preset size combo
         size_row = QHBoxLayout()
-        size_row.addWidget(QLabel("Cell Size:"))
+        size_row.addWidget(QLabel(_("label_cell_size")))
         self.cell_size_combo = QComboBox()
         self.cell_size_combo.addItem("Auto", 0)
         self.cell_size_combo.addItem("16 × 16 px", 16)
@@ -1251,7 +1267,7 @@ class TGlyphApp(QMainWindow):
 
         # Custom size spinbox (hidden by default)
         custom_row = QHBoxLayout()
-        custom_row.addWidget(QLabel("Custom (px):"))
+        custom_row.addWidget(QLabel(_("label_custom_px")))
         self.custom_size_spin = QSpinBox()
         self.custom_size_spin.setRange(8, 256)
         self.custom_size_spin.setValue(32)
@@ -1261,19 +1277,26 @@ class TGlyphApp(QMainWindow):
 
         # Fill empty spaces checkbox
         from PyQt6.QtWidgets import QCheckBox
-        self.fill_empty_cb = QCheckBox("เติมลงในช่องว่างของ Base Image (ถ้ามี)")
+        self.fill_empty_cb = QCheckBox(_("cb_fill_empty"))
         self.fill_empty_cb.setChecked(False)
         self.fill_empty_cb.setStyleSheet(f"color: {Mocha.TEXT}; margin-top: 5px; margin-bottom: 5px;")
         gen_layout.addWidget(self.fill_empty_cb)
 
         # Autofit checkbox
-        self.autofit_cb = QCheckBox("ลดขนาด Cell อัตโนมัติเพื่อให้พอดีกรอบ Base Image")
+        self.autofit_cb = QCheckBox(_("cb_autofit"))
         self.autofit_cb.setChecked(False)
         self.autofit_cb.setStyleSheet(f"color: {Mocha.TEXT}; margin-bottom: 5px;")
         gen_layout.addWidget(self.autofit_cb)
 
+        # Full PUA checkbox
+        self.full_pua_cb = QCheckBox(_("cb_full_pua") if _("cb_full_pua") != "cb_full_pua" else "Full PUA Mode (Shift standalone letters)")
+        self.full_pua_cb.setChecked(False)
+        self.full_pua_cb.setStyleSheet(f"color: {Mocha.TEXT}; margin-bottom: 5px;")
+        gen_layout.addWidget(self.full_pua_cb)
+
         # Generate button
         self.btn_generate = QPushButton("🔄  Generate Font Sheet")
+        self.btn_generate.setToolTip(_("tooltip_generate"))
         self.btn_generate.setMinimumHeight(40)
         self.btn_generate.setStyleSheet(
             f"QPushButton {{ background-color: {Mocha.BLUE}; color: {Mocha.BG}; "
@@ -1286,7 +1309,7 @@ class TGlyphApp(QMainWindow):
         layout.addWidget(gen_group)
 
         # ── Offset / Scale Sliders ──
-        slider_group = QGroupBox("Adjustments")
+        slider_group = QGroupBox(_("group_adjustments"))
         sl_layout = QVBoxLayout(slider_group)
         sl_layout.setSpacing(2)
 
@@ -1353,7 +1376,7 @@ class TGlyphApp(QMainWindow):
         layout.addWidget(slider_group)
 
         # ── Override Sliders ──
-        override_group = QGroupBox("Overrides")
+        override_group = QGroupBox(_("group_overrides"))
         ov_layout = QVBoxLayout(override_group)
         ov_layout.setSpacing(2)
 
@@ -1403,10 +1426,12 @@ class TGlyphApp(QMainWindow):
 
         # ── Action Buttons ──
         self.btn_reset = QPushButton(self._i18n.t("reset"))
+        self.btn_reset.setToolTip(_("tooltip_reset"))
         self.btn_reset.clicked.connect(self._on_reset_adjustment)
         layout.addWidget(self.btn_reset)
 
         self.btn_apply_category = QPushButton(self._i18n.t("apply_category"))
+        self.btn_apply_category.setToolTip(_("tooltip_apply_category"))
         self.btn_apply_category.clicked.connect(self._on_apply_to_category)
         layout.addWidget(self.btn_apply_category)
 
@@ -1501,7 +1526,7 @@ class TGlyphApp(QMainWindow):
     def _on_load_font(self) -> None:
         """Open file dialog to load a .ttf or .otf font."""
         start_dir = self._config.get("last_font_path", "") or str(_SCRIPT_DIR)
-        path, _ = QFileDialog.getOpenFileName(
+        path, _ext = QFileDialog.getOpenFileName(
             self,
             self._i18n.t("load_font"),
             start_dir,
@@ -1526,7 +1551,7 @@ class TGlyphApp(QMainWindow):
     def _on_load_project(self) -> None:
         """Load a .ppfs project JSON file."""
         start_dir = self._config.get("last_project_path", "") or str(_SCRIPT_DIR)
-        path, _ = QFileDialog.getOpenFileName(
+        path, _ext = QFileDialog.getOpenFileName(
             self,
             self._i18n.t("load_project"),
             start_dir,
@@ -1565,7 +1590,7 @@ class TGlyphApp(QMainWindow):
     def _on_save_project(self) -> None:
         """Save current state to a .ppfs JSON file."""
         start_dir = self._config.get("last_project_path", "") or str(_SCRIPT_DIR)
-        path, _ = QFileDialog.getSaveFileName(
+        path, _ext = QFileDialog.getSaveFileName(
             self,
             self._i18n.t("save_project"),
             start_dir,
@@ -1613,11 +1638,11 @@ class TGlyphApp(QMainWindow):
         profile = dlg.get_profile()
         output_path = dlg.get_output_path()
         if not output_path:
-            QMessageBox.warning(self, "Error", "No output folder selected.")
+            QMessageBox.warning(self, "Error", _("err_no_output_folder"))
             return
 
         if not self._font_path or not Path(self._font_path).exists():
-            QMessageBox.warning(self, "Error", "No font loaded. Cannot export.")
+            QMessageBox.warning(self, "Error", _("err_no_font_export"))
             return
 
         self._config["last_export_path"] = output_path
@@ -1629,12 +1654,12 @@ class TGlyphApp(QMainWindow):
         # Determine glyphs to export (skip ones marked as error)
         glyphs_to_export = [g for g in self._glyph_model.glyphs if g.get("status") != "error"]
         if not glyphs_to_export:
-            QMessageBox.warning(self, "Error", "No valid glyphs to export.")
+            QMessageBox.warning(self, "Error", _("err_no_valid_glyphs"))
             return
             
         from PyQt6.QtWidgets import QProgressDialog
         total_steps = len(glyphs_to_export) + 5
-        progress = QProgressDialog(self._i18n.t("export_start"), "Cancel", 0, total_steps, self)
+        progress = QProgressDialog(self._i18n.t("export_start"), _("export_cancel"), 0, total_steps, self)
         progress.setWindowTitle(self._i18n.t("export_title"))
         progress.setWindowModality(Qt.WindowModality.WindowModal)
         progress.setMinimumDuration(0)
@@ -1713,7 +1738,7 @@ class TGlyphApp(QMainWindow):
             atlas_h = int(self._config.get("atlas_height", 4096))
 
             # 3) Create Atlas Image & Packing Data
-            progress.setLabelText("Generating images...")
+            progress.setLabelText(_("progress_generating"))
             progress.setValue(step + 2)
             QApplication.processEvents()
 
@@ -1760,7 +1785,7 @@ class TGlyphApp(QMainWindow):
             pil_atlas.save(png_path)
             
             # 4) Save DDS
-            progress.setLabelText("Converting to DDS...")
+            progress.setLabelText(_("progress_converting_dds"))
             progress.setValue(step + 3)
             QApplication.processEvents()
             
@@ -1769,15 +1794,32 @@ class TGlyphApp(QMainWindow):
                 dds_converter.png_to_dds_bc4(str(png_path), str(dds_path))
                     
             # 5) Generate metadata (.scr / json)
-            progress.setLabelText("Generating metadata...")
+            progress.setLabelText(_("progress_metadata"))
             progress.setValue(step + 4)
             QApplication.processEvents()
             
             # Save mapping json
-            mapping = pua_engine.generate_full_mapping()
+            mapping = pua_engine.generate_full_mapping(full_pua_mode=hasattr(self, 'full_pua_cb') and self.full_pua_cb.isChecked())
             with open(out_dir / "mapping.json", "w", encoding="utf-8") as f:
                 json.dump(mapping, f, indent=2, ensure_ascii=False)
                 
+            # Execute Plugin Exporters
+            from exporters import PROFILES
+            if profile in PROFILES:
+                try:
+                    PROFILES[profile](
+                        rects=rects,
+                        metrics=glyph_metrics_export,
+                        atlas_w=atlas_w,
+                        atlas_h=atlas_h,
+                        font_name=self._font_name,
+                        line_height=target_h,
+                        png_path=str(png_path),
+                        out_dir=str(out_dir)
+                    )
+                except Exception as e:
+                    print(f"[Export] Plugin {profile} failed: {e}")
+
             # Generate SCR file for Dying Light 2
             if profile == "dying_light_2":
                 scr_content = []
@@ -2428,7 +2470,7 @@ class TGlyphApp(QMainWindow):
     def _on_generate_sheet(self) -> None:
         """Generate/regenerate the font sheet with current settings."""
         if not self._font_path:
-            QMessageBox.warning(self, "No Font", "Please load a font file first.")
+            QMessageBox.warning(self, "No Font", _("err_no_font_generate"))
             return
 
         # Determine cell size
@@ -2448,7 +2490,7 @@ class TGlyphApp(QMainWindow):
             self.statusBar().showMessage(f"✅ Font sheet generated! Cell size: {cell_size}px", 5000)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Generation failed:\n{e}")
-            self.statusBar().showMessage(f"❌ Generation failed", 5000)
+            self.statusBar().showMessage(_("sheet_failed"), 5000)
 
     def _generate_base_image_sheet(self, cell_size: int) -> None:
         """Core logic for generating a font sheet onto the base image or blank canvas."""
@@ -2461,8 +2503,7 @@ class TGlyphApp(QMainWindow):
             glyph_items.append((cp, chr(cp)))
             
         try:
-            import pua_engine
-            for pua_cp in pua_engine.get_all_pua_codepoints():
+            for pua_cp in pua_engine.get_all_pua_codepoints(full_pua_mode=hasattr(self, 'full_pua_cb') and self.full_pua_cb.isChecked()):
                 combo = pua_engine.get_combo_for_pua(pua_cp)
                 glyph_items.append((pua_cp, combo))
         except Exception as e:
@@ -2710,7 +2751,7 @@ class TGlyphApp(QMainWindow):
         chars = get_full_charset()
 
         # Add PUA composites from the engine
-        pua_codepoints = pua_engine.get_all_pua_codepoints()
+        pua_codepoints = pua_engine.get_all_pua_codepoints(full_pua_mode=hasattr(self, 'full_pua_cb') and self.full_pua_cb.isChecked())
         for pua_cp in pua_codepoints:
             try:
                 combo = pua_engine.get_combo_for_pua(pua_cp)
@@ -2931,6 +2972,15 @@ def main() -> None:
     from PyQt6.QtCore import QLocale
     QLocale.setDefault(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
 
+    import sys
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            myappid = "thub.tglyph.app.1.0"
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except Exception:
+            pass
+
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     app.setStyleSheet(build_stylesheet())
@@ -2941,7 +2991,8 @@ def main() -> None:
     app.setFont(app_font)
 
     # Set application window icon
-    app.setWindowIcon(QIcon(str(_SCRIPT_DIR / "Logo.png")))
+    logo_path = _SCRIPT_DIR.parent.parent.parent / "assets" / "TGlyph.png"
+    app.setWindowIcon(QIcon(str(logo_path.resolve())))
 
     # Show startup dialog
     startup = StartupDialog()

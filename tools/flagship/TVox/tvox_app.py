@@ -1,18 +1,20 @@
 import sys
 import os
 
-# Append paths
+# TV-C5: sys.path MUST be set up before any local imports
 flagship_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(flagship_dir, 'Core'))
 sys.path.append(os.path.join(flagship_dir, 'TStudio'))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from i18n_helper import _
 
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QSplitter, QFileDialog, QMessageBox,
     QSlider, QLabel, QComboBox, QGroupBox
 )
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 
 # Prepend TVox dir to PATH so libmpv-2.dll is found automatically
 os.environ["PATH"] = os.path.dirname(os.path.abspath(__file__)) + os.pathsep + os.environ["PATH"]
@@ -38,9 +40,12 @@ except ImportError as e:
 
 if HAS_TSTUDIO:
     class TVoxApp(TranslationStudio):
+        # TV-C4: Signals to safely route MPV callbacks to Qt UI thread
+        time_pos_updated = pyqtSignal(float)
+        duration_updated = pyqtSignal(float)
         def __init__(self):
             super().__init__()
-            self.setWindowTitle("TVox - FMV Modding Studio (Powered by TStudio Engine)")
+            self.setWindowTitle(_("window_title"))
             self.setGeometry(100, 100, 1400, 900)
 
             # --- Internal State ---
@@ -49,16 +54,11 @@ if HAS_TSTUDIO:
             self.mark_b = None
             self.loop_active = False
 
-            # 1. Capture the existing UI that TStudio built
-            tstudio_widget = self.centralWidget()
-            tstudio_widget.setParent(None) # Detach from window
+            # 1. TStudio is now fully dock-based, no central widget to detach
             
-            # 2. Re-attach tstudio_widget as the main central widget
-            self.setCentralWidget(tstudio_widget)
-            
-            # 3. Create DockWidget for Video
+            # 2. Create DockWidget for Video
             from PyQt6.QtWidgets import QDockWidget, QMainWindow
-            self.video_dock = QDockWidget(" ⠿ TVox Video Player ", self)
+            self.video_dock = QDockWidget(_("dock_video_player"), self)
             self.video_dock.setAllowedAreas(Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
             self.video_dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetMovable)
             self.setDockOptions(self.dockOptions() | QMainWindow.DockOption.AllowNestedDocks)
@@ -110,28 +110,32 @@ if HAS_TSTUDIO:
 
             # Playback Controls
             self.btn_open_video = QPushButton("📂")
-            self.btn_open_video.setToolTip("Open Video")
+            self.btn_open_video.setToolTip(_("tooltip_open_video"))
             self.btn_open_video.clicked.connect(self.open_video)
             self.btn_open_video.setStyleSheet("background: transparent; font-size: 16px; border: none;")
             
             self.btn_seek_m1 = QPushButton("-1s")
+            self.btn_seek_m1.setToolTip(_("tooltip_seek_m1"))
             self.btn_seek_m1.clicked.connect(lambda: self.seek_relative(-1.0))
             self.btn_seek_m1.setStyleSheet("background: transparent; color: #a6adc8; border: none;")
             
             self.btn_seek_m01 = QPushButton("-.1s")
+            self.btn_seek_m01.setToolTip(_("tooltip_seek_m01"))
             self.btn_seek_m01.clicked.connect(lambda: self.seek_relative(-0.1))
             self.btn_seek_m01.setStyleSheet("background: transparent; color: #a6adc8; border: none;")
             
             self.btn_play_pause = QPushButton("▶")
-            self.btn_play_pause.setToolTip("Play / Pause")
+            self.btn_play_pause.setToolTip(_("tooltip_play_pause"))
             self.btn_play_pause.clicked.connect(self.toggle_play)
             self.btn_play_pause.setStyleSheet("background: transparent; color: #a6e3a1; font-weight: bold; font-size: 18px; border: none;")
             
             self.btn_seek_p01 = QPushButton("+.1s")
+            self.btn_seek_p01.setToolTip(_("tooltip_seek_p01"))
             self.btn_seek_p01.clicked.connect(lambda: self.seek_relative(0.1))
             self.btn_seek_p01.setStyleSheet("background: transparent; color: #a6adc8; border: none;")
             
             self.btn_seek_p1 = QPushButton("+1s")
+            self.btn_seek_p1.setToolTip(_("tooltip_seek_p1"))
             self.btn_seek_p1.clicked.connect(lambda: self.seek_relative(1.0))
             self.btn_seek_p1.setStyleSheet("background: transparent; color: #a6adc8; border: none;")
             
@@ -153,14 +157,14 @@ if HAS_TSTUDIO:
             from tvox_waveform import WaveformWidget, AudioExtractorWorker
             from ffmpeg_utils import ensure_ffmpeg
             
-            self.lbl_time_curr = QLabel("00:00.000")
+            self.lbl_time_curr = QLabel(_("time_default"))
             self.lbl_time_curr.setStyleSheet("color: #a6adc8; font-family: monospace; font-size: 11px;")
             
             self.waveform = WaveformWidget()
             self.waveform.seek_requested.connect(self.on_waveform_seek)
             self.waveform.installEventFilter(self)
             
-            self.lbl_time_total = QLabel("00:00.000")
+            self.lbl_time_total = QLabel(_("time_default"))
             self.lbl_time_total.setStyleSheet("color: #a6adc8; font-family: monospace; font-size: 11px;")
             
             panel_layout.addWidget(self.lbl_time_curr)
@@ -168,15 +172,18 @@ if HAS_TSTUDIO:
             panel_layout.addWidget(self.lbl_time_total)
             
             # Loop Controls
-            self.btn_mark_a = QPushButton("[A]")
+            self.btn_mark_a = QPushButton(_("btn_mark_a"))
+            self.btn_mark_a.setToolTip(_("tooltip_mark_a"))
             self.btn_mark_a.clicked.connect(self.set_mark_a)
             self.btn_mark_a.setStyleSheet("background: transparent; border: 1px solid #cba6f7; color: #cba6f7; font-weight: bold; padding: 2px 6px; border-radius: 4px;")
             
-            self.btn_mark_b = QPushButton("[B]")
+            self.btn_mark_b = QPushButton(_("btn_mark_b"))
+            self.btn_mark_b.setToolTip(_("tooltip_mark_b"))
             self.btn_mark_b.clicked.connect(self.set_mark_b)
             self.btn_mark_b.setStyleSheet("background: transparent; border: 1px solid #f38ba8; color: #f38ba8; font-weight: bold; padding: 2px 6px; border-radius: 4px;")
             
             self.btn_loop = QPushButton("🔁")
+            self.btn_loop.setToolTip(_("tooltip_loop"))
             self.btn_loop.clicked.connect(self.toggle_loop)
             self.btn_loop.setStyleSheet("background: #45475a; color: #cdd6f4; font-weight: bold; padding: 4px; border-radius: 4px;")
             
@@ -199,7 +206,11 @@ if HAS_TSTUDIO:
             # 6. Initialize MPV and Timer
             self.player = None
             self.init_mpv()
-            
+
+            # TV-C4: Connect signals to UI slot methods
+            self.time_pos_updated.connect(self._on_time_pos_ui)
+            self.duration_updated.connect(self._on_duration_ui)
+
             self.update_timer = QTimer(self)
             self.update_timer.setInterval(30) # ~33fps updates
             self.update_timer.timeout.connect(self.update_ui_from_mpv)
@@ -209,8 +220,9 @@ if HAS_TSTUDIO:
             self.table.selectionModel().currentChanged.connect(self.on_tvox_row_selected)
             
             # Set initial title with profile
+            # TV-W4: Pass the actual profile name into the format string
             active = getattr(self, '_profiles_data', {}).get("active_preset", "Default")
-            self.setWindowTitle(f"TVox - FMV Modding Studio [{active}]")
+            self.setWindowTitle(_("window_title_profile").format(active=active))
             
             # Override TStudio's large minimum size to allow DockWidget to expand
             self.setMinimumSize(1000, 600)
@@ -224,7 +236,7 @@ if HAS_TSTUDIO:
         def check_requirements(self):
             if not MPV_AVAILABLE:
                 msg = f"MPV Engine ไม่พร้อมใช้งาน!\n\nโปรดดาวน์โหลดไฟล์ libmpv-2.dll และนำมาวางไว้ที่:\n{os.path.dirname(__file__)}\n\nรายละเอียด Error:\n{MPV_ERROR}"
-                QMessageBox.critical(self, "MPV Engine Missing", msg)
+                QMessageBox.critical(self, _("dlg_mpv_missing_title"), msg)
 
         def on_profile_changed(self, text):
             super().on_profile_changed(text)
@@ -238,7 +250,7 @@ if HAS_TSTUDIO:
                 # osc=False because we built our own UI now!
                 self.player = mpv.MPV(wid=int(self.video_widget.winId()), osc=False, input_default_bindings=True, input_vo_keyboard=True, keep_open=True)
             except Exception as e:
-                QMessageBox.critical(self, "MPV Error", f"Failed to initialize MPV player: {e}")
+                QMessageBox.critical(self, _("dlg_mpv_init_error_title"), _("dlg_mpv_init_error_msg"))
 
         # --- MPV UI UPDATE LOGIC ---
         def resizeEvent(self, event):
@@ -260,67 +272,85 @@ if HAS_TSTUDIO:
             return super().eventFilter(obj, event)
 
         def format_time(self, seconds):
-            if seconds is None: return "00:00.000"
+            if seconds is None: return _("time_default")
             m = int(seconds // 60)
             s = int(seconds % 60)
             ms = int((seconds % 1) * 1000)
             return f"{m:02d}:{s:02d}.{ms:03d}"
 
-        def update_ui_from_mpv(self):
-            if not self.player or not hasattr(self.player, 'time_pos') or self.player.time_pos is None:
-                return
-
-            pos = self.player.time_pos
-            dur = self.player.duration or 1.0
-
-            # Update Labels
+        def _on_time_pos_ui(self, pos):
+            """TV-C4: Slot called via pyqtSignal to safely update time UI."""
             self.lbl_time_curr.setText(self.format_time(pos))
+
+        def _on_duration_ui(self, dur):
+            """TV-C4: Slot called via pyqtSignal to safely update duration UI."""
             self.lbl_time_total.setText(self.format_time(dur))
 
-            # Update Waveform
-            if not getattr(self.waveform, 'is_dragging', False):
-                self.waveform.update_position(pos, dur)
+        def update_ui_from_mpv(self):
+            # TV-C3: Wrap entire body in try-except — player may be destroyed
+            try:
+                if not self.player or not hasattr(self.player, 'time_pos') or self.player.time_pos is None:
+                    return
 
-            # Subtitle Sync
-            if hasattr(self, 'lbl_subtitle') and hasattr(self, 'subtitle_timing'):
-                active_text = ""
-                active_row_id = None
-                for timing in self.subtitle_timing:
-                    if timing["start"] <= pos <= timing["end"]:
-                        active_row_id = timing["row_id"]
-                        break
-                
-                if active_row_id is not None and hasattr(self, 'model'):
-                    # Find the text in the table model by matching row_id to col 0
-                    # For performance, could cache row index, but this is fast enough for small sets
-                    for row in self.model._data:
-                        if str(row[0]) == active_row_id:
-                            # Use Translation (col 3) if available, else Source (col 2)
-                            active_text = row[3] if len(row) > 3 and str(row[3]).strip() else row[2]
+                pos = self.player.time_pos
+
+                # TV-W1: Guard duration access
+                duration = getattr(self.player, 'duration', None)
+                if duration is None:
+                    return
+                dur = duration if duration > 0 else 1.0
+
+                # TV-C4: Emit signals instead of touching UI directly
+                self.time_pos_updated.emit(pos)
+                self.duration_updated.emit(dur)
+
+                # Update Waveform
+                if not getattr(self.waveform, 'is_dragging', False):
+                    self.waveform.update_position(pos, dur)
+
+                # Subtitle Sync
+                if hasattr(self, 'lbl_subtitle') and hasattr(self, 'subtitle_timing'):
+                    active_text = ""
+                    active_row_id = None
+                    for timing in self.subtitle_timing:
+                        if timing["start"] <= pos <= timing["end"]:
+                            active_row_id = timing["row_id"]
                             break
-                
-                if active_text:
-                    if self.lbl_subtitle.text() != active_text:
-                        self.lbl_subtitle.setText(active_text)
-                    if self.lbl_subtitle.isHidden():
-                        self.lbl_subtitle.show()
-                        self.lbl_subtitle.raise_()
-                else:
-                    if not self.lbl_subtitle.isHidden():
-                        self.lbl_subtitle.hide()
 
-            # Handle A-B Looping
-            if self.loop_active and self.mark_a is not None and self.mark_b is not None:
-                if self.mark_a < self.mark_b:
-                    if pos >= self.mark_b:
-                        if not getattr(self, 'is_loop_seeking', False):
-                            try:
-                                self.is_loop_seeking = True
-                                self.player.time_pos = self.mark_a
-                            except Exception:
-                                pass
-                    elif pos < self.mark_b - 0.2:
-                        self.is_loop_seeking = False
+                    if active_row_id is not None and hasattr(self, 'model'):
+                        # Find the text in the table model by matching row_id to col 0
+                        # For performance, could cache row index, but this is fast enough for small sets
+                        for row in self.model._data:
+                            if str(row[0]) == active_row_id:
+                                # Use Translation (col 3) if available, else Source (col 2)
+                                active_text = row[3] if len(row) > 3 and str(row[3]).strip() else row[2]
+                                break
+
+                    if active_text:
+                        if self.lbl_subtitle.text() != active_text:
+                            self.lbl_subtitle.setText(active_text)
+                        if self.lbl_subtitle.isHidden():
+                            self.lbl_subtitle.show()
+                            self.lbl_subtitle.raise_()
+                    else:
+                        if not self.lbl_subtitle.isHidden():
+                            self.lbl_subtitle.hide()
+
+                # Handle A-B Looping
+                if self.loop_active and self.mark_a is not None and self.mark_b is not None:
+                    if self.mark_a < self.mark_b:
+                        if pos >= self.mark_b:
+                            if not getattr(self, 'is_loop_seeking', False):
+                                try:
+                                    self.is_loop_seeking = True
+                                    self.player.time_pos = self.mark_a
+                                except Exception:
+                                    pass
+                        elif pos < self.mark_b - 0.2:
+                            self.is_loop_seeking = False
+
+            except Exception:
+                pass  # TV-C3: player may be destroyed during shutdown
 
         # --- UI ACTIONS ---
         def on_waveform_seek(self, target_sec):
@@ -372,15 +402,28 @@ if HAS_TSTUDIO:
 
         def open_video(self):
             if not self.player: return
-            file_path, _ = QFileDialog.getOpenFileName(self, "Open Video File", "", "Video Files (*.mp4 *.mkv *.avi *.webm *.mov *.bundle)")
+            file_path, _ext = QFileDialog.getOpenFileName(self, _("fdlg_open_video_title"), "", "Video Files (*.mp4 *.mkv *.avi *.webm *.mov *.bundle)")
             if file_path:
                 try:
                     from tbundle_manager import TBundleManager
                     if TBundleManager.is_unity_bundle(file_path):
                         out_dir = os.path.join(os.path.dirname(file_path), "_tvox_cache")
-                        extracted_video = TBundleManager.extract_video(file_path, out_dir)
-                        if extracted_video:
-                            file_path = extracted_video
+                        
+                        def do_work():
+                            return TBundleManager.extract_video(file_path, out_dir)
+                            
+                        def on_result(extracted_video):
+                            if extracted_video:
+                                self.player.play(extracted_video)
+                                self.player.pause = True
+                                self.btn_play_pause.setText("▶")
+                                
+                        from tstudio_ui_shared import ApiWorker
+                        from PyQt6.QtCore import QThreadPool
+                        worker = ApiWorker(do_work)
+                        worker.signals.finished.connect(on_result)
+                        QThreadPool.globalInstance().start(worker)
+                        return
                 except Exception as e:
                     print(f"Bundle extract error: {e}")
 
@@ -395,8 +438,8 @@ if HAS_TSTUDIO:
                 
                 self.mark_a = None
                 self.mark_b = None
-                self.btn_mark_a.setText("[A]")
-                self.btn_mark_b.setText("[B]")
+                self.btn_mark_a.setText(_("btn_mark_a"))
+                self.btn_mark_b.setText(_("btn_mark_b"))
                 
                 # Check for FFmpeg and start extracting audio
                 from ffmpeg_utils import ensure_ffmpeg
@@ -417,7 +460,12 @@ if HAS_TSTUDIO:
             self.player.pause = not self.player.pause
 
         def seek_relative(self, seconds):
-            if not self.player: return
+            # TV-W2: Guard against seeking when no file is loaded
+            try:
+                if not self.player or not getattr(self.player, 'path', None):
+                    return
+            except Exception:
+                return
             self.player.seek(seconds, reference="relative")
 
         def change_speed(self, text):
@@ -445,11 +493,15 @@ if HAS_TSTUDIO:
                 self.btn_loop.setStyleSheet("background: #a6e3a1; color: #1e1e2e; font-weight: bold; padding: 4px; border-radius: 4px;")
                 # If we turn on loop but missed a mark, maybe auto set it?
                 if self.mark_a is not None and self.mark_b is None:
-                    if self.player.duration:
-                        self.mark_b = self.player.duration
+                    # TV-W1: Guard player.duration
+                    duration = getattr(self.player, 'duration', None) if self.player else None
+                    if duration:
+                        self.mark_b = duration
             else:
                 self.btn_loop.setText("🔁")
                 self.btn_loop.setStyleSheet("background: #45475a; color: #cdd6f4; font-weight: bold; padding: 4px; border-radius: 4px;")
+                # TV-C2: Reset loop-seeking flag when loop is disabled
+                self.is_loop_seeking = False
 
         def on_tvox_row_selected(self, current, previous):
             # This is called *after* TStudio's own on_row_selected
@@ -460,13 +512,29 @@ if HAS_TSTUDIO:
             # Future feature: jump to start time of dialogue
             pass
 
+        def closeEvent(self, event):
+            """TV-C1: Clean shutdown — stop timers and terminate MPV player."""
+            # Stop UI update timer
+            if hasattr(self, 'update_timer') and self.update_timer:
+                self.update_timer.stop()
+            # Stop any waveform-related timers
+            if hasattr(self, 'waveform_timer') and self.waveform_timer:
+                self.waveform_timer.stop()
+            # Terminate MPV player gracefully
+            if hasattr(self, 'player') and self.player:
+                try:
+                    self.player.terminate()
+                except Exception:
+                    pass
+            event.accept()
+
 else:
     from PyQt6.QtWidgets import QMainWindow
     class TVoxApp(QMainWindow):
         def __init__(self):
             super().__init__()
-            self.setWindowTitle("TVox - Error")
-            QMessageBox.critical(self, "Error", "TStudio engine not found!")
+            self.setWindowTitle(_("window_title_error"))
+            QMessageBox.critical(self, _("dlg_tstudio_missing_title"), _("dlg_tstudio_missing_msg"))
 
 def main():
     app = QApplication(sys.argv)

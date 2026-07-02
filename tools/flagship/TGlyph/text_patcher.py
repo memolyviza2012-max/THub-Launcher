@@ -1,3 +1,4 @@
+from i18n_helper import _
 import sys
 import os
 import json
@@ -169,7 +170,8 @@ class TextPatcherApp(QMainWindow):
         map_row = QHBoxLayout()
         self.map_edit = QLineEdit()
         self.map_edit.setPlaceholderText("เลือกไฟล์ mapping.json ที่ได้จาก Font Studio...")
-        map_btn = QPushButton("Browse")
+        map_btn = QPushButton(_("startup_browse"))
+        map_btn.setToolTip(_("tooltip_map_btn"))
         map_btn.clicked.connect(self._browse_mapping)
         map_row.addWidget(self.map_edit)
         map_row.addWidget(map_btn)
@@ -181,8 +183,10 @@ class TextPatcherApp(QMainWindow):
         self.in_edit = QLineEdit()
         self.in_edit.setPlaceholderText("เลือกไฟล์ (.json, .txt) หรือเลือกทั้งโฟลเดอร์...")
         in_btn_file = QPushButton("Select Files")
+        in_btn_file.setToolTip(_("tooltip_in_file"))
         in_btn_file.clicked.connect(self._browse_input_files)
         in_btn_dir = QPushButton("Select Folder")
+        in_btn_dir.setToolTip(_("tooltip_in_dir"))
         in_btn_dir.clicked.connect(self._browse_input_dir)
         in_row.addWidget(self.in_edit)
         in_row.addWidget(in_btn_file)
@@ -194,7 +198,8 @@ class TextPatcherApp(QMainWindow):
         out_row = QHBoxLayout()
         self.out_edit = QLineEdit()
         self.out_edit.setPlaceholderText("เลือกโฟลเดอร์ปลายทาง...")
-        out_btn = QPushButton("Browse")
+        out_btn = QPushButton(_("startup_browse"))
+        out_btn.setToolTip(_("tooltip_out_btn"))
         out_btn.clicked.connect(self._browse_output)
         out_row.addWidget(self.out_edit)
         out_row.addWidget(out_btn)
@@ -204,6 +209,7 @@ class TextPatcherApp(QMainWindow):
 
         # Start Button
         self.btn_start = QPushButton("⚡ เริ่มแปลงข้อความ (Start Patching)")
+        self.btn_start.setToolTip(_("tooltip_start"))
         self.btn_start.setObjectName("primary")
         self.btn_start.clicked.connect(self._start_patching)
         layout.addWidget(self.btn_start)
@@ -222,12 +228,12 @@ class TextPatcherApp(QMainWindow):
         self.input_paths = []
 
     def _browse_mapping(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Select mapping.json", "", "JSON Files (*.json)")
+        path, _ext = QFileDialog.getOpenFileName(self, "Select mapping.json", "", "JSON Files (*.json)")
         if path:
             self.map_edit.setText(path)
 
     def _browse_input_files(self):
-        paths, _ = QFileDialog.getOpenFileNames(self, "Select Input Files", "", "All Files (*.*)")
+        paths, _ext = QFileDialog.getOpenFileNames(self, "Select Input Files", "", "All Files (*.*)")
         if paths:
             self.input_paths = paths
             if len(paths) == 1:

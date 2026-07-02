@@ -1,0 +1,22 @@
+{
+  "window_title": "TVox - استوديو تعديل FMV (مدعوم بمحرك TStudio)",
+  "window_title_profile": "TVox - استوديو تعديل FMV [{active}]",
+  "window_title_error": "TVox - خطأ",
+  "dock_video_player": "⠿ مشغل فيديو TVox",
+  "tooltip_open_video": "فتح فيديو",
+  "tooltip_prev_subtitle": "ترجمة سابقة",
+  "tooltip_play_pause": "تشغيل / إيقاف مؤقت",
+  "tooltip_next_subtitle": "ترجمة تالية",
+  "btn_mark_a": "[A]",
+  "btn_mark_b": "[B]",
+  "btn_auto_scroll": "📌 تمرير تلقائي",
+  "time_default": "00:00.000",
+  "dlg_mpv_missing_title": "محرك MPV مفقود",
+  "dlg_mpv_missing_msg": "محرك MPV غير متوفر!",
+  "dlg_mpv_init_error_title": "خطأ MPV",
+  "dlg_mpv_init_error_msg": "فشل تهيئة مشغل MPV: {e}",
+  "dlg_tstudio_missing_title": "خطأ",
+  "dlg_tstudio_missing_msg": "محرك TStudio غير موجود!",
+  "fdlg_open_video_title": "فتح ملف فيديو",
+  "fdlg_open_video_filter": "ملفات الفيديو (*.mp4 *.mkv *.avi *.webm *.mov *.bundle *.assets)"
+}

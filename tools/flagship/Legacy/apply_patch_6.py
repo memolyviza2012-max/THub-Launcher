@@ -84,7 +84,7 @@ new_deploy = '''    def deploy_to_game(self):
         target_path = retail_path
         if not os.path.exists(os.path.dirname(retail_path)):
             options = QFileDialog.Option.DontUseNativeDialog
-            fileName, _ = QFileDialog.getSaveFileName(self, "หาโฟลเดอร์เกมไม่เจอ กรุณาเลือกที่เก็บไฟล์ JSON ด้วยตัวเอง", "strings_th.json", "JSON Files (*.json)", options=options)
+            fileName, _ext = QFileDialog.getSaveFileName(self, "หาโฟลเดอร์เกมไม่เจอ กรุณาเลือกที่เก็บไฟล์ JSON ด้วยตัวเอง", "strings_th.json", "JSON Files (*.json)", options=options)
             if not fileName:
                 return
             target_path = fileName

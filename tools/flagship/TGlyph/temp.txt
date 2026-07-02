@@ -1,0 +1,20 @@
+        gen_layout.addLayout(custom_row)
+
+        # Fill empty spaces checkbox
+        from PyQt6.QtWidgets import QCheckBox
+        self.fill_empty_cb = QCheckBox("เติมลงในช่องว่างของ Base Image (ถ้ามี)")
+        self.fill_empty_cb.setChecked(False)
+        self.fill_empty_cb.setStyleSheet(f"color: {Mocha.TEXT}; margin-top: 5px; margin-bottom: 5px;")
+        gen_layout.addWidget(self.fill_empty_cb)
+
+        # Autofit checkbox
+        self.autofit_cb = QCheckBox("ลดขนาด Cell อัตโนมัติเพื่อให้พอดีกรอบ Base Image")
+        self.autofit_cb.setChecked(False)
+        self.autofit_cb.setStyleSheet(f"color: {Mocha.TEXT}; margin-bottom: 5px;")
+        gen_layout.addWidget(self.autofit_cb)
+
+        # Full PUA checkbox
+        self.full_pua_cb = QCheckBox("เปิดใช้งานโหมด Full PUA (ย้ายอักษรเดี่ยวลง PUA)")
+        self.full_pua_cb.setChecked(False)
+        self.full_pua_cb.setStyleSheet(f"color: {Mocha.TEXT}; margin-bottom: 10px;")
+        self.full_pua_cb.stateChanged.connect(self._on_full_pua_changed)

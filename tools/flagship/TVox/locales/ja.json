@@ -1,0 +1,22 @@
+{
+  "window_title": "TVox - FMV Modding Studio（TStudio Engine搭載）",
+  "window_title_profile": "TVox - FMV Modding Studio [{active}]",
+  "window_title_error": "TVox - エラー",
+  "dock_video_player": "⠿ TVox ビデオプレイヤー",
+  "tooltip_open_video": "動画を開く",
+  "tooltip_prev_subtitle": "前の字幕",
+  "tooltip_play_pause": "再生 / 一時停止",
+  "tooltip_next_subtitle": "次の字幕",
+  "btn_mark_a": "[A]",
+  "btn_mark_b": "[B]",
+  "btn_auto_scroll": "📌 自動スクロール",
+  "time_default": "00:00.000",
+  "dlg_mpv_missing_title": "MPVエンジンが見つかりません",
+  "dlg_mpv_missing_msg": "MPVエンジンが利用できません！",
+  "dlg_mpv_init_error_title": "MPVエラー",
+  "dlg_mpv_init_error_msg": "MPVプレイヤーの初期化に失敗しました：{e}",
+  "dlg_tstudio_missing_title": "エラー",
+  "dlg_tstudio_missing_msg": "TStudioエンジンが見つかりません！",
+  "fdlg_open_video_title": "動画ファイルを開く",
+  "fdlg_open_video_filter": "動画ファイル（*.mp4 *.mkv *.avi *.webm *.mov *.bundle *.assets）"
+}

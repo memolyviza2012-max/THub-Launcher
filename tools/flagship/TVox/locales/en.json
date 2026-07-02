@@ -1,0 +1,22 @@
+{
+  "window_title": "TVox - FMV Modding Studio (Powered by TStudio Engine)",
+  "window_title_profile": "TVox - FMV Modding Studio [{active}]",
+  "window_title_error": "TVox - Error",
+  "dock_video_player": " ⠿ TVox Video Player ",
+  "tooltip_open_video": "Open Video",
+  "tooltip_prev_subtitle": "Previous Subtitle",
+  "tooltip_play_pause": "Play / Pause",
+  "tooltip_next_subtitle": "Next Subtitle",
+  "btn_mark_a": "[A]",
+  "btn_mark_b": "[B]",
+  "btn_auto_scroll": "📌 Auto-Scroll",
+  "time_default": "00:00.000",
+  "dlg_mpv_missing_title": "MPV Engine Missing",
+  "dlg_mpv_missing_msg": "MPV Engine is not available!\n\nPlease download libmpv-2.dll and place it at:\n{path}\n\nError details:\n{error}",
+  "dlg_mpv_init_error_title": "MPV Error",
+  "dlg_mpv_init_error_msg": "Failed to initialize MPV player: {e}",
+  "dlg_tstudio_missing_title": "Error",
+  "dlg_tstudio_missing_msg": "TStudio engine not found!",
+  "fdlg_open_video_title": "Open Video File",
+  "fdlg_open_video_filter": "Video Files (*.mp4 *.mkv *.avi *.webm *.mov *.bundle *.assets)"
+}

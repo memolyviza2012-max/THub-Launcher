@@ -2,6 +2,8 @@ import os
 import re
 import json
 import csv
+import shutil
+import tempfile
 import UnityPy
 
 class TBundleManager:
@@ -215,9 +217,29 @@ class TBundleManager:
                                 break
                         except Exception as e:
                             pass
-                            
-            with open(bundle_path, 'wb') as f:
-                f.write(env.file.save())
+
+            # Backup original bundle before overwriting
+            bak_path = bundle_path + '.bak'
+            shutil.copy2(bundle_path, bak_path)
+
+            # Atomic write to temp then replace
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                dir=os.path.dirname(os.path.abspath(bundle_path)),
+                suffix='.tmp'
+            )
+            try:
+                with os.fdopen(tmp_fd, 'wb') as f:
+                    f.write(env.file.save())
+                os.replace(tmp_path, bundle_path)
+            except Exception:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                # Restore from backup on failure
+                if os.path.exists(bak_path):
+                    shutil.copy2(bak_path, bundle_path)
+                raise
                 
             return True, bundle_path
         except Exception as e:

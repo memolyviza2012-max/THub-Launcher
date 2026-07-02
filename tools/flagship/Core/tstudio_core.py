@@ -2,7 +2,8 @@ import os
 import sys
 import json
 import csv
-import sys
+import tempfile
+import shutil
 csv.field_size_limit(2147483647)
 import requests
 
@@ -34,6 +35,21 @@ Return ONLY a valid JSON array of 3 strings: ["option1", "option2", "option3"]
 Text: {source_text}"""
 
 class TStudioCore:
+    _PROJECT_PATH = None
+    
+    @classmethod
+    def set_project_path(cls, path):
+        if path and os.path.exists(path):
+            cls._PROJECT_PATH = path
+            
+    @classmethod
+    def get_prompts_path(cls):
+        if cls._PROJECT_PATH:
+            p = os.path.join(cls._PROJECT_PATH, "07_TLM_Lore", "project_tlm.json")
+            if not os.path.exists(os.path.dirname(p)):
+                os.makedirs(os.path.dirname(p), exist_ok=True)
+            return p
+        return PROMPTS_PATH
     @staticmethod
     def load_config():
         data = {}
@@ -44,26 +60,87 @@ class TStudioCore:
         except Exception as e:
             print(f"Error loading config: {e}")
             
-        return {
-            "google_key": data.get("google_key", ""),
-            "anthropic_key": data.get("anthropic_key", ""),
-            "deepseek_key": data.get("deepseek_key", data.get("api_key", "")),
-            "openai_key": data.get("openai_key", ""),
-            "model": data.get("model", "deepseek-chat"),
-            "provider": data.get("provider", "DeepSeek"),
-            "local_url": data.get("local_url", "http://localhost:1234/v1/chat/completions")
-        }
+        # Apply defaults for core settings
+        data.setdefault("google_key", "")
+        data.setdefault("anthropic_key", "")
+        if "api_key" in data and "deepseek_key" not in data:
+            data["deepseek_key"] = data["api_key"]
+        data.setdefault("deepseek_key", "")
+        data.setdefault("openai_key", "")
+        data.setdefault("model", "deepseek-chat")
+        data.setdefault("provider", "DeepSeek")
+        data.setdefault("local_url", "http://localhost:1234/v1/chat/completions")
+        if "local_url" in data and "base_url" not in data:
+            data["base_url"] = data["local_url"]
+        data.setdefault("base_url", "")
+        
+        # Ensure correct types
+        try:
+            data["temperature"] = float(data.get("temperature", 0.3))
+        except:
+            data["temperature"] = 0.3
+            
+        try:
+            data["max_tokens"] = int(data.get("max_tokens", 4096))
+        except:
+            data["max_tokens"] = 4096
+            
+        try:
+            data["timeout"] = int(data.get("timeout", 30))
+        except:
+            data["timeout"] = 30
+            
+        return data
 
     @staticmethod
     def save_config(cfg):
         try:
-            with open(CONFIG_PATH, 'w', encoding='utf-8') as f:
-                json.dump(cfg, f, ensure_ascii=False, indent=4)
+            path = CONFIG_PATH
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                dir=os.path.dirname(os.path.abspath(path)),
+                suffix='.tmp'
+            )
+            try:
+                with os.fdopen(tmp_fd, 'w', encoding='utf-8') as f:
+                    json.dump(cfg, f, ensure_ascii=False, indent=4)
+                shutil.move(tmp_path, path)
+            except Exception:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
         except Exception as e:
             print(f"Error saving config: {e}")
 
-    @staticmethod
-    def load_profiles():
+    @classmethod
+    def get_last_dir(cls):
+        """Returns the last used directory, stored in config.json."""
+        try:
+            if os.path.exists(CONFIG_PATH):
+                with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                return data.get("last_dir", "")
+        except Exception:
+            pass
+        return ""
+
+    @classmethod
+    def set_last_dir(cls, file_path):
+        """Saves the directory of the given file_path to config.json."""
+        try:
+            data = {}
+            if os.path.exists(CONFIG_PATH):
+                with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            data["last_dir"] = os.path.dirname(file_path)
+            with open(CONFIG_PATH, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            print(f"Error saving last_dir: {e}")
+
+    @classmethod
+    def load_profiles(cls):
         data = {
             "active_preset": "Default",
             "presets": {
@@ -71,13 +148,15 @@ class TStudioCore:
                     "single": "",
                     "opt": "",
                     "batch": "", # Added for TRun
-                    "glossary": {}
+                    "glossary": {},
+                    "max_bytes_limit": 63
                 }
             }
         }
         try:
-            if os.path.exists(PROMPTS_PATH):
-                with open(PROMPTS_PATH, 'r', encoding='utf-8') as f:
+            target_path = cls.get_prompts_path()
+            if os.path.exists(target_path):
+                with open(target_path, 'r', encoding='utf-8') as f:
                     loaded = json.load(f)
                     if "single_prompt" in loaded:
                         data["presets"]["Default"]["single"] = loaded.get("single_prompt", DEFAULT_SINGLE_PROMPT)
@@ -90,7 +169,8 @@ class TStudioCore:
                                 "single": v.get("single", ""),
                                 "opt": v.get("opt", ""),
                                 "batch": v.get("batch", v.get("single", "")),
-                                "glossary": v.get("glossary", {})
+                                "glossary": v.get("glossary", {}),
+                                "max_bytes_limit": v.get("max_bytes_limit", 63)
                             }
         except json.JSONDecodeError as e:
             print(f"Failed to parse prompts.json: {e}")
@@ -120,16 +200,29 @@ class TStudioCore:
                 
         return data
 
-    @staticmethod
-    def save_profiles(data):
+    @classmethod
+    def save_profiles(cls, data):
         try:
-            with open(PROMPTS_PATH, 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
+            path = cls.get_prompts_path()
+            tmp_fd, tmp_path = tempfile.mkstemp(
+                dir=os.path.dirname(os.path.abspath(path)),
+                suffix='.tmp'
+            )
+            try:
+                with os.fdopen(tmp_fd, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=4)
+                shutil.move(tmp_path, path)
+            except Exception:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
         except Exception as e:
             print(f"Error saving profiles: {e}")
 
-    @staticmethod
-    def get_current_profile_data():
+    @classmethod
+    def get_current_profile_data(cls):
         profiles = TStudioCore.load_profiles()
         active = profiles.get("active_preset", "Default")
         return profiles["presets"].get(active, {"single": "", "opt": "", "batch": "", "glossary": {}})
@@ -140,6 +233,7 @@ class CoreAI:
 
     @staticmethod
     def generate_content(cfg, prompt, is_local=False):
+        content = ""  # Ensure content is always defined (guard against UnboundLocalError)
         model = cfg.get("model", "deepseek-chat")
         if is_local:
             model = "custom-local-llm"
@@ -154,13 +248,24 @@ class CoreAI:
             elif not model.startswith("gemini") and not model.startswith("claude") and not model.startswith("deepseek") and not cfg.get("openai_key"):
                 raise Exception("OpenAI API Key is missing! Please configure it in Settings.")
 
+        timeout_val = cfg.get("timeout", 30)
+        temp_val = cfg.get("temperature", 0.3)
+        max_tokens_val = cfg.get("max_tokens", 4096)
+        base_url = cfg.get("base_url", "").rstrip("/")
+
         if model.startswith("gemini"):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={cfg['google_key']}"
+            if base_url: 
+                base_url = base_url.rstrip("/")
+                if "generateContent" not in base_url:
+                    url = f"{base_url}/v1beta/models/{model}:generateContent?key={cfg['google_key']}"
+                else:
+                    url = f"{base_url}?key={cfg['google_key']}"
             payload = {
                 "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"temperature": 0.3}
+                "generationConfig": {"temperature": temp_val, "maxOutputTokens": max_tokens_val}
             }
-            res = CoreAI._session.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30)
+            res = CoreAI._session.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=timeout_val)
             if res.status_code == 200:
                 content = res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
             else:
@@ -168,12 +273,14 @@ class CoreAI:
 
         elif model.startswith("claude"):
             url = "https://api.anthropic.com/v1/messages"
+            if base_url: 
+                url = base_url if base_url.endswith("/messages") else f"{base_url.rstrip('/')}/v1/messages" if not base_url.rstrip("/").endswith("/v1") else f"{base_url.rstrip('/')}/messages"
             headers = {"x-api-key": cfg["anthropic_key"], "anthropic-version": "2023-06-01", "content-type": "application/json"}
             payload = {
-                "model": model, "max_tokens": 4096, "temperature": 0.3,
+                "model": model, "max_tokens": max_tokens_val, "temperature": temp_val,
                 "messages": [{"role": "user", "content": prompt}]
             }
-            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=30)
+            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
             if res.status_code == 200:
                 content = res.json()["content"][0]["text"].strip()
             else:
@@ -181,12 +288,14 @@ class CoreAI:
             
         elif model.startswith("deepseek"):
             url = "https://api.deepseek.com/chat/completions"
+            if base_url:
+                url = base_url if base_url.endswith("/chat/completions") else f"{base_url.rstrip('/')}/chat/completions"
             headers = {"Authorization": f"Bearer {cfg['deepseek_key']}", "Content-Type": "application/json"}
             payload = {
-                "model": model, "temperature": 0.3,
+                "model": model, "temperature": temp_val, "max_tokens": max_tokens_val,
                 "messages": [{"role": "user", "content": prompt}]
             }
-            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=30)
+            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
             if res.status_code == 200:
                 content = res.json()["choices"][0]["message"]["content"].strip()
             else:
@@ -194,30 +303,34 @@ class CoreAI:
             
         elif model == "custom-local-llm" or model == "Local LLM":
             # LM Studio / Ollama defaults
-            url = "http://localhost:1234/v1/chat/completions"
+            url = base_url if base_url else "http://localhost:1234/v1/chat/completions"
+            if not url.endswith("/chat/completions"):
+                url = f"{url.rstrip('/')}/chat/completions"
             headers = {"Content-Type": "application/json"}
             payload = {
-                "model": "local-model", "temperature": 0.3,
+                "model": "local-model", "temperature": temp_val, "max_tokens": max_tokens_val,
                 "messages": [{"role": "user", "content": prompt}]
             }
             try:
-                res = CoreAI._session.post(url, json=payload, headers=headers, timeout=30)
+                res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
                 if res.status_code == 200:
                     content = res.json()["choices"][0]["message"]["content"].strip()
                 else:
                     raise Exception(f"Local API Error {res.status_code}: {res.text}")
             except requests.exceptions.ConnectionError:
-                raise Exception("Could not connect to Local LLM at http://localhost:1234/v1. Make sure your server (e.g., LM Studio) is running.")
+                raise Exception(f"Could not connect to Local LLM at {url}. Make sure your server (e.g., LM Studio) is running.")
                 
         else:
             # Assume OpenAI standard
             url = "https://api.openai.com/v1/chat/completions"
+            if base_url:
+                url = base_url if base_url.endswith("/chat/completions") else f"{base_url.rstrip('/')}/chat/completions"
             headers = {"Authorization": f"Bearer {cfg['openai_key']}", "Content-Type": "application/json"}
             payload = {
-                "model": model, "temperature": 0.3,
+                "model": model, "temperature": temp_val, "max_tokens": max_tokens_val,
                 "messages": [{"role": "user", "content": prompt}]
             }
-            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=30)
+            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
             if res.status_code == 200:
                 content = res.json()["choices"][0]["message"]["content"].strip()
             else:
@@ -251,7 +364,7 @@ class TFormatManager:
             return []
 
     @staticmethod
-    def format_to_standard(file_path, mapping):
+    def format_to_standard(file_path, mapping, output_path=None):
         original_data = {}
         standard_rows = []
         
@@ -268,31 +381,46 @@ class TFormatManager:
                 original_data[row_id] = row
                 standard_rows.append([row_id, src_text, trans_text, ""])
 
-        base_dir = os.path.dirname(file_path)
-        standard_path = os.path.join(base_dir, "translation.csv")
+        # Always compute base_dir before using it (BUG 1 fix)
+        base_dir = os.path.dirname(output_path) if output_path else os.path.dirname(file_path)
+
+        if output_path is None:
+            standard_path = os.path.join(base_dir, "translation.csv")
+        else:
+            standard_path = output_path
         
-        with open(standard_path, 'w', encoding='utf-8-sig', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["ID", "Source", "Translation", "AI_Reference"])
-            writer.writerows(standard_rows)
-            
-        json_path = os.path.join(base_dir, "original_data.json")
+        try:
+            with open(standard_path, 'w', encoding='utf-8-sig', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(["ID", "Source", "Translation", "AI_Reference"])
+                writer.writerows(standard_rows)
+        except (PermissionError, OSError) as e:
+            raise RuntimeError(f'Cannot write to {standard_path}. Is the file open in another program?') from e
+
+        # Use stem-based meta filename instead of hardcoded 'original_data.json' (BUG 1 fix)
+        stem = os.path.splitext(os.path.basename(file_path))[0]
+        json_path = os.path.join(base_dir, f'{stem}_meta.json')
         wrapper = {
             "mapping": mapping,
             "data": original_data
         }
-        with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(wrapper, f, indent=4, ensure_ascii=False)
+        try:
+            with open(json_path, 'w', encoding='utf-8') as f:
+                json.dump(wrapper, f, indent=4, ensure_ascii=False)
+        except (PermissionError, OSError) as e:
+            raise RuntimeError(f'Cannot write to {json_path}. Is the file open in another program?') from e
             
         return standard_path
 
     @staticmethod
     def export_original(translation_csv_path):
         base_dir = os.path.dirname(translation_csv_path)
-        json_path = os.path.join(base_dir, "original_data.json")
+        # Use stem-based meta filename instead of hardcoded 'original_data.json' (BUG 2 fix)
+        stem = os.path.splitext(os.path.basename(translation_csv_path))[0]
+        json_path = os.path.join(base_dir, f'{stem}_meta.json')
         
         if not os.path.exists(json_path):
-            return False, "No original_data.json found. Cannot export back to original format."
+            return False, f"No {stem}_meta.json found. Cannot export back to original format."
             
         with open(json_path, 'r', encoding='utf-8') as f:
             wrapper = json.load(f)
@@ -301,7 +429,7 @@ class TFormatManager:
         original_data = wrapper.get("data", {})
             
         if not original_data:
-            return False, "original_data.json is empty."
+            return False, f"{stem}_meta.json is empty."
             
         with open(translation_csv_path, 'r', encoding='utf-8-sig', errors='replace') as f:
             reader = csv.reader(f)
@@ -320,13 +448,154 @@ class TFormatManager:
         original_headers = list(original_data[first_key].keys())
         if not mapping.get('trans') and 'Translation' not in original_headers:
             original_headers.append('Translation')
-            
-        output_path = os.path.join(base_dir, "Translated_Original.csv")
-        with open(output_path, 'w', encoding='utf-8-sig', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=original_headers)
-            writer.writeheader()
-            for row_id, row_data in original_data.items():
-                writer.writerow(row_data)
+
+        # Use stem-based output filename instead of hardcoded 'Translated_Original.csv' (BUG 2 fix)
+        output_path = os.path.join(base_dir, f'{stem}_exported.csv')
+        try:
+            with open(output_path, 'w', encoding='utf-8-sig', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=original_headers)
+                writer.writeheader()
+                for row_id, row_data in original_data.items():
+                    writer.writerow(row_data)
+        except (PermissionError, OSError) as e:
+            raise RuntimeError(f'Cannot write to {output_path}. Is the file open in another program?') from e
                 
         return True, output_path
+
+
+class TPakManager:
+    @staticmethod
+    def extract_pak_to_csv(filepath):
+        import struct
+        try:
+            with open(filepath, 'rb') as f:
+                pdata = f.read()
+            
+            if len(pdata) < 12:
+                return None
+                
+            version, encoding, padding, resource_count, alias_count = struct.unpack('<IB3sHH', pdata[:12])
+            if version != 5:
+                return None
+                
+            # Parse resource index
+            resources = []
+            offset = 12
+            for _ in range(resource_count + 1):
+                r_id, r_offset = struct.unpack('<HI', pdata[offset:offset+6])
+                resources.append((r_id, r_offset))
+                offset += 6
+                
+            # Extract data and filter text
+            entries = []
+            for i in range(resource_count):
+                r_id, r_offset = resources[i]
+                next_offset = resources[i+1][1]
+                res_bytes = pdata[r_offset:next_offset]
+                
+                try:
+                    dec_enc = 'utf-16' if encoding == 2 else 'utf-8'
+                    val = res_bytes.decode(dec_enc)
+                    if len(val) > 0 and all(32 <= ord(c) <= 126 or ord(c) > 127 or c in '\r\n\t' for c in val[:50]):
+                        entries.append((f"{r_id}", val))
+                except Exception:
+                    pass
+                    
+            if entries:
+                base = os.path.splitext(filepath)[0]
+                csv_out = base + '_parsed.csv'
+                with open(csv_out, 'w', encoding='utf-8-sig', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["ID", "Source", "Translation", "AI_Reference"])
+                    for lid, text in entries:
+                        writer.writerow([lid, text, '', ''])
+                return csv_out
+        except Exception as e:
+            print(f"Error parsing pak: {e}")
+        return None
+
+    @staticmethod
+    def reconstruct_pak_file(original_pak_path, csv_path, output_pak_path):
+        import struct
+        
+        with open(original_pak_path, 'rb') as f:
+            data = f.read()
+            
+        version, encoding, padding, resource_count, alias_count = struct.unpack('<IB3sHH', data[:12])
+        if version != 5:
+            raise ValueError(f"Only Chromium PAK version 5 is supported (got version {version})")
+            
+        # Parse resource index
+        resources = []
+        offset = 12
+        for _ in range(resource_count + 1):
+            r_id, r_offset = struct.unpack('<HI', data[offset:offset+6])
+            resources.append((r_id, r_offset))
+            offset += 6
+            
+        # Parse alias index
+        aliases = []
+        for _ in range(alias_count):
+            r_id, entry_idx = struct.unpack('<HH', data[offset:offset+4])
+            aliases.append((r_id, entry_idx))
+            offset += 4
+            
+        # Extract original resource bytes
+        res_data = {}
+        for i in range(resource_count):
+            r_id, r_offset = resources[i]
+            next_offset = resources[i+1][1]
+            res_data[r_id] = data[r_offset:next_offset]
+            
+        # Read the translated CSV
+        translations = {}
+        with open(csv_path, 'r', encoding='utf-8-sig', errors='replace') as f:
+            reader = csv.reader(f)
+            next(reader, None) # skip header
+            for row in reader:
+                if len(row) >= 3:
+                    r_id_str = row[0].strip()
+                    trans_text = row[2]
+                    if trans_text.strip():
+                        try:
+                            translations[int(r_id_str)] = trans_text
+                        except ValueError:
+                            pass
+                            
+        # Replace resource bytes with translated ones
+        dec_enc = 'utf-16' if encoding == 2 else 'utf-8'
+        for r_id, trans_val in translations.items():
+            if r_id in res_data:
+                res_data[r_id] = trans_val.encode(dec_enc)
+                
+        # Pack back
+        start_data_offset = 12 + (resource_count + 1) * 6 + alias_count * 4
+        
+        packed_data = b''
+        offsets = {}
+        current_offset = start_data_offset
+        
+        original_ids = [r_id for r_id, _ in resources[:-1]]
+        for r_id in original_ids:
+            offsets[r_id] = current_offset
+            r_bytes = res_data[r_id]
+            packed_data += r_bytes
+            current_offset += len(r_bytes)
+            
+        sentinel_offset = current_offset
+        
+        res_index_bytes = b''
+        for r_id in original_ids:
+            res_index_bytes += struct.pack('<HI', r_id, offsets[r_id])
+        res_index_bytes += struct.pack('<HI', 0, sentinel_offset)
+        
+        alias_bytes = b''
+        for r_id, entry_idx in aliases:
+            alias_bytes += struct.pack('<HH', r_id, entry_idx)
+            
+        final_data = struct.pack('<IB3sHH', version, encoding, padding, resource_count, alias_count) + res_index_bytes + alias_bytes + packed_data
+        
+        with open(output_pak_path, 'wb') as f:
+            f.write(final_data)
+
 

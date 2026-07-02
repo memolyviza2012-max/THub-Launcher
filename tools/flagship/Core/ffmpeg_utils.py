@@ -47,6 +47,7 @@ def ensure_ffmpeg(parent_widget):
         return None
         
     # Proceed to download
+    zip_path = None
     try:
         if getattr(sys, 'frozen', False):
             base_dir = os.path.dirname(sys.executable)
@@ -115,7 +116,7 @@ def ensure_ffmpeg(parent_widget):
         
     except Exception as e:
         QMessageBox.critical(parent_widget, "Download Failed", f"การดาวน์โหลดผิดพลาด:\n{e}")
-        if os.path.exists(zip_path):
+        if zip_path is not None and os.path.exists(zip_path):
             try: os.remove(zip_path)
             except: pass
         return None

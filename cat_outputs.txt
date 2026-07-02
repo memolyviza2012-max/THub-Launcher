@@ -1,0 +1,772 @@
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-19T04:16:14Z
+Completed At: 2026-06-19T04:16:14Z
+
+				The command completed successfully.
+				Output:
+				195: def show_home(self):
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-19T08:56:06Z
+Completed At: 2026-06-19T08:56:07Z
+
+				The command completed successfully.
+				Output:
+				
+main.py:61:    def __init__(self, widget, text):
+main.py:68:    def enter(self, event=None):
+main.py:81:    def leave(self, event=None):
+main.py:119:    def __init__(self):
+main.py:201:    def change_appearance_mode(self, new_appearance_mode: str):
+main.py:204:    def clear_main_frame(self):
+main.py:208:    def load_local_config(self):
+main.py:217:    def save_local_config(self):
+main.py:222:    def show_home(self):
+main.py:251:    def show_dashboard_help(self):
+main.py:359:    def on_projects_resize(self, event):
+main.py:368:    def _rearrange_project_cards(self):
+main.py:386:    def add_new_project_wizard(self):
+main.py:419:    def import_project_wizard(self):
+main.py:450:    def rename_project(self, index):
+main.py:461:    def delete_project(self, index):
+main.py:470:    def set_translation_folder(self, index):
+main.py:496:            def refresh_list():
+main.py:516:            def remove_folder(idx):
+main.py:521:            def add_folder():
+main.py:557:    def start_progress_calculation(self, index, path, pct_lbl, progress_bar):
+main.py:601:    def calculate_translation_progress_worker(self, index, scan_paths, pct_lbl, progress_bar, root_path):
+main.py:684:    def _update_progress_ui(self, pct_lbl, progress_bar, pct, error=False):
+main.py:697:    def show_progress_details(self, index):
+main.py:723:    def open_project_folder(self, path):
+main.py:729:    def check_for_updates(self):
+main.py:733:    def check_for_updates_bg(self):
+main.py:761:    def update_status(self, text, color):
+main.py:765:    def prompt_update(self, latest_version, notes, dl_url):
+main.py:772:    def perform_self_update_bg(self, dl_url):
+main.py:773:        def show_updating_window():
+main.py:837:    def show_flagship(self):
+main.py:859:    def fetch_flagship_registry_bg(self, parent_frame):
+main.py:870:    def _on_flagship_grid_resize(self, event=None):
+main.py:889:    def _rearrange_flagship_cards(self):
+main.py:905:    def render_flagship_cards(self, parent_frame, registry_data):
+main.py:918:    def create_flagship_card(self, parent, item):
+main.py:954:    def launch_script_with_loading(self, path, icon_btn, orig_img):
+main.py:962:    def _execute_launch(self, path, icon_btn, orig_img):
+main.py:967:    def launch_script(self, path):
+main.py:979:    def show_flagship_update_btn(self, parent_frame, item, latest_tag):
+main.py:986:    def show_tool_library(self):
+main.py:1009:        def render_category(category_name, parent_frame):
+main.py:1040:    def build_tool_row(self, parent_frame, tool_data, fav_list, is_custom=False, is_fav_tab=False):
+main.py:1081:                def switch_version(selected_ver, t_name=tool_name):
+main.py:1100:            def do_launch(p=tool_path, cvar=context_var):
+main.py:1151:    def check_tool_updates_bg(self):
+main.py:1184:    def show_tool_category(self, tab_name, categories, is_fav_tab=False):
+main.py:1241:    def show_tool_update_btn(self, name, latest_tag, github_repo):
+main.py:1250:    def toggle_favorite(self, tool_name):
+main.py:1259:    def add_custom_tool_dialog(self):
+main.py:1282:        def save_custom():
+main.py:1301:    def uninstall_tool(self, tool_name):
+main.py:1357:    def delete_custom_tool(self, tool_name):
+main.py:1371:    def link_tool(self, tool_name):
+main.py:1379:    def launch_linked_tool(self, path, target_path=None):
+main.py:1389:    def show_knowledge(self):
+main.py:1429:    def change_kb_lang(self, lang):
+main.py:1433:    def build_kb_tree(self):
+main.py:1492:    def load_markdown(self, filepath):
+main.py:1537:    def open_in_browser(self):
+main.py:1581:    def show_about(self):
+
+
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-19T09:07:03Z
+Completed At: 2026-06-19T09:07:04Z
+
+				The command completed successfully.
+				Output:
+				
+LineNumber Line                                                                                                     
+---------- ----                                                                                                     
+        61     def __init__(self, widget, text):                                                                    
+        68     def enter(self, event=None):                                                                         
+        81     def leave(self, event=None):                                                                         
+       119     def __init__(self):                                                                                  
+       201     def change_appearance_mode(self, new_appearance_mode: str):                                          
+       204     def clear_main_frame(self):                                                                          
+       208     def load_local_config(self):                                                                         
+       217     def save_local_config(self):                                                                         
+       222     def show_home(self):                                                                                 
+       251     def show_dashboard_help(self):                                                                       
+       359     def on_projects_resize(self, event):                                                                 
+       368     def _rearrange_project_cards(self):                                                                  
+       386     def add_new_project_wizard(self):                                                                    
+       419     def import_project_wizard(self):                                                                     
+       450     def rename_project(self, index):                                                                     
+       461     def delete_project(self, index):                                                                     
+       470     def set_translation_folder(self, index):                                                             
+       496             def refresh_list():                                                                          
+       516             def remove_folder(idx):                                                                      
+       521             def add_folder():                                                                            
+       557     def start_progress_calculation(self, index, path, pct_lbl, progress_bar):                            
+       601     def calculate_translation_progress_worker(self, index, scan_paths, pct_lbl, progress_bar, root_path):
+       684     def _update_progress_ui(self, pct_lbl, progress_bar, pct, error=False):                              
+       697     def show_progress_details(self, index):                                                              
+       723     def open_project_folder(self, path):                                                                 
+       729     def check_for_updates(self):                                                                         
+       733     def check_for_updates_bg(self):                                                                      
+       761     def update_status(self, text, color):                                                                
+       765     def prompt_update(self, latest_version, notes, dl_url):                                              
+       772     def perform_self_update_bg(self, dl_url):                                                            
+       777         def show_updating_window():                                                                      
+       795         def update_progress(pct):                                                                        
+       872     def show_flagship(self):                                                                             
+       894     def fetch_flagship_registry_bg(self, parent_frame):                                                  
+       905     def _on_flagship_grid_resize(self, event=None):                                                      
+       924     def _rearrange_flagship_cards(self):                                                                 
+       940     def render_flagship_cards(self, parent_frame, registry_data):                                        
+       953     def create_flagship_card(self, parent, item):                                                        
+       989     def launch_script_with_loading(self, path, icon_btn, orig_img):                                      
+       997     def _execute_launch(self, path, icon_btn, orig_img):                                                 
+      1002     def launch_script(self, path):                                                                       
+      1014     def show_flagship_update_btn(self, parent_frame, item, latest_tag):                                  
+      1021     def show_tool_library(self):                                                                         
+      1044         def render_category(category_name, parent_frame):                                                
+      1075     def build_tool_row(self, parent_frame, tool_data, fav_list, is_custom=False, is_fav_tab=False):      
+      1116                 def switch_version(selected_ver, t_name=tool_name):                                      
+      1135             def do_launch(p=tool_path, cvar=context_var):                                                
+      1186     def check_tool_updates_bg(self):                                                                     
+      1219     def show_tool_category(self, tab_name, categories, is_fav_tab=False):                                
+      1276     def show_tool_update_btn(self, name, latest_tag, github_repo):                                       
+      1285     def toggle_favorite(self, tool_name):                                                                
+      1294     def add_custom_tool_dialog(self):                                                                    
+      1317         def save_custom():                                                                               
+      1336     def uninstall_tool(self, tool_name):                                                                 
+      1392     def delete_custom_tool(self, tool_name):                                                             
+      1406     def link_tool(self, tool_name):                                                                      
+      1414     def launch_linked_tool(self, path, target_path=None):                                                
+      1424     def show_knowledge(self):                                                                            
+      1464     def change_kb_lang(self, lang):                                                                      
+      1468     def build_kb_tree(self):                                                                             
+      1527     def load_markdown(self, filepath):                                                                   
+      1572     def open_in_browser(self):                                                                           
+      1616     def show_about(self):                                                                                
+
+
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-26T06:49:13Z
+Completed At: 2026-06-26T06:49:13Z
+
+				The command completed successfully.
+				Output:
+				
+    def __init__(self, widget, text):
+    def enter(self, event=None):
+    def leave(self, event=None):
+def setup_entry_enhancements(entry):
+    def on_control_key(event):
+    def show_context_menu(event):
+    def __init__(self, parent, is_import_mode=False, initial_path=None, edit_project_data=None):
+    def on_path_keypress(self, event):
+    def update_workspace_path(self, event=None):
+    def browse_workspace(self):
+    def browse_tool_path(self):
+    def browse_original_files(self):
+    def on_submit(self):
+    def save_default_author(self):
+    def save_default_contributors(self):
+    def __init__(self, parent, project_data):
+    def _setup_agent_tab(self):
+    def _setup_web_tab(self):
+    def _copy_to_clipboard(self, text):
+    def _update_agent_prompt(self):
+    def _update_web_prompt(self):
+    def __init__(self):
+    def change_appearance_mode(self, new_appearance_mode: str):
+    def clear_main_frame(self):
+    def load_local_config(self):
+    def save_local_config(self):
+    def show_home(self):
+    def show_dashboard_help(self):
+    def on_projects_resize(self, event=None):
+    def _rearrange_project_cards(self):
+    def launch_project_flagship(self, tool_name, project_path, project_name=None):
+    def open_ai_helper_dialog(self, proj_data):
+    def add_new_project_wizard(self):
+    def edit_project_settings(self, index):
+    def import_project_wizard(self):
+    def rename_project(self, index):
+    def delete_project(self, index):
+    def set_translation_folder(self, index):
+            def refresh_list():
+            def remove_folder(idx):
+            def add_folder():
+    def start_progress_calculation(self, index, path, pct_lbl, progress_bar):
+    def calculate_translation_progress_worker(self, index, scan_paths, pct_lbl, progress_bar, root_path):
+    def _update_progress_ui(self, pct_lbl, progress_bar, pct, error=False):
+    def show_progress_details(self, index):
+    def open_project_folder(self, path):
+    def check_for_updates(self):
+    def check_for_updates_bg(self):
+    def update_status(self, text, color):
+    def prompt_update(self, latest_version, notes, dl_url):
+    def perform_self_update_bg(self, dl_url):
+        def show_updating_window():
+        def update_progress(pct):
+    def show_flagship(self):
+    def fetch_flagship_registry_bg(self, parent_frame):
+    def _on_flagship_grid_resize(self, event=None):
+    def _rearrange_flagship_cards(self):
+    def render_flagship_cards(self, parent_frame, registry_data):
+    def create_flagship_card(self, parent, item):
+    def launch_script_with_loading(self, path, icon_btn, orig_img):
+    def _execute_launch(self, path, icon_btn, orig_img):
+    def launch_script(self, path):
+    def show_flagship_update_btn(self, parent_frame, item, latest_tag):
+    def show_tool_library(self):
+        def render_category(category_name, parent_frame):
+    def build_tool_row(self, parent_frame, tool_data, fav_list, is_custom=False, is_fav_tab=False):
+                def switch_version(selected_ver, t_name=tool_name):
+            def do_launch(p=tool_path, cvar=context_var):
+    def check_tool_updates_bg(self):
+    def show_tool_category(self, tab_name, categories, is_fav_tab=False):
+    def show_tool_update_btn(self, name, latest_tag, github_repo):
+    def toggle_favorite(self, tool_name):
+    def add_custom_tool_dialog(self):
+        def save_custom():
+    def uninstall_tool(self, tool_name):
+    def delete_custom_tool(self, tool_name):
+    def link_tool(self, tool_name):
+    def launch_linked_tool(self, path, target_path=None):
+    def show_knowledge(self):
+    def change_kb_lang(self, lang):
+    def build_kb_tree(self):
+    def load_markdown(self, filepath):
+    def open_in_browser(self):
+    def show_about(self):
+
+
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-26T06:49:18Z
+Completed At: 2026-06-26T06:49:18Z
+
+				The command completed successfully.
+				Output:
+				
+>     def show_home(self):
+          self.clear_main_frame()
+          
+          # Header Area
+          header_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+          header_frame.pack(fill="x", padx=30, pady=(30, 10))
+          
+          # Pack right-side buttons first to prevent them from being pushed out
+          btn_new_proj = ctk.CTkButton(header_frame, text="+ New Project", font=ctk.CTkFont(weight="bold"), 
+fg_color="#a6e3a1", hover_color="#89dceb", text_color="#1e1e2e", command=self.add_new_project_wizard)
+          btn_new_proj.pack(side="right")
+          
+          btn_import_proj = ctk.CTkButton(header_frame, text="dY"� Import Project", font=ctk.CTkFont(weight="bold"), 
+fg_color="transparent", border_width=1, border_color="#89b4fa", text_color="#89b4fa", hover_color="#313244", 
+command=self.import_project_wizard)
+          btn_import_proj.pack(side="right", padx=(0, 10))
+          
+          lbl_title = ctk.CTkLabel(header_frame, text="Project Dashboard", font=ctk.CTkFont(size=28, weight="bold"), 
+anchor="w")
+          lbl_title.pack(side="left")
+          
+          btn_help = ctk.CTkButton(header_frame, text="�?"", width=30, fg_color="transparent", text_color="#f9e2af", 
+hover_color="#313244", font=ctk.CTkFont(size=20), command=self.show_dashboard_help)
+          btn_help.pack(side="left", padx=(5, 0))
+          ToolTip(btn_help, "�,,�,1�1^�,�,�,-�1�,S�1%�,؅,�,T")
+          
+          self.search_var = ctk.StringVar()
+          self.search_var.trace_add("write", lambda *args: self._rearrange_project_cards())
+          search_entry = ctk.CTkEntry(header_frame, textvariable=self.search_var, placeholder_text="dY"? 
+�,,�1%�,T�,�,�1,�,>�,�1?�,^�,?�,�1O...", width=200)
+          search_entry.pack(side="left", padx=(20, 0))
+          setup_entry_enhancements(search_entry)
+          
+          lbl_desc = ctk.CTkLabel(self.main_frame, text="�,�,'�,T�,"�,�,�1%�,�,T�,�,�,s�,�,1�1^ THub Launcher 
+�,"�,1�,T�,�1O�,�,�,�1?�,,�,�,�1^�,�,؅,�,�,�1?�,>�,�1?�,?�,�,-�,�1^�,"�,�,-�,�1^�,�,,�,"", 
+font=ctk.CTkFont(size=14), text_color="gray")
+          lbl_desc.pack(anchor="w", padx=30, pady=(0, 20))
+  
+          # Active Projects Grid
+          self.projects_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
+          self.projects_frame.pack(fill="both", expand=True, padx=20, pady=(0, 10))
+          
+          projects = self.config.get("projects", [])
+          self.project_card_widgets = []
+          self._current_proj_cols = -1
+          
+          if not projects:
+              ctk.CTkLabel(self.projects_frame, text="�,�,�,؅1,�,�1^�,�,�1,�,>�,�1?�,^�,?�,�1O �,?�," + New 
+Project �1?�,z�,�1^�,�1?�,�,'�1^�,�,�1%�,T!", text_color="gray").grid(row=0, column=0, pady=50)
+          else:
+              for i, proj in enumerate(projects):
+                  proj_path = proj.get("path", "")
+                  author_name = ""
+                  meta_path = os.path.join(proj_path, "thub_project.json")
+                  if os.path.exists(meta_path):
+                      try:
+                          with open(meta_path, "r", encoding="utf-8") as f:
+                              local_meta = json.load(f)
+                              author_name = local_meta.get("author", "").strip()
+                      except Exception:
+                          pass
+  
+                  card = ctk.CTkFrame(self.projects_frame, width=440, height=210, corner_radius=10, 
+fg_color="#1e1e2e", border_width=1, border_color="#45475a")
+                  card.pack_propagate(False)
+                  self.project_card_widgets.append((card, proj))
+                  
+                  card_top = ctk.CTkFrame(card, fg_color="transparent")
+                  card_top.pack(fill="x", padx=15, pady=(15, 5))
+                  
+                  # Pack right-side buttons first so they don't disappear on resize
+                  btn_set = ctk.CTkButton(card_top, text="�sT�,?", width=30, fg_color="transparent", 
+text_color="#94e2d5", hover_color="#313244", command=lambda idx=i: self.edit_project_settings(idx))
+                  btn_set.pack(side="right")
+                  
+                  btn_ren = ctk.CTkButton(card_top, text="�o?�,?", width=30, fg_color="transparent", 
+text_color="#f9e2af", hover_color="#313244", command=lambda idx=i: self.rename_project(idx))
+                  btn_ren.pack(side="right", padx=(5, 0))
+                  
+                  btn_del = ctk.CTkButton(card_top, text="dY-`�,?", width=30, fg_color="transparent", 
+text_color="#f38ba8", hover_color="#313244", command=lambda idx=i: self.delete_project(idx))
+                  btn_del.pack(side="right", padx=(5, 0))
+                  
+                  name_lbl = ctk.CTkLabel(card_top, text=proj.get("name", "Unknown"), font=ctk.CTkFont(size=18, 
+weight="bold"), text_color="#cba6f7", anchor="w")
+                  name_lbl.pack(side="left")
+                  
+                  if author_name:
+                      author_lbl = ctk.CTkLabel(card_top, text=f"  by {author_name}", font=ctk.CTkFont(size=12, 
+slant="italic"), text_color="#a6adc8", anchor="w")
+                      author_lbl.pack(side="left", padx=(5, 0), pady=(4, 0))
+                  
+                  path_lbl = ctk.CTkLabel(card, text=proj.get("path", ""), font=ctk.CTkFont(size=12), 
+text_color="gray", anchor="w")
+                  path_lbl.pack(fill="x", padx=15, pady=0)
+                  
+                  # --- PROGRESS SECTION ---
+
+
+
+
+
+--- CAT OUTPUT 2 ---
+
+Created At: 2026-06-26T06:51:33Z
+Completed At: 2026-06-26T06:51:33Z
+
+				The command completed successfully.
+				Output:
+				
+          self.project_card_widgets = []
+          self._current_proj_cols = -1
+          
+          if not projects:
+              ctk.CTkLabel(self.projects_frame, text="�,�,�,؅1,�,�1^�,�,�1,�,>�,�1?�,^�,?�,�1O �,?�," + New 
+Project �1?�,z�,�1^�,�1?�,�,'�1^�,�,�1%�,T!", text_color="gray").grid(row=0, column=0, pady=50)
+          else:
+              for i, proj in enumerate(projects):
+                  proj_path = proj.get("path", "")
+                  author_name = ""
+                  meta_path = os.path.join(proj_path, "thub_project.json")
+                  if os.path.exists(meta_path):
+                      try:
+                          with open(meta_path, "r", encoding="utf-8") as f:
+                              local_meta = json.load(f)
+                              author_name = local_meta.get("author", "").strip()
+                      except Exception:
+                          pass
+  
+                  card = ctk.CTkFrame(self.projects_frame, width=440, height=210, corner_radius=10, 
+fg_color="#1e1e2e", border_width=1, border_color="#45475a")
+                  card.pack_propagate(False)
+                  self.project_card_widgets.append((card, proj))
+                  
+                  card_top = ctk.CTkFrame(card, fg_color="transparent")
+                  card_top.pack(fill="x", padx=15, pady=(15, 5))
+                  
+                  # Pack right-side buttons first so they don't disappear on resize
+                  btn_set = ctk.CTkButton(card_top, text="�sT�,?", width=30, fg_color="transparent", 
+text_color="#94e2d5", hover_color="#313244", command=lambda idx=i: self.edit_project_settings(idx))
+                  btn_set.pack(side="right")
+                  
+                  btn_ren = ctk.CTkButton(card_top, text="�o?�,?", width=30, fg_color="transparent", 
+text_color="#f9e2af", hover_color="#313244", command=lambda idx=i: self.rename_project(idx))
+                  btn_ren.pack(side="right", padx=(5, 0))
+                  
+                  btn_del = ctk.CTkButton(card_top, text="dY-`�,?", width=30, fg_color="transparent", 
+text_color="#f38ba8", hover_color="#313244", command=lambda idx=i: self.delete_project(idx))
+                  btn_del.pack(side="right", padx=(5, 0))
+                  
+>                 name_lbl = ctk.CTkLabel(card_top, text=proj.get("name", "Unknown"), font=ctk.CTkFont(size=18, 
+weight="bold"), text_color="#cba6f7", anchor="w")
+                  name_lbl.pack(side="left")
+                  
+                  if author_name:
+                      author_lbl = ctk.CTkLabel(card_top, text=f"  by {author_name}", font=ctk.CTkFont(size=12, 
+slant="italic"), text_color="#a6adc8", anchor="w")
+                      author_lbl.pack(side="left", padx=(5, 0), pady=(4, 0))
+                  
+                  path_lbl = ctk.CTkLabel(card, text=proj.get("path", ""), font=ctk.CTkFont(size=12), 
+text_color="gray", anchor="w")
+                  path_lbl.pack(fill="x", padx=15, pady=0)
+                  
+                  # --- PROGRESS SECTION ---
+
+
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-26T06:51:47Z
+Completed At: 2026-06-26T06:51:48Z
+
+				The command completed successfully.
+				Output:
+				
+      def save_local_config(self):
+          with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+              json.dump(self.config, f, indent=4)
+  
+      # --- 1. Home / Dashboard ---
+>     def show_home(self):
+
+
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-26T06:56:24Z
+Completed At: 2026-06-26T06:56:24Z
+
+				The command completed successfully.
+				Output:
+				
+>     def show_home(self):
+          self.clear_main_frame()
+          
+          # Header Area
+          header_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
+          header_frame.pack(fill="x", padx=30, pady=(30, 10))
+          
+          # Pack right-side buttons first to prevent them from being pushed out
+          btn_new_proj = ctk.CTkButton(header_frame, text="+ New Project", font=ctk.CTkFont(weight="bold"), 
+fg_color="#a6e3a1", hover_color="#89dceb", text_color="#1e1e2e", command=self.add_new_project_wizard)
+          btn_new_proj.pack(side="right")
+          
+          btn_import_proj = ctk.CTkButton(header_frame, text="dY"� Import Project", font=ctk.CTkFont(weight="bold"), 
+fg_color="transparent", border_width=1, border_color="#89b4fa", text_color="#89b4fa", hover_color="#313244", 
+command=self.import_project_wizard)
+          btn_import_proj.pack(side="right", padx=(0, 10))
+          
+          lbl_title = ctk.CTkLabel(header_frame, text="Project Dashboard", font=ctk.CTkFont(size=28, weight="bold"), 
+anchor="w")
+          lbl_title.pack(side="left")
+          
+          btn_help = ctk.CTkButton(header_frame, text="�?"", width=30, fg_color="transparent", text_color="#f9e2af", 
+hover_color="#313244", font=ctk.CTkFont(size=20), command=self.show_dashboard_help)
+          btn_help.pack(side="left", padx=(5, 0))
+          ToolTip(btn_help, "�,,�,1�1^�,�,�,-�1�,S�1%�,؅,�,T")
+          
+          self.search_var = ctk.StringVar()
+          self.search_var.trace_add("write", lambda *args: self._rearrange_project_cards())
+          search_entry = ctk.CTkEntry(header_frame, textvariable=self.search_var, placeholder_text="dY"? 
+�,,�1%�,T�,�,�1,�,>�,�1?�,^�,?�,�1O...", width=200)
+          search_entry.pack(side="left", padx=(20, 0))
+          setup_entry_enhancements(search_entry)
+          
+          lbl_desc = ctk.CTkLabel(self.main_frame, text="�,�,'�,T�,"�,�,�1%�,�,T�,�,�,s�,�,1�1^ THub Launcher 
+�,"�,1�,T�,�1O�,�,�,�1?�,,�,�,�1^�,�,؅,�,�,�1?�,>�,�1?�,?�,�,-�,�1^�,"�,�,-�,�1^�,�,,�,"", 
+font=ctk.CTkFont(size=14), text_color="gray")
+          lbl_desc.pack(anchor="w", padx=30, pady=(0, 20))
+  
+          # Active Projects Grid
+          self.projects_frame = ctk.CTkScrollableFrame(self.main_frame, fg_color="transparent")
+          self.projects_frame.pack(fill="both", expand=True, padx=20, pady=(0, 10))
+          
+          projects = self.config.get("projects", [])
+          self.project_card_widgets = []
+          self._current_proj_cols = -1
+          
+          if not projects:
+              ctk.CTkLabel(self.projects_frame, text="�,�,�,؅1,�,�1^�,�,�1,�,>�,�1?�,^�,?�,�1O �,?�," + New 
+Project �1?�,z�,�1^�,�1?�,�,'�1^�,�,�1%�,T!", text_color="gray").grid(row=0, column=0, pady=50)
+          else:
+              for i, proj in enumerate(projects):
+                  proj_path = proj.get("path", "")
+                  author_name = ""
+                  meta_path = os.path.join(proj_path, "thub_project.json")
+                  if os.path.exists(meta_path):
+                      try:
+                          with open(meta_path, "r", encoding="utf-8") as f:
+                              local_meta = json.load(f)
+                              author_name = local_meta.get("author", "").strip()
+                      except Exception:
+                          pass
+  
+                  card = ctk.CTkFrame(self.projects_frame, width=440, height=210, corner_radius=10, 
+fg_color="#1e1e2e", border_width=1, border_color="#45475a")
+                  card.pack_propagate(False)
+                  self.project_card_widgets.append((card, proj))
+                  
+                  card_top = ctk.CTkFrame(card, fg_color="transparent")
+                  card_top.pack(fill="x", padx=15, pady=(15, 5))
+                  
+                  # Pack right-side buttons first so they don't disappear on resize
+                  btn_set = ctk.CTkButton(card_top, text="�sT�,?", width=30, fg_color="transparent", 
+text_color="#94e2d5", hover_color="#313244", command=lambda idx=i: self.edit_project_settings(idx))
+                  btn_set.pack(side="right")
+                  
+                  btn_ren = ctk.CTkButton(card_top, text="�o?�,?", width=30, fg_color="transparent", 
+text_color="#f9e2af", hover_color="#313244", command=lambda idx=i: self.rename_project(idx))
+                  btn_ren.pack(side="right", padx=(5, 0))
+                  
+                  btn_del = ctk.CTkButton(card_top, text="dY-`�,?", width=30, fg_color="transparent", 
+text_color="#f38ba8", hover_color="#313244", command=lambda idx=i: self.delete_project(idx))
+                  btn_del.pack(side="right", padx=(5, 0))
+                  
+                  name_lbl = ctk.CTkLabel(card_top, text=proj.get("name", "Unknown"), font=ctk.CTkFont(size=18, 
+weight="bold"), text_color="#cba6f7", anchor="w")
+
+
+
+
+
+--- CAT OUTPUT 2 ---
+
+Created At: 2026-06-26T06:57:09Z
+Completed At: 2026-06-26T06:57:10Z
+
+				The command completed successfully.
+				Output:
+				
+>                 card_top = ctk.CTkFrame(card, fg_color="transparent")
+                  card_top.pack(fill="x", padx=15, pady=(15, 5))
+                  
+                  # Pack right-side buttons first so they don't disappear on resize
+                  btn_set = ctk.CTkButton(card_top, text="�sT�,?", width=30, fg_color="transparent", 
+text_color="#94e2d5", hover_color="#313244", command=lambda idx=i: self.edit_project_settings(idx))
+                  btn_set.pack(side="right")
+                  
+                  btn_ren = ctk.CTkButton(card_top, text="�o?�,?", width=30, fg_color="transparent", 
+text_color="#f9e2af", hover_color="#313244", command=lambda idx=i: self.rename_project(idx))
+                  btn_ren.pack(side="right", padx=(5, 0))
+                  
+                  btn_del = ctk.CTkButton(card_top, text="dY-`�,?", width=30, fg_color="transparent", 
+text_color="#f38ba8", hover_color="#313244", command=lambda idx=i: self.delete_project(idx))
+                  btn_del.pack(side="right", padx=(5, 0))
+                  
+                  name_lbl = ctk.CTkLabel(card_top, text=proj.get("name", "Unknown"), font=ctk.CTkFont(size=18, 
+weight="bold"), text_color="#cba6f7", anchor="w")
+                  name_lbl.pack(side="left")
+                  
+
+
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-26T07:53:16Z
+Completed At: 2026-06-26T07:53:16Z
+
+				The command completed successfully.
+				Output:
+				
+>     def _on_drag_start(self, event, index, widget):
+          self._drag_start_idx = index
+          self._drag_widget = widget
+          self._drag_y = event.y_root
+          
+          # Create a floating ghost label
+          self._ghost = ctk.CTkToplevel(self)
+          self._ghost.overrideredirect(True)
+          self._ghost.attributes("-alpha", 0.7)
+          self._ghost.attributes("-topmost", True)
+          
+          proj_name = self.config["projects"][index].get("name", "Unknown")
+          lbl = ctk.CTkLabel(self._ghost, text=f" �%�  {proj_name} ", font=ctk.CTkFont(size=16, weight="bold"), 
+fg_color="#313244", text_color="#cba6f7", corner_radius=5)
+          lbl.pack(padx=5, pady=5)
+          
+          # Position ghost
+          self._ghost.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+  
+      def _on_drag_motion(self, event):
+          if hasattr(self, '_ghost') and self._ghost.winfo_exists():
+              self._ghost.geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
+  
+      def _on_drag_release(self, event):
+          if hasattr(self, '_ghost') and self._ghost.winfo_exists():
+              self._ghost.destroy()
+              
+          if not hasattr(self, '_drag_start_idx'):
+              return
+              
+          # Determine drop target by finding the closest card
+          target_idx = None
+          min_dist = float('inf')
+          for i, (card, proj) in enumerate(self.project_card_widgets):
+              cx = card.winfo_rootx() + card.winfo_width() / 2
+              cy = card.winfo_rooty() + card.winfo_height() / 2
+              dist = (cx - event.x_root)**2 + (cy - event.y_root)**2
+              if dist < min_dist:
+                  min_dist = dist
+                  target_idx = i
+                  
+          if target_idx is not None and target_idx != self._drag_start_idx:
+              projects = self.config.get("projects", [])
+              dragged_proj = projects[self._drag_start_idx]
+              target_proj = projects[target_idx]
+              
+              # Remove from old position
+              popped = projects.pop(self._drag_start_idx)
+              
+              # If dragged item is pinned but target is unpinned, unpin it
+              if popped.get("pinned", False) and not target_proj.get("pinned", False):
+                  popped["pinned"] = False
+              # If dragged item is unpinned but target is pinned, pin it
+              elif not popped.get("pinned", False) and target_proj.get("pinned", False):
+                  popped["pinned"] = True
+                  
+              # Insert at new position
+              projects.insert(target_idx, popped)
+              
+              self.save_local_config()
+              self.show_home()
+              
+          if hasattr(self, '_drag_start_idx'):
+              delattr(self, '_drag_start_idx')
+          if hasattr(self, '_drag_widget'):
+              delattr(self, '_drag_widget')
+  
+      # --- 1. Home / Dashboard ---
+      def show_home(self):
+          self.clear_main_frame()
+          
+          # Header Area
+
+
+
+
+
+--- CAT OUTPUT 1 ---
+
+Created At: 2026-06-26T08:16:40Z
+Completed At: 2026-06-26T08:16:40Z
+
+				The command completed successfully.
+				Output:
+				
+    def __init__(self, widget, text):
+    def enter(self, event=None):
+    def leave(self, event=None):
+def setup_entry_enhancements(entry):
+    def on_control_key(event):
+    def show_context_menu(event):
+    def __init__(self, parent, is_import_mode=False, initial_path=None, edit_project_data=None):
+    def on_path_keypress(self, event):
+    def update_workspace_path(self, event=None):
+    def browse_workspace(self):
+    def browse_tool_path(self):
+    def browse_original_files(self):
+    def on_submit(self):
+    def save_default_author(self):
+    def save_default_contributors(self):
+    def __init__(self, parent, project_data):
+    def _setup_agent_tab(self):
+    def _setup_web_tab(self):
+    def _copy_to_clipboard(self, text):
+    def _update_agent_prompt(self):
+    def _update_web_prompt(self):
+    def __init__(self):
+    def change_appearance_mode(self, new_appearance_mode: str):
+    def clear_main_frame(self):
+    def load_local_config(self):
+    def save_local_config(self):
+    def toggle_pin_project(self, index):
+    def _on_drag_start(self, event, index, widget):
+    def _on_drag_motion(self, event):
+    def _on_drag_release(self, event):
+    def show_home(self):
+    def _rearrange_project_cards(self):
+    def launch_project_flagship(self, tool_name, project_path, project_name=None):
+    def open_ai_helper_dialog(self, proj_data):
+    def add_new_project_wizard(self):
+    def edit_project_settings(self, index):
+    def import_project_wizard(self):
+    def rename_project(self, index):
+    def delete_project(self, index):
+    def set_translation_folder(self, index):
+            def refresh_list():
+            def remove_folder(idx):
+            def add_folder():
+    def start_progress_calculation(self, index, path, pct_lbl, progress_bar):
+    def calculate_translation_progress_worker(self, index, scan_paths, pct_lbl, progress_bar, root_path):
+    def _update_progress_ui(self, pct_lbl, progress_bar, pct, error=False):
+    def show_progress_details(self, index):
+    def open_project_folder(self, path):
+    def check_for_updates(self):
+    def check_for_updates_bg(self):
+    def update_status(self, text, color):
+    def prompt_update(self, latest_version, notes, dl_url):
+    def perform_self_update_bg(self, dl_url):
+        def show_updating_window():
+        def update_progress(pct):
+    def show_flagship(self):
+    def fetch_flagship_registry_bg(self, parent_frame):
+    def _on_flagship_grid_resize(self, event=None):
+    def _rearrange_flagship_cards(self):
+    def render_flagship_cards(self, parent_frame, registry_data):
+    def create_flagship_card(self, parent, item):
+    def launch_script_with_loading(self, path, icon_btn, orig_img):
+    def _execute_launch(self, path, icon_btn, orig_img):
+    def launch_script(self, path):
+    def show_flagship_update_btn(self, parent_frame, item, latest_tag):
+    def show_tool_library(self):
+        def render_category(category_name, parent_frame):
+    def build_tool_row(self, parent_frame, tool_data, fav_list, is_custom=False, is_fav_tab=False):
+                def switch_version(selected_ver, t_name=tool_name):
+            def do_launch(p=tool_path, cvar=context_var):
+    def check_tool_updates_bg(self):
+    def show_tool_category(self, tab_name, categories, is_fav_tab=False):
+    def show_tool_update_btn(self, name, latest_tag, github_repo):
+    def toggle_favorite(self, tool_name):
+    def add_custom_tool_dialog(self):
+        def save_custom():
+    def uninstall_tool(self, tool_name):
+    def delete_custom_tool(self, tool_name):
+    def link_tool(self, tool_name):
+    def launch_linked_tool(self, path, target_path=None):
+    def show_knowledge(self):
+    def change_kb_lang(self, lang):
+    def build_kb_tree(self):
+    def load_markdown(self, filepath):
+    def open_in_browser(self):
+    def show_about(self):
+
+
+
+
+

@@ -1,3 +1,4 @@
+from tstudio_i18n import _
 import os
 import subprocess
 import csv
@@ -7,6 +8,12 @@ def auto_convert_to_csv(filepath, parent_widget=None):
     ext = os.path.splitext(filepath)[1].lower()
     if ext in ['.locres', '.lor']:
         return convert_locres_to_tstudio_csv(filepath, parent_widget)
+    elif ext == '.pak':
+        from tstudio_core import TPakManager
+        csv_out = TPakManager.extract_pak_to_csv(filepath)
+        if csv_out:
+            return csv_out
+        raise ValueError("ไม่พบข้อความที่สามารถแปลได้ในไฟล์ .pak นี้ หรือไม่ใช่ Chromium PAK v5")
     elif ext == '.csv':
         return filepath # Already a CSV
     else:
@@ -55,7 +62,7 @@ def convert_locres_to_tstudio_csv(filepath, parent_widget=None):
             raise ValueError("No valid translation strings found in the .locres file.")
         
         if parent_widget:
-            QMessageBox.information(parent_widget, "Success", f"แปลงไฟล์ {os.path.basename(filepath)} สำเร็จ!\nได้ทั้งหมด {row_count} บรรทัด")
+            QMessageBox.information(parent_widget, _("success_title"), f"แปลงไฟล์ {os.path.basename(filepath)} สำเร็จ!\nได้ทั้งหมด {row_count} บรรทัด")
             
         return tstudio_csv
         
@@ -65,7 +72,7 @@ def convert_locres_to_tstudio_csv(filepath, parent_widget=None):
         raise e
     except Exception as e:
         if parent_widget:
-            QMessageBox.critical(parent_widget, "Error", f"ไม่สามารถแปลงไฟล์ได้:\n{str(e)}")
+            QMessageBox.critical(parent_widget, _("error_title"), f"ไม่สามารถแปลงไฟล์ได้:\n{str(e)}")
         raise e
     finally:
         # Clean up temporary dump file

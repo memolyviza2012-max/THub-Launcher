@@ -1,0 +1,22 @@
+{
+  "window_title": "TVox - FMV Modding Studio (на базе TStudio Engine)",
+  "window_title_profile": "TVox - FMV Modding Studio [{active}]",
+  "window_title_error": "TVox - Ошибка",
+  "dock_video_player": "⠿ TVox Видеоплеер",
+  "tooltip_open_video": "Открыть видео",
+  "tooltip_prev_subtitle": "Предыдущий субтитр",
+  "tooltip_play_pause": "Воспроизвести / Пауза",
+  "tooltip_next_subtitle": "Следующий субтитр",
+  "btn_mark_a": "[A]",
+  "btn_mark_b": "[B]",
+  "btn_auto_scroll": "📌 Автопрокрутка",
+  "time_default": "00:00.000",
+  "dlg_mpv_missing_title": "Движок MPV отсутствует",
+  "dlg_mpv_missing_msg": "Движок MPV недоступен!",
+  "dlg_mpv_init_error_title": "Ошибка MPV",
+  "dlg_mpv_init_error_msg": "Не удалось инициализировать MPV плеер: {e}",
+  "dlg_tstudio_missing_title": "Ошибка",
+  "dlg_tstudio_missing_msg": "Движок TStudio не найден!",
+  "fdlg_open_video_title": "Открыть видеофайл",
+  "fdlg_open_video_filter": "Видеофайлы (*.mp4 *.mkv *.avi *.webm *.mov *.bundle *.assets)"
+}

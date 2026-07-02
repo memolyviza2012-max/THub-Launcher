@@ -216,3 +216,22 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Sensitive Configs
+hub_config.json
+tools/flagship/Core/config.json
+
+
+# Untracked development files
+*.bak
+*.broken_bak
+*_temp/
+Releases/
+
+
+# Large binaries
+*.dll
+*.exe
+*.zip
+*.pak

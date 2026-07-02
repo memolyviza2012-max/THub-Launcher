@@ -2,10 +2,1745 @@
     "active_preset": "Default",
     "presets": {
         "Default": {
+            "single": "\n\nSTRICT LENGTH & CONTENT RULES (NON-NEGOTIABLE):\n- Your translation MUST match the length and structure of the source text as closely as possible.\n- If the source is a short UI label (e.g. 'ID:', 'Rank', 'Mass'), return ONLY its short Thai equivalent. Do NOT write a full sentence.\n- If the source is 1-3 words, return 1-5 words maximum.\n- Do NOT expand, elaborate, invent, or add any content that is not explicitly in the source text.\n- Do NOT use your knowledge of the game's story or lore to add context or flavor text.\n- Do NOT add colons, notes, parentheses, backstory, or any extra characters not present in the source.",
+            "opt": "",
+            "batch": "\n\nSTRICT LENGTH & CONTENT RULES (NON-NEGOTIABLE):\n- Your translation MUST match the length and structure of the source text as closely as possible.\n- If the source is a short UI label (e.g. 'ID:', 'Rank', 'Mass'), return ONLY its short Thai equivalent. Do NOT write a full sentence.\n- If the source is 1-3 words, return 1-5 words maximum.\n- Do NOT expand, elaborate, invent, or add any content that is not explicitly in the source text.\n- Do NOT use your knowledge of the game's story or lore to add context or flavor text.\n- Do NOT add colons, notes, parentheses, backstory, or any extra characters not present in the source.",
+            "glossary": {},
+            "max_bytes_limit": 63
+        },
+        "Hardspace Shipbreaker": {
+            "single": "You are a professional game translator specializing in Thai localization for the video game 'Hardspace Shipbreaker'. Your task is to translate the provided {source_text} into Thai. The tone must match the game's gritty, industrial, and darkly humorous sci-fi setting: use direct, utilitarian language with occasional cynical or slangy worker jargon, avoiding overly formal or poetic Thai. Return ONLY the pure Thai string translation of {source_text}. Do NOT include the Context ID {id} in your output. Preserve all UI/game tags like {...}, [...], <...> exactly as they appear, without translating or modifying their content.",
+            "opt": "You are a professional game translator specializing in Thai localization for the game 'Hardspace Shipbreaker'. Your task is to translate the provided source text '{source_text}' (Context ID: {id}) into Thai. Follow these rules strictly:\n\n1. Return exactly 3 different Thai translation options for '{source_text}'.\n2. The options must vary slightly in tone (e.g., formal, casual, gritty/industrial) while remaining fitting for the game's sci-fi, industrial, and workplace-simulator setting.\n3. Output MUST be a strict JSON array of 3 strings, with no additional text, explanation, or formatting.\n4. Do NOT include the Context ID '{id}' in your output.\n5. Preserve all UI/game tags like {...}, [...], <...> exactly as they appear in the source text; do not modify or remove them.",
+            "batch": "You are a professional game translator specializing in Thai localization for the video game 'Hardspace Shipbreaker'. Your task is to translate the provided {source_text} into Thai. The tone must match the game's gritty, industrial, and darkly humorous sci-fi setting: use direct, utilitarian language with occasional cynical or slangy worker jargon, avoiding overly formal or poetic Thai. Return ONLY the pure Thai string translation of {source_text}. Do NOT include the Context ID {id} in your output. Preserve all UI/game tags like {...}, [...], <...> exactly as they appear, without translating or modifying their content.",
+            "glossary": {
+                "Shipbreaker": [
+                    "ชิปเบรกเกอร์",
+                    "General"
+                ],
+                "Lynx": [
+                    "Lynx",
+                    "General"
+                ],
+                "Lynx Salvage": [
+                    "บริษัทกู้ซากลิงซ์",
+                    "Faction"
+                ],
+                "Grapple": [
+                    "ตะขอเกี่ยว",
+                    "Other"
+                ],
+                "Stinger": [
+                    "ปืนสติงเกอร์",
+                    "Item"
+                ],
+                "Splitsaw": [
+                    "เลื่อยแยกชิ้น",
+                    "Other"
+                ],
+                "Data Probe": [
+                    "หัววัดข้อมูล",
+                    "Other"
+                ],
+                "Scanner": [
+                    "เครื่องสแกน",
+                    "Item"
+                ],
+                "Salvage Credit": [
+                    "เครดิตกู้ซาก",
+                    "General"
+                ],
+                "Work Order": [
+                    "ใบสั่งงาน",
+                    "Quest"
+                ],
+                "Habitat": [
+                    "ที่พักอาศัย",
+                    "Location"
+                ],
+                "Bay": [
+                    "อู่ซ่อมเรือ",
+                    "Location"
+                ],
+                "Reactor": [
+                    "เครื่องปฏิกรณ์",
+                    "Item"
+                ],
+                "Fuel Tank": [
+                    "ถังเชื้อเพลิง",
+                    "Item"
+                ],
+                "Power Cell": [
+                    "เซลล์พลังงาน",
+                    "Item"
+                ],
+                "Atmospheric Regulator": [
+                    "ตัวควบคุมบรรยากาศ",
+                    "Item"
+                ],
+                "Coolant": [
+                    "สารหล่อเย็น",
+                    "Item"
+                ],
+                "Nanocarbon Panel": [
+                    "แผงนาโนคาร์บอน",
+                    "Item"
+                ],
+                "Aluminum": [
+                    "อะลูมิเนียม",
+                    "Item"
+                ],
+                "Steel": [
+                    "เหล็ก",
+                    "Item"
+                ],
+                "Titanium": [
+                    "ไทเทเนียม",
+                    "Item"
+                ],
+                "Cutter": [
+                    "คัตเตอร์",
+                    "Weapon"
+                ],
+                "Demolition Charge": [
+                    "ระเบิดทำลาย",
+                    "Weapon"
+                ],
+                "Tethers": [
+                    "สายรั้ง",
+                    "Item"
+                ],
+                "Mackerel": [
+                    "แมกเคอเรล",
+                    "General"
+                ],
+                "Gecko": [
+                    "เก็กโกะ",
+                    "General"
+                ],
+                "Javelin": [
+                    "จาเวลิน",
+                    "General"
+                ],
+                "Atlas": [
+                    "แอตลาส",
+                    "General"
+                ],
+                "Cargo Container": [
+                    "ตู้คอนเทนเนอร์สินค้า",
+                    "Item"
+                ],
+                "Barge": [
+                    "บาร์จ",
+                    "Location"
+                ],
+                "Salvage": [
+                    "การกู้ซาก",
+                    "General"
+                ],
+                "Shipbreaking": [
+                    "การแยกชิ้นส่วนยาน",
+                    "General"
+                ],
+                "Debt": [
+                    "หนี้สิน",
+                    "General"
+                ],
+                "Shift": [
+                    "กะทำงาน",
+                    "General"
+                ],
+                "Lynx Corporation": [
+                    "บริษัทลิงซ์",
+                    "Faction"
+                ],
+                "Lynx Debt": [
+                    "หนี้ลิงซ์",
+                    "General"
+                ],
+                "Salvage Yard": [
+                    "ลานกู้ซาก",
+                    "General"
+                ],
+                "Work Order Terminal": [
+                    "เครื่องรับคำสั่งงาน",
+                    "Item"
+                ],
+                "Habitat Module": [
+                    "โมดูลที่พัก",
+                    "Location"
+                ],
+                "Ship Bay": [
+                    "อู่ยาน",
+                    "Location"
+                ],
+                "Fuel Line": [
+                    "ท่อน้ำมันเชื้อเพลิง",
+                    "Item"
+                ],
+                "Thruster": [
+                    "เครื่องขับดัน",
+                    "Item"
+                ],
+                "Engine": [
+                    "เครื่องยนต์",
+                    "Item"
+                ],
+                "Power Generator": [
+                    "เครื่องกำเนิดพลังงาน",
+                    "Item"
+                ],
+                "Electrical Panel": [
+                    "แผงไฟฟ้า",
+                    "Item"
+                ],
+                "Data Drive": [
+                    "ไดรฟ์ข้อมูล",
+                    "Item"
+                ],
+                "Cargo Bay": [
+                    "ห้องเก็บสินค้า",
+                    "Location"
+                ],
+                "Airlock": [
+                    "ประตูอากาศ",
+                    "Item"
+                ],
+                "Hull Panel": [
+                    "แผ่นเกราะตัวเรือ",
+                    "Item"
+                ],
+                "Structural Beam": [
+                    "คานโครงสร้าง",
+                    "Item"
+                ],
+                "Pressure Valve": [
+                    "วาล์วความดัน",
+                    "Item"
+                ],
+                "Oxygen Tank": [
+                    "ถังออกซิเจน",
+                    "Item"
+                ],
+                "Fuel Canister": [
+                    "กระป๋องเชื้อเพลิง",
+                    "Item"
+                ],
+                "Explosive Canister": [
+                    "กระป๋องระเบิด",
+                    "Item"
+                ],
+                "Radioactive Material": [
+                    "วัสดุกัมมันตรังสี",
+                    "Item"
+                ],
+                "Salvage Crate": [
+                    "ลังกู้ซาก",
+                    "Item"
+                ],
+                "Tool Storage": [
+                    "ที่เก็บเครื่องมือ",
+                    "Item"
+                ],
+                "Suit Charger": [
+                    "เครื่องชาร์จชุด",
+                    "Item"
+                ],
+                "Workbench": [
+                    "โต๊ะทำงาน",
+                    "Item"
+                ],
+                "Upgrade Terminal": [
+                    "เครื่องอัปเกรด",
+                    "Item"
+                ],
+                "Salvage Credit Balance": [
+                    "ยอดเครดิตกู้ซาก",
+                    "General"
+                ],
+                "Debt Repayment": [
+                    "การชำระหนี้",
+                    "General"
+                ],
+                "Shift Timer": [
+                    "เวลานับถอยหลังกะ",
+                    "General"
+                ],
+                "Oxygen Level": [
+                    "ระดับออกซิเจน",
+                    "General"
+                ],
+                "Fuel Level": [
+                    "ระดับเชื้อเพลิง",
+                    "General"
+                ],
+                "Hull Integrity": [
+                    "ความสมบูรณ์ของตัวเรือ",
+                    "General"
+                ],
+                "Depressurization": [
+                    "การลดความดัน",
+                    "General"
+                ],
+                "Explosion": [
+                    "การระเบิด",
+                    "General"
+                ],
+                "Electrical Hazard": [
+                    "อันตรายจากไฟฟ้า",
+                    "General"
+                ],
+                "Radiation Hazard": [
+                    "อันตรายจากรังสี",
+                    "General"
+                ],
+                "Tether Line": [
+                    "สายยึด",
+                    "Item"
+                ],
+                "Magnetic Boots": [
+                    "รองเท้าแม่เหล็ก",
+                    "Item"
+                ],
+                "Suit Upgrade": [
+                    "อัปเกรดชุด",
+                    "Item"
+                ],
+                "Tool Upgrade": [
+                    "อัปเกรดเครื่องมือ",
+                    "Item"
+                ],
+                "Grapple Upgrade": [
+                    "อัปเกรดกริปเปิล",
+                    "Item"
+                ],
+                "Stinger Upgrade": [
+                    "อัปเกรดสติงเกอร์",
+                    "Item"
+                ],
+                "Splitsaw Upgrade": [
+                    "อัปเกรดสปลิตซอว์",
+                    "Item"
+                ],
+                "Data Probe Upgrade": [
+                    "อัปเกรดดาต้าโพรบ",
+                    "Item"
+                ],
+                "Scanner Upgrade": [
+                    "อัปเกรดสแกนเนอร์",
+                    "Item"
+                ],
+                "Salvage Goal": [
+                    "เป้าหมายการกู้ซาก",
+                    "Quest"
+                ],
+                "Work Order Objective": [
+                    "วัตถุประสงค์ของคำสั่งงาน",
+                    "Quest"
+                ],
+                "Bonus Objective": [
+                    "วัตถุประสงค์โบนัส",
+                    "Quest"
+                ],
+                "Ship Class": [
+                    "คลาสยาน",
+                    "General"
+                ],
+                "Mackerel Class": [
+                    "คลาสแมกเคอเรล",
+                    "General"
+                ],
+                "Gecko Class": [
+                    "คลาสเก็กโก",
+                    "General"
+                ],
+                "Javelin Class": [
+                    "คลาสจาเวลิน",
+                    "General"
+                ],
+                "Atlas Class": [
+                    "คลาสแอตลาส",
+                    "General"
+                ],
+                "Cargo Container Type": [
+                    "ประเภทตู้คอนเทนเนอร์",
+                    "General"
+                ],
+                "Barge Container": [
+                    "ตู้บรรทุก",
+                    "Item"
+                ],
+                "Salvage Processor": [
+                    "ซาก โพรเซสเซอร์",
+                    "Item"
+                ],
+                "Furnace": [
+                    "เฟอร์เนส",
+                    "Item"
+                ],
+                "Cutter Charge": [
+                    "ประจุคัตเตอร์",
+                    "Item"
+                ],
+                "Demolition Charge Detonator": [
+                    "เครื่องจุดชนวนระเบิด",
+                    "Item"
+                ],
+                "Shipbreaker Union": [
+                    "สหภาพคนแยกยาน",
+                    "Faction"
+                ],
+                "Union Representative": [
+                    "ตัวแทนสหภาพ",
+                    "Person"
+                ],
+                "Lynx Supervisor": [
+                    "หัวหน้างานลิงซ์",
+                    "Person"
+                ],
+                "Salvage Yard Manager": [
+                    "ผู้จัดการลานกู้ซาก",
+                    "Person"
+                ],
+                "Fellow Shipbreaker": [
+                    "เพื่อนร่วมงาน ชิปเบรกเกอร์",
+                    "Person"
+                ],
+                "Weaver": [
+                    "วีเวอร์",
+                    "Person"
+                ],
+                "Handheld Utility": [
+                    "อุปกรณ์อเนกประสงค์",
+                    "General"
+                ],
+                "Space Rope": [
+                    "เชือกอวกาศ",
+                    "General"
+                ],
+                "Kessler": [
+                    "เคสเลอร์",
+                    "General"
+                ],
+                "Abode Domicile": [
+                    "บ้านพักคนงาน",
+                    "General"
+                ],
+                "Accelerator Array": [
+                    "ตัวเร่งอนุภาคแบบแถวเรียง",
+                    "General"
+                ],
+                "Everwork": [
+                    "เอเวอร์เวิร์ก",
+                    "General"
+                ],
+                "Cargo": [
+                    "สินค้า",
+                    "General"
+                ],
+                "Carrier": [
+                    "แคร์เรียร์",
+                    "General"
+                ],
+                "Processor": [
+                    "โปรเซสเซอร์",
+                    "General"
+                ],
+                "Tanker": [
+                    "เรือบรรทุก",
+                    "General"
+                ],
+                "New Ship Access:": [
+                    "ยานบรรทุกใหม่:",
+                    "General"
+                ],
+                "Delhi": [
+                    "เดลี",
+                    "Other"
+                ],
+                "Officer.railmail": [
+                    "ออฟฟิเซอร์.เรลเมล",
+                    "Person"
+                ]
+            },
+            "max_bytes_limit": 63
+        },
+        "Dying Light 2": {
+            "single": "\n\nSTRICT LENGTH & CONTENT RULES (NON-NEGOTIABLE):\n- Your translation MUST match the length and structure of the source text as closely as possible.\n- If the source is a short UI label (e.g. 'ID:', 'Rank', 'Mass'), return ONLY its short Thai equivalent. Do NOT write a full sentence.\n- If the source is 1-3 words, return 1-5 words maximum.\n- Do NOT expand, elaborate, invent, or add any content that is not explicitly in the source text.\n- Do NOT use your knowledge of the game's story or lore to add context or flavor text.\n- Do NOT add colons, notes, parentheses, backstory, or any extra characters not present in the source.",
+            "opt": "",
+            "batch": "\n\nSTRICT LENGTH & CONTENT RULES (NON-NEGOTIABLE):\n- Your translation MUST match the length and structure of the source text as closely as possible.\n- If the source is a short UI label (e.g. 'ID:', 'Rank', 'Mass'), return ONLY its short Thai equivalent. Do NOT write a full sentence.\n- If the source is 1-3 words, return 1-5 words maximum.\n- Do NOT expand, elaborate, invent, or add any content that is not explicitly in the source text.\n- Do NOT use your knowledge of the game's story or lore to add context or flavor text.\n- Do NOT add colons, notes, parentheses, backstory, or any extra characters not present in the source.",
+            "glossary": {},
+            "max_bytes_limit": 63
+        },
+        "Dead island": {
             "single": "",
             "opt": "",
             "batch": "",
-            "glossary": {}
+            "glossary": {},
+            "max_bytes_limit": 63
+        },
+        "Boltgun": {
+            "single": "You are a translation AI specialized in localizing the video game 'Warhammer 40,000: Boltgun' from English to Thai. Your task is to translate the given source text into Thai, adhering strictly to the following rules.\n\nFirst, you will receive input in the format: {id}: {source_text}\n\nYou must return ONLY the pure Thai string translation of {source_text}. Do not include the Context ID ({id}) in your output under any circumstances. Do not add any explanations, notes, or formatting outside the translation.\n\nThe tone must match the game's setting: aggressive, brutal, and reverent to the Imperium of Man. Use harsh, direct, and violent vocabulary where appropriate, reflecting the grimdark universe of Warhammer 40,000. Avoid polite or flowery phrasing.\n\nPreserve all UI/game tags exactly as they appear. This includes any text enclosed in curly braces {...}, square brackets [...], angle brackets <...>, or similar markup. Do not translate, modify, or remove these tags.\n\nObey these rules without exception: 'Warhammer 40,000'.",
+            "opt": "You are a professional game translator specializing in Warhammer 40,000: Boltgun. Translate the following game text from English to Thai. The Context ID is {id} and the source text is {source_text}.  \n\nReturn exactly 3 different Thai translation options for {source_text} as a strict JSON array of 3 strings. Each option must vary slightly in tone (e.g., formal, gritty, action-oriented) while remaining fitting for the violent, retro-shooter, Warhammer 40,000 setting of Boltgun.  \n\nDo NOT include the Context ID ({id}) in your output. Preserve all UI/game tags like {...}, [...], <...> exactly as they appear in the source text.  \n\nObey these rules: 'Warhammer 40,000'.",
+            "batch": "You are a translation AI specialized in localizing the video game 'Warhammer 40,000: Boltgun' from English to Thai. Your task is to translate the given source text into Thai, adhering strictly to the following rules.\n\nFirst, you will receive input in the format: {id}: {source_text}\n\nYou must return ONLY the pure Thai string translation of {source_text}. Do not include the Context ID ({id}) in your output under any circumstances. Do not add any explanations, notes, or formatting outside the translation.\n\nThe tone must match the game's setting: aggressive, brutal, and reverent to the Imperium of Man. Use harsh, direct, and violent vocabulary where appropriate, reflecting the grimdark universe of Warhammer 40,000. Avoid polite or flowery phrasing.\n\nPreserve all UI/game tags exactly as they appear. This includes any text enclosed in curly braces {...}, square brackets [...], angle brackets <...>, or similar markup. Do not translate, modify, or remove these tags.\n\nObey these rules without exception: 'Warhammer 40,000'.",
+            "glossary": {
+                "Boltgun": [
+                    "ปืนโบลต์กัน",
+                    "Weapon"
+                ],
+                "Space Marine": [
+                    "สเปซมารีน",
+                    "Faction"
+                ],
+                "Chaos": [
+                    "เคออส",
+                    "Faction"
+                ],
+                "Malum Caedo": [
+                    "มาลัม ซีโด",
+                    "Person"
+                ],
+                "Ultramarines": [
+                    "อัลตรามารีนส์",
+                    "Faction"
+                ],
+                "Heretic": [
+                    "พวกนอกรีต",
+                    "General"
+                ],
+                "Daemon": [
+                    "ปีศาจ",
+                    "General"
+                ],
+                "Bolter": [
+                    "ปืนโบลเตอร์",
+                    "Weapon"
+                ],
+                "Chainsword": [
+                    "ดาบเลื่อย",
+                    "Weapon"
+                ],
+                "Plasma Gun": [
+                    "ปืนพลาสม่า",
+                    "Weapon"
+                ],
+                "Melta Gun": [
+                    "ปืนเมลต้า",
+                    "Weapon"
+                ],
+                "Heavy Bolter": [
+                    "ปืนโบลเตอร์หนัก",
+                    "Weapon"
+                ],
+                "Frag Grenade": [
+                    "ระเบิดกระจาย",
+                    "Item"
+                ],
+                "Krak Grenade": [
+                    "ระเบิดเจาะเกราะ",
+                    "Item"
+                ],
+                "Health": [
+                    "พลังชีวิต",
+                    "Item"
+                ],
+                "Armor": [
+                    "เกราะ",
+                    "Item"
+                ],
+                "Ammo": [
+                    "กระสุน",
+                    "Item"
+                ],
+                "Shield": [
+                    "โล่",
+                    "Item"
+                ],
+                "Keycard": [
+                    "คีย์การ์ด",
+                    "Item"
+                ],
+                "Relic": [
+                    "โบราณวัตถุ",
+                    "Item"
+                ],
+                "Grimoire": [
+                    "ตำราคาถูก",
+                    "Item"
+                ],
+                "Servo Skull": [
+                    "เซอร์โว สกัล",
+                    "General"
+                ],
+                "Cultist": [
+                    "สาวกลัทธิ",
+                    "Faction"
+                ],
+                "Chaos Space Marine": [
+                    "เคออสสเปซมารีน",
+                    "Faction"
+                ],
+                "Plague Marine": [
+                    "เพลกมารีน",
+                    "Other"
+                ],
+                "Rubric Marine": [
+                    "รูบริคมารีน",
+                    "Faction"
+                ],
+                "Berserker": [
+                    "เบอร์เซิร์กเกอร์",
+                    "Faction"
+                ],
+                "Daemonette": [
+                    "เดมอนเน็ตต์",
+                    "General"
+                ],
+                "Bloodletter": [
+                    "บลัดเล็ตเตอร์",
+                    "General"
+                ],
+                "Plaguebearer": [
+                    "เพลกแบเรอร์",
+                    "General"
+                ],
+                "Horror": [
+                    "ฮอร์เรอร์",
+                    "General"
+                ],
+                "Chaos Spawn": [
+                    "เคออกลายพันธุ์",
+                    "General"
+                ],
+                "Obliterator": [
+                    "ออบลิเทเรเตอร์",
+                    "General"
+                ],
+                "Forge World": [
+                    "ฟอร์จเวิลด์",
+                    "Location"
+                ],
+                "Graia": [
+                    "ไกรอา",
+                    "Location"
+                ],
+                "Manufactorum": [
+                    "โรงงานผลิต",
+                    "Location"
+                ],
+                "Temple": [
+                    "วิหาร",
+                    "Location"
+                ],
+                "Sanctuary": [
+                    "สถานที่ศักดิ์สิทธิ์",
+                    "Location"
+                ],
+                "The Emperor": [
+                    "จักรพรรดิ",
+                    "Person"
+                ],
+                "Inquisitor": [
+                    "อินควิซิเตอร์",
+                    "Person"
+                ],
+                "Tech Priest": [
+                    "เทคพรีสต์",
+                    "Person"
+                ],
+                "Jump Pack": [
+                    "ชุดกระโดด",
+                    "Item"
+                ],
+                "Vengeance": [
+                    "การแก้แค้น",
+                    "Quest"
+                ],
+                "Purge": [
+                    "การชำระล้าง",
+                    "Quest"
+                ],
+                "Slaughter": [
+                    "การสังหารหมู่",
+                    "Quest"
+                ],
+                "Exterminatus": [
+                    "เอ็กซ์เทอร์มินาทัส",
+                    "General"
+                ],
+                "Warp": [
+                    "วาร์ป",
+                    "General"
+                ],
+                "Blessing": [
+                    "พร",
+                    "Item"
+                ],
+                "Sigil": [
+                    "สัญลักษณ์",
+                    "Item"
+                ],
+                "Shrine": [
+                    "ศาลเจ้า",
+                    "Location"
+                ],
+                "Astartes": [
+                    "อัสตาร์เตส",
+                    "Faction"
+                ],
+                "Imperium": [
+                    "อิมพีเรียม",
+                    "Faction"
+                ],
+                "Chaos Undivided": [
+                    "เคออสไร้การแบ่งแยก",
+                    "Faction"
+                ],
+                "Nurgle": [
+                    "เนอร์เกิล",
+                    "Faction"
+                ],
+                "Khorne": [
+                    "คอร์น",
+                    "Faction"
+                ],
+                "Tzeentch": [
+                    "ซินช์",
+                    "Faction"
+                ],
+                "Slaanesh": [
+                    "สลานีช",
+                    "Faction"
+                ],
+                "Inquisition": [
+                    "อินควิซิชัน",
+                    "Faction"
+                ],
+                "Adeptus Mechanicus": [
+                    "อเดปตุส เมคานิคัส",
+                    "Faction"
+                ],
+                "Servitor": [
+                    "เซอร์วิทอร์",
+                    "Person"
+                ],
+                "Dreadnought": [
+                    "เดรดนอท",
+                    "Person"
+                ],
+                "Chaos Lord": [
+                    "ลอร์ดแห่งเคออส",
+                    "Person"
+                ],
+                "Sorcerer": [
+                    "จอมเวท",
+                    "Person"
+                ],
+                "Havoc": [
+                    "เฮวอค",
+                    "Person"
+                ],
+                "Raptor": [
+                    "แร็พเตอร์",
+                    "Person"
+                ],
+                "Possessed": [
+                    "นักรบอสูร",
+                    "Person"
+                ],
+                "Helbrute": [
+                    "เฮลบรูท",
+                    "Person"
+                ],
+                "Defiler": [
+                    "ดีไฟเลอร์",
+                    "Person"
+                ],
+                "Predator Tank": [
+                    "รถถังพรีเดเตอร์",
+                    "Weapon"
+                ],
+                "Rhino": [
+                    "ไรโน",
+                    "Weapon"
+                ],
+                "Land Raider": [
+                    "แลนด์ เรเดอร์",
+                    "Weapon"
+                ],
+                "Whirlwind": [
+                    "เวิร์ลวินด์",
+                    "Weapon"
+                ],
+                "Vindicator": [
+                    "วินดิเคเตอร์",
+                    "Weapon"
+                ],
+                "Storm Bolter": [
+                    "ปืนสตอร์มโบลเตอร์",
+                    "Weapon"
+                ],
+                "Combi-Flamer": [
+                    "ปืนคอมบิเฟลมเมอร์",
+                    "Weapon"
+                ],
+                "Combi-Melta": [
+                    "ปืนคอมบิเมลต้า",
+                    "Weapon"
+                ],
+                "Power Fist": [
+                    "หมัดพลัง",
+                    "Weapon"
+                ],
+                "Power Sword": [
+                    "พาวเวอร์ ซอร์ด",
+                    "Weapon"
+                ],
+                "Thunder Hammer": [
+                    "ค้อนสายฟ้า",
+                    "Weapon"
+                ],
+                "Lascannon": [
+                    "ปืนใหญ่เลเซอร์",
+                    "Weapon"
+                ],
+                "Missile Launcher": [
+                    "เครื่องยิงจรวด",
+                    "Weapon"
+                ],
+                "Autocannon": [
+                    "ปืนออโตแคนนอน",
+                    "Weapon"
+                ],
+                "Plasma Pistol": [
+                    "ปืนพกพลาสมา",
+                    "Weapon"
+                ],
+                "Bolt Pistol": [
+                    "ปืนพกโบลต์",
+                    "Weapon"
+                ],
+                "Stubber": [
+                    "ปืนสตับเบอร์",
+                    "Weapon"
+                ],
+                "Heavy Stubber": [
+                    "ปืนสตับเบอร์หนัก",
+                    "Weapon"
+                ],
+                "Flamer": [
+                    "ปืนพ่นไฟ",
+                    "Weapon"
+                ],
+                "Heavy Flamer": [
+                    "เครื่องพ่นไฟหนัก",
+                    "Weapon"
+                ],
+                "Grenade Launcher": [
+                    "เครื่องยิงลูกระเบิด",
+                    "Weapon"
+                ],
+                "Melta Bomb": [
+                    "ระเบิดเมลต้า",
+                    "Item"
+                ],
+                "Stimm": [
+                    "ยากระตุ้น",
+                    "Item"
+                ],
+                "Adrenaline Shot": [
+                    "ยาฉีดอะดรีนาลีน",
+                    "Item"
+                ],
+                "Data Slate": [
+                    "แผ่นข้อมูล",
+                    "Item"
+                ],
+                "Aquila": [
+                    "อควิลา",
+                    "Item"
+                ],
+                "Skull": [
+                    "กะโหลก",
+                    "Item"
+                ],
+                "Hive City": [
+                    "ไฮฟ์ ซิตี้",
+                    "Location"
+                ],
+                "Space Hulk": [
+                    "ซากยานอวกาศมหึมา",
+                    "Location"
+                ],
+                "Battle Barge": [
+                    "แบตเทิล บาร์จ",
+                    "Location"
+                ],
+                "Strike Cruiser": [
+                    "สไตรค์ ครูเซอร์",
+                    "Location"
+                ],
+                "Teleportarium": [
+                    "เทเลพอร์ทาเรียม",
+                    "Location"
+                ],
+                "Imperial Guard": [
+                    "ทหารรักษาจักรวรรดิ",
+                    "Faction"
+                ],
+                "Sister of Battle": [
+                    "ซิสเตอร์ออฟแบทเทิล",
+                    "Person"
+                ],
+                "Commissar": [
+                    "คอมมิสซาร์",
+                    "Person"
+                ],
+                "Techmarine": [
+                    "เทคมารีน",
+                    "Person"
+                ],
+                "Apothecary": [
+                    "อพอธิคารี",
+                    "Person"
+                ],
+                "Chaplain": [
+                    "ศาสนาจารย์",
+                    "Person"
+                ],
+                "Librarian": [
+                    "ไลบราเรียน",
+                    "Person"
+                ],
+                "Chapter Master": [
+                    "แชปเตอร์มาสเตอร์",
+                    "Person"
+                ],
+                "Primaris Marine": [
+                    "พรีมาริสมารีน",
+                    "Person"
+                ],
+                "Scout Marine": [
+                    "สเกาต์มารีน",
+                    "Person"
+                ],
+                "Terminator": [
+                    "เทอร์มิเนเตอร์",
+                    "Person"
+                ],
+                "Assault Marine": [
+                    "แอสซอลต์มารีน",
+                    "Person"
+                ],
+                "Devastator Marine": [
+                    "เดวาสเตเตอร์มารีน",
+                    "Person"
+                ],
+                "Tactical Marine": [
+                    "แทคติคอลมารีน",
+                    "Person"
+                ],
+                "Noise Marine": [
+                    "นอยส์มารีน",
+                    "Person"
+                ],
+                "Thousand Son": [
+                    "ธาวซันด์ซัน",
+                    "Faction"
+                ],
+                "Death Guard": [
+                    "เดธการ์ด",
+                    "Faction"
+                ],
+                "World Eater": [
+                    "เวิลด์อีตเตอร์",
+                    "Faction"
+                ],
+                "Emperor's Children": [
+                    "เอมเพอเรอร์ชิลเดรน",
+                    "Faction"
+                ],
+                "Black Legion": [
+                    "แบล็กลีเจียน",
+                    "Faction"
+                ],
+                "Iron Warrior": [
+                    "ไอรอนวอร์ริเออร์",
+                    "Faction"
+                ],
+                "Night Lord": [
+                    "ไนท์ลอร์ด",
+                    "Faction"
+                ],
+                "Alpha Legion": [
+                    "อัลฟ่าลีเจียน",
+                    "Faction"
+                ],
+                "Word Bearer": [
+                    "เวิร์ดแบร์เรอร์",
+                    "Faction"
+                ],
+                "Flesh Tearer": [
+                    "เฟลชเทียเรอร์",
+                    "Faction"
+                ],
+                "Blood Angel": [
+                    "บลัดแองเจิล",
+                    "Faction"
+                ],
+                "Dark Angel": [
+                    "ดาร์กแองเจิล",
+                    "Faction"
+                ],
+                "Space Wolf": [
+                    "สเปซวูล์ฟ",
+                    "Faction"
+                ],
+                "Imperial Fist": [
+                    "อิมพีเรียลฟิสต์",
+                    "Faction"
+                ],
+                "Salamander": [
+                    "ซาลาแมนเดอร์",
+                    "Faction"
+                ],
+                "Cathedral": [
+                    "มหาวิหาร",
+                    "Location"
+                ],
+                "Chapel": [
+                    "โบสถ์น้อย",
+                    "Location"
+                ],
+                "Vault": [
+                    "ห้องนิรภัย",
+                    "Location"
+                ],
+                "Armory": [
+                    "คลังอาวุธ",
+                    "Location"
+                ],
+                "Bridge": [
+                    "สะพานเดินเรือ",
+                    "Location"
+                ],
+                "Reactor Core": [
+                    "แกนปฏิกรณ์",
+                    "Location"
+                ],
+                "Sewer": [
+                    "ท่อระบายน้ำ",
+                    "Location"
+                ],
+                "Courtyard": [
+                    "ลานกลางแจ้ง",
+                    "Location"
+                ],
+                "Barracks": [
+                    "ค่ายทหาร",
+                    "Location"
+                ],
+                "Observatory": [
+                    "หอดูดาว",
+                    "Location"
+                ]
+            },
+            "max_bytes_limit": 63
+        },
+        "DIRE_ECHO": {
+            "single": "You are a professional game translator specializing in Thai localization for the dark, gritty, and atmospheric horror game 'DIRE ECHO'. Your task is to translate the following game text from English to Thai. The tone must be immersive, tense, and foreboding, matching the game's eerie and desperate setting. Use natural, colloquial Thai that fits a survival horror narrative, avoiding overly formal or flowery language.\n\nYou will receive a Context ID in the format {id} and the source text in the format {source_text}. You must return ONLY the pure Thai string translation of {source_text}. Do not include the Context ID ({id}) in your output under any circumstances. Preserve all UI/game tags such as {...}, [...], <...> exactly as they appear in the source text; do not translate or modify these tags. Output only the translated Thai text, with no additional commentary, explanations, or formatting.",
+            "opt": "You are a professional game translator specializing in Thai localization for the dark, atmospheric horror game 'DIRE ECHO'. Your task is to translate the given {source_text} into Thai. Return exactly 3 different Thai translation options for {source_text}. The options must vary slightly in tone (e.g., formal, colloquial, eerie/poetic) while remaining fitting for the game's tense, mysterious, and often grim setting. Output must be a strict JSON array of 3 strings, with no additional text, keys, or formatting. Do not include the Context ID {id} in your output. Preserve all UI/game tags like {...}, [...], <...> exactly as they appear in {source_text}; do not modify, translate, or remove them.",
+            "batch": "You are a professional game translator specializing in Thai localization for the dark, gritty, and atmospheric horror game 'DIRE ECHO'. Your task is to translate the following game text from English to Thai. The tone must be immersive, tense, and foreboding, matching the game's eerie and desperate setting. Use natural, colloquial Thai that fits a survival horror narrative, avoiding overly formal or flowery language.\n\nYou will receive a Context ID in the format {id} and the source text in the format {source_text}. You must return ONLY the pure Thai string translation of {source_text}. Do not include the Context ID ({id}) in your output under any circumstances. Preserve all UI/game tags such as {...}, [...], <...> exactly as they appear in the source text; do not translate or modify these tags. Output only the translated Thai text, with no additional commentary, explanations, or formatting.",
+            "glossary": {
+                "Dire Echo": [
+                    "เสียงสะท้อนแห่งหายนะ",
+                    "General"
+                ],
+                "The Wailing": [
+                    "เสียงครวญคราง",
+                    "Faction"
+                ],
+                "Echo Shard": [
+                    "เศษเสี้ยวเสียงสะท้อน",
+                    "Item"
+                ],
+                "Void Walker": [
+                    "ผู้เดินในห้วงว่าง",
+                    "Person"
+                ],
+                "Crimson Waste": [
+                    "แดนรกร้างสีเลือด",
+                    "Location"
+                ],
+                "Soul Reaper": [
+                    "ผู้เก็บเกี่ยววิญญาณ",
+                    "Weapon"
+                ],
+                "Rift Blade": [
+                    "ดาบรอยแยก",
+                    "Weapon"
+                ],
+                "Shadow Cloak": [
+                    "เสื้อคลุมเงา",
+                    "Item"
+                ],
+                "Echo Stone": [
+                    "หินเสียงสะท้อน",
+                    "Item"
+                ],
+                "The Hollow": [
+                    "ห้วงว่าง",
+                    "Location"
+                ],
+                "Silent Order": [
+                    "คำสั่งแห่งความเงียบ",
+                    "Faction"
+                ],
+                "Kael": [
+                    "เคล",
+                    "Person"
+                ],
+                "Lyra": [
+                    "ไลร่า",
+                    "Person"
+                ],
+                "Vorn": [
+                    "วอร์น",
+                    "Person"
+                ],
+                "Echo of the Fallen": [
+                    "เสียงสะท้อนของผู้ล่วงลับ",
+                    "Quest"
+                ],
+                "Rift Gate": [
+                    "ประตูรอยแยก",
+                    "Location"
+                ],
+                "Phantom Essence": [
+                    "แฟนทอม เอสเซนซ์",
+                    "Item"
+                ],
+                "Bone Spear": [
+                    "หอกกระดูก",
+                    "Weapon"
+                ],
+                "Twilight Amulet": [
+                    "เครื่องรางสนธยา",
+                    "Item"
+                ],
+                "The Shattered Keep": [
+                    "ป้อมปราการที่แตกสลาย",
+                    "Location"
+                ],
+                "Blood Pact": [
+                    "พันธสัญญาเลือด",
+                    "Faction"
+                ],
+                "Mira": [
+                    "มิร่า",
+                    "Person"
+                ],
+                "Dren": [
+                    "เดรน",
+                    "Person"
+                ],
+                "Echo of the Lost": [
+                    "เสียงสะท้อนของผู้สูญหาย",
+                    "Quest"
+                ],
+                "Void Crystal": [
+                    "วอยด์ คริสตัล",
+                    "Item"
+                ],
+                "Shadow Dagger": [
+                    "มีดสั้นเงา",
+                    "Weapon"
+                ],
+                "The Abyss": [
+                    "เหวลึก",
+                    "Location"
+                ],
+                "Iron Covenant": [
+                    "พันธสัญญาเหล็ก",
+                    "Faction"
+                ],
+                "Sera": [
+                    "เซร่า",
+                    "Person"
+                ],
+                "Rork": [
+                    "รอร์ค",
+                    "Person"
+                ],
+                "Echo of the Forgotten": [
+                    "เสียงสะท้อนของผู้ถูกลืม",
+                    "Quest"
+                ],
+                "Rift Essence": [
+                    "ริฟท์ เอสเซนซ์",
+                    "Item"
+                ],
+                "Cursed Bow": [
+                    "ธนูต้องสาป",
+                    "Weapon"
+                ],
+                "The Ashen Fields": [
+                    "ทุ่งเถ้าถ่าน",
+                    "Location"
+                ],
+                "Sunken Temple": [
+                    "วิหารจมน้ำ",
+                    "Location"
+                ],
+                "The Unbound": [
+                    "ผู้ไร้พันธนาการ",
+                    "Faction"
+                ],
+                "Nyx": [
+                    "นิกซ์",
+                    "Person"
+                ],
+                "Thalia": [
+                    "ธาเลีย",
+                    "Person"
+                ],
+                "Echo of the Betrayed": [
+                    "เสียงสะท้อนของผู้ถูกทรยศ",
+                    "Quest"
+                ],
+                "Soul Lantern": [
+                    "โคมวิญญาณ",
+                    "Item"
+                ],
+                "Doom Hammer": [
+                    "ค้อนแห่งหายนะ",
+                    "Weapon"
+                ],
+                "The Obsidian Spire": [
+                    "ยอดหินออบซิเดียน",
+                    "Location"
+                ],
+                "Frozen Wastes": [
+                    "แดนน้ำแข็งรกร้าง",
+                    "Location"
+                ],
+                "The Ember Clan": [
+                    "เผ่าember",
+                    "Faction"
+                ],
+                "Zara": [
+                    "ซาร่า",
+                    "Person"
+                ],
+                "Grim": [
+                    "กริม",
+                    "Person"
+                ],
+                "Echo of the Damned": [
+                    "เสียงสะท้อนของผู้ถูกสาป",
+                    "Quest"
+                ],
+                "Void Tear": [
+                    "น้ำตาห้วงว่าง",
+                    "Item"
+                ],
+                "Ghost Armor": [
+                    "โกสต์ อาร์เมอร์",
+                    "Item"
+                ],
+                "The Last Echo": [
+                    "เสียงสะท้อนสุดท้าย",
+                    "General"
+                ],
+                "The Weeping Woods": [
+                    "ป่าไม้ร่ำไห้",
+                    "Location"
+                ],
+                "Crystal Caverns": [
+                    "ถ้ำคริสตัล",
+                    "Location"
+                ],
+                "Bleakmoor": [
+                    "บลีคมัวร์",
+                    "Location"
+                ],
+                "The Drowned City": [
+                    "เมืองจมน้ำ",
+                    "Location"
+                ],
+                "Scorched Expanse": [
+                    "ทุ่งแผดเผา",
+                    "Location"
+                ],
+                "The Whispering Gorge": [
+                    "หุบเขากระซิบ",
+                    "Location"
+                ],
+                "Festering Swamp": [
+                    "หนองน้ำเน่าเฟะ",
+                    "Location"
+                ],
+                "The Iron Gate": [
+                    "ประตูเหล็ก",
+                    "Location"
+                ],
+                "Sanctuary of Echoes": [
+                    "สถานศักดิ์สิทธิ์แห่งเสียงสะท้อน",
+                    "Location"
+                ],
+                "The Black Market": [
+                    "ตลาดมืด",
+                    "Location"
+                ],
+                "Riftfall Village": [
+                    "หมู่บ้านริฟต์ฟอล",
+                    "Location"
+                ],
+                "The Luminous Depths": [
+                    "ห้วงลึกเรืองแสง",
+                    "Location"
+                ],
+                "Ashfall Citadel": [
+                    "ป้อมเถ้าถล่ม",
+                    "Location"
+                ],
+                "The Silent Marsh": [
+                    "บึงเงียบงัน",
+                    "Location"
+                ],
+                "Cinder Peak": [
+                    "ยอดเขาถ่านไฟ",
+                    "Location"
+                ],
+                "The Echoing Halls": [
+                    "โถงสะท้อนก้อง",
+                    "Location"
+                ],
+                "Bonefield": [
+                    "ทุ่งกระดูก",
+                    "Location"
+                ],
+                "The Obsidian Gate": [
+                    "ประตูออบซิเดียน",
+                    "Location"
+                ],
+                "Frostmire": [
+                    "ฟรอสต์ไมร์",
+                    "Location"
+                ],
+                "The Shattered Coast": [
+                    "ชายฝั่งแตกสลาย",
+                    "Location"
+                ]
+            },
+            "max_bytes_limit": 59
+        },
+        "Outpost Infinity Siege": {
+            "single": "You are a professional game translator specializing in Thai localization for the sci-fi/cyberpunk game 'Outpost Infinity Siege'. Your task is to translate the given {source_text} from English to Thai. Return ONLY the pure Thai string translation of {source_text}. Do NOT include the Context ID {id} in your output. Preserve all UI/game tags like {...}, [...], <...> exactly as they appear without modification. The translation must strictly follow a Sci-Fi / Cyberpunk tone: use futuristic, high-tech, and slightly gritty vocabulary; avoid overly casual or traditional Thai idioms; keep it concise and impactful, matching the game's tactical and immersive atmosphere.",
+            "opt": "You are a professional game localization AI specializing in Thai translations for the video game 'Outpost Infinity Siege'. Your task is to translate the given {source_text} from English to Thai, adhering strictly to the game's Sci-Fi / Cyberpunk tone. The output must be a strict JSON array of exactly 3 strings, each representing a distinct Thai translation option. The three options must vary slightly in tone (e.g., one formal/technical, one gritty/street, one neutral/standard) while remaining appropriate for the game's setting. Do NOT include the Context ID ({id}) in your output. Preserve all UI/game tags such as {...}, [...], <...> exactly as they appear in the source text, without modification. Return ONLY the raw JSON array, with no additional text, quotes, or markdown.",
+            "batch": "You are a professional game translator specializing in Thai localization for the sci-fi/cyberpunk game 'Outpost Infinity Siege'. Your task is to translate the given {source_text} from English to Thai. Return ONLY the pure Thai string translation of {source_text}. Do NOT include the Context ID {id} in your output. Preserve all UI/game tags like {...}, [...], <...> exactly as they appear without modification. The translation must strictly follow a Sci-Fi / Cyberpunk tone: use futuristic, high-tech, and slightly gritty vocabulary; avoid overly casual or traditional Thai idioms; keep it concise and impactful, matching the game's tactical and immersive atmosphere.",
+            "glossary": {
+                "Outpost": [
+                    "ฐานทัพ",
+                    "Location"
+                ],
+                "Infinity Siege": [
+                    "การปิดล้อมอนันต์",
+                    "General"
+                ],
+                "Commander": [
+                    "ผู้บัญชาการ",
+                    "Person"
+                ],
+                "Scout": [
+                    "หน่วยสอดแนม",
+                    "Person"
+                ],
+                "Engineer": [
+                    "วิศวกร",
+                    "Person"
+                ],
+                "Soldier": [
+                    "ทหาร",
+                    "Person"
+                ],
+                "Turret": [
+                    "ป้อมปืน",
+                    "Weapon"
+                ],
+                "Barricade": [
+                    "สิ่งกีดขวาง",
+                    "Item"
+                ],
+                "Supply Crate": [
+                    "ลังเสบียง",
+                    "Item"
+                ],
+                "Ammo": [
+                    "กระสุน",
+                    "Item"
+                ],
+                "Medkit": [
+                    "ชุดปฐมพยาบาล",
+                    "Item"
+                ],
+                "Rifle": [
+                    "ปืนไรเฟิล",
+                    "Weapon"
+                ],
+                "Shotgun": [
+                    "ปืนลูกซอง",
+                    "Weapon"
+                ],
+                "Pistol": [
+                    "ปืนพก",
+                    "Weapon"
+                ],
+                "Grenade": [
+                    "ระเบิดมือ",
+                    "Weapon"
+                ],
+                "Rocket Launcher": [
+                    "เครื่องยิงจรวด",
+                    "Weapon"
+                ],
+                "Sniper Rifle": [
+                    "ปืนสไนเปอร์",
+                    "Weapon"
+                ],
+                "Machine Gun": [
+                    "ปืนกล",
+                    "Weapon"
+                ],
+                "Armor": [
+                    "เกราะ",
+                    "Item"
+                ],
+                "Shield": [
+                    "โล่",
+                    "Item"
+                ],
+                "Repair Kit": [
+                    "ชุดซ่อมแซม",
+                    "Item"
+                ],
+                "Blueprint": [
+                    "แบบแปลน",
+                    "Item"
+                ],
+                "Resource": [
+                    "ทรัพยากร",
+                    "General"
+                ],
+                "Metal": [
+                    "โลหะ",
+                    "Item"
+                ],
+                "Wood": [
+                    "ไม้",
+                    "Item"
+                ],
+                "Stone": [
+                    "หิน",
+                    "Item"
+                ],
+                "Fuel": [
+                    "เชื้อเพลิง",
+                    "Item"
+                ],
+                "Food": [
+                    "อาหาร",
+                    "Item"
+                ],
+                "Water": [
+                    "น้ำ",
+                    "Item"
+                ],
+                "The Siege": [
+                    "การปิดล้อม",
+                    "Quest"
+                ],
+                "Survival Mode": [
+                    "โหมดเอาชีวิตรอด",
+                    "General"
+                ],
+                "Wave": [
+                    "ระลอก",
+                    "General"
+                ],
+                "Enemy": [
+                    "ศัตรู",
+                    "General"
+                ],
+                "Ally": [
+                    "พันธมิตร",
+                    "General"
+                ],
+                "Base": [
+                    "ฐาน",
+                    "Location"
+                ],
+                "Watchtower": [
+                    "หอสังเกตการณ์",
+                    "Location"
+                ],
+                "Barracks": [
+                    "ค่ายทหาร",
+                    "Location"
+                ],
+                "Workshop": [
+                    "โรงงาน",
+                    "Location"
+                ],
+                "Armory": [
+                    "คลังอาวุธ",
+                    "Location"
+                ],
+                "Hospital": [
+                    "โรงพยาบาล",
+                    "Location"
+                ],
+                "Storage": [
+                    "คลังเก็บของ",
+                    "Location"
+                ],
+                "Wall": [
+                    "กำแพง",
+                    "Item"
+                ],
+                "Gate": [
+                    "ประตู",
+                    "Item"
+                ],
+                "Trap": [
+                    "กับดัก",
+                    "Item"
+                ],
+                "Mine": [
+                    "ทุ่นระเบิด",
+                    "Weapon"
+                ],
+                "Radar": [
+                    "เรดาร์",
+                    "Item"
+                ],
+                "Generator": [
+                    "เครื่องกำเนิดไฟฟ้า",
+                    "Item"
+                ],
+                "Battery": [
+                    "แบตเตอรี่",
+                    "Item"
+                ],
+                "Communication Tower": [
+                    "หอสื่อสาร",
+                    "Location"
+                ],
+                "Reinforcement": [
+                    "กำลังเสริม",
+                    "General"
+                ],
+                "Morale": [
+                    "ขวัญกำลังใจ",
+                    "General"
+                ],
+                "Experience": [
+                    "ประสบการณ์",
+                    "General"
+                ],
+                "Level": [
+                    "ระดับ",
+                    "General"
+                ],
+                "Skill": [
+                    "ทักษะ",
+                    "General"
+                ],
+                "Perk": [
+                    "ความสามารถพิเศษ",
+                    "General"
+                ],
+                "Upgrade": [
+                    "อัปเกรด",
+                    "General"
+                ],
+                "Research": [
+                    "วิจัย",
+                    "General"
+                ],
+                "Craft": [
+                    "ประดิษฐ์",
+                    "General"
+                ],
+                "Salvage": [
+                    "กอบกู้",
+                    "General"
+                ],
+                "Trade": [
+                    "ค้าขาย",
+                    "General"
+                ],
+                "Merchant": [
+                    "พ่อค้า",
+                    "Person"
+                ],
+                "Wanderer": [
+                    "ผู้พเนจร",
+                    "Person"
+                ],
+                "Raider": [
+                    "ผู้โจมตี",
+                    "Faction"
+                ],
+                "Defender": [
+                    "ผู้ป้องกัน",
+                    "Faction"
+                ],
+                "The Remnants": [
+                    "เศษซาก",
+                    "Faction"
+                ],
+                "The Alliance": [
+                    "พันธมิตร",
+                    "Faction"
+                ],
+                "The Horde": [
+                    "ฝูงชน",
+                    "Faction"
+                ],
+                "Outpost Guard": [
+                    "ทหารรักษาฐานทัพ",
+                    "Person"
+                ],
+                "Siege Breaker": [
+                    "ผู้ทำลายการปิดล้อม",
+                    "Person"
+                ],
+                "Heavy Infantry": [
+                    "ทหารราบหนัก",
+                    "Person"
+                ],
+                "Sniper": [
+                    "มือสไนเปอร์",
+                    "Person"
+                ],
+                "Demolitionist": [
+                    "ผู้เชี่ยวชาญการทำลาย",
+                    "Person"
+                ],
+                "Medic": [
+                    "แพทย์สนาม",
+                    "Person"
+                ],
+                "Scavenger": [
+                    "นักเก็บกวาด",
+                    "Person"
+                ],
+                "Boss": [
+                    "บอส",
+                    "Person"
+                ],
+                "Elite": [
+                    "ระดับหัวกะทิ",
+                    "General"
+                ],
+                "Rally Point": [
+                    "จุดรวมพล",
+                    "Location"
+                ],
+                "Forward Base": [
+                    "ฐานหน้า",
+                    "Location"
+                ],
+                "Ruins": [
+                    "ซากปรักหักพัง",
+                    "Location"
+                ],
+                "Desert": [
+                    "ทะเลทราย",
+                    "Location"
+                ],
+                "Forest": [
+                    "ป่า",
+                    "Location"
+                ],
+                "Mountain Pass": [
+                    "ช่องเขาบนภูเขา",
+                    "Location"
+                ],
+                "Coastal Outpost": [
+                    "ฐานทัพชายฝั่ง",
+                    "Location"
+                ],
+                "Underground Bunker": [
+                    "บังเกอร์ใต้ดิน",
+                    "Location"
+                ],
+                "Airstrike": [
+                    "โจมตีทางอากาศ",
+                    "Weapon"
+                ],
+                "Artillery": [
+                    "ปืนใหญ่",
+                    "Weapon"
+                ],
+                "Flame Thrower": [
+                    "เครื่องพ่นไฟ",
+                    "Weapon"
+                ],
+                "Laser Gun": [
+                    "ปืนเลเซอร์",
+                    "Weapon"
+                ],
+                "Plasma Cannon": [
+                    "ปืนใหญ่พลาสม่า",
+                    "Weapon"
+                ],
+                "EMP Grenade": [
+                    "ระเบิด EMP",
+                    "Weapon"
+                ],
+                "Night Vision Goggles": [
+                    "แว่นตามองกลางคืน",
+                    "Item"
+                ],
+                "Gas Mask": [
+                    "หน้ากากกันแก๊ส",
+                    "Item"
+                ],
+                "Radio": [
+                    "วิทยุ",
+                    "Item"
+                ],
+                "Map": [
+                    "แผนที่",
+                    "Item"
+                ],
+                "Keycard": [
+                    "บัตรกุญแจ",
+                    "Item"
+                ],
+                "Lockbox": [
+                    "กล่องล็อค",
+                    "Item"
+                ],
+                "Supply Drop": [
+                    "การส่งเสบียง",
+                    "Quest"
+                ],
+                "Defend the Outpost": [
+                    "ปกป้องฐานทัพ",
+                    "Quest"
+                ],
+                "Eliminate the Horde": [
+                    "กำจัดฝูงชน",
+                    "Quest"
+                ],
+                "Retrieve Intel": [
+                    "นำข้อมูลกลับมา",
+                    "Quest"
+                ]
+            },
+            "max_bytes_limit": 69
         }
     }
 }
