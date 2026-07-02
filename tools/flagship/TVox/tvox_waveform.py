@@ -36,10 +36,14 @@ class AudioExtractorWorker(QThread):
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
 
             process = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, startupinfo=startupinfo)
-            process.wait()
-
-            if self.is_cancelled:
-                return
+            
+            import time
+            while process.poll() is None:
+                if self.is_cancelled:
+                    process.terminate()
+                    process.wait()
+                    return
+                time.sleep(0.1)
 
             if not os.path.exists(temp_raw):
                 self.error.emit("Failed to extract audio track.")

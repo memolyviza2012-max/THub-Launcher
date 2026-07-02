@@ -405,6 +405,12 @@ from PyQt6.QtGui import QTextDocument, QAbstractTextDocumentLayout
 from PyQt6.QtCore import QSize
 
 class HtmlDelegate(QStyledItemDelegate):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.doc = QTextDocument()
+        self.doc.setDefaultStyleSheet("body { color: #cdd6f4; font-family: inherit; font-size: 13px; }")
+        self.doc.setDocumentMargin(4)
+
     def paint(self, painter, option, index):
         from PyQt6.QtWidgets import QStyleOptionViewItem
         options = QStyleOptionViewItem(option)
@@ -421,9 +427,6 @@ class HtmlDelegate(QStyledItemDelegate):
         if option.state & QStyle.StateFlag.State_Selected:
             painter.fillRect(option.rect, option.palette.highlight())
 
-        doc = QTextDocument()
-        doc.setDefaultStyleSheet("body { color: #cdd6f4; font-family: inherit; font-size: 13px; }")
-        
         text = options.text
         # if text does not contain HTML tags, escape it to avoid parsing issues?
         # In our case, the html_source has tags. If not, it's plain text.
@@ -431,8 +434,7 @@ class HtmlDelegate(QStyledItemDelegate):
             # simple escape
             text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             
-        doc.setHtml(f"<body>{text}</body>")
-        doc.setDocumentMargin(4)
+        self.doc.setHtml(f"<body>{text}</body>")
 
         painter.translate(option.rect.left(), option.rect.top())
         clip = option.rect.translated(-option.rect.left(), -option.rect.top())
@@ -440,19 +442,17 @@ class HtmlDelegate(QStyledItemDelegate):
 
         ctx = QAbstractTextDocumentLayout.PaintContext()
         ctx.palette = option.palette
-        doc.documentLayout().draw(painter, ctx)
+        self.doc.documentLayout().draw(painter, ctx)
         painter.restore()
 
     def sizeHint(self, option, index):
         options = option
         self.initStyleOption(options, index)
-        doc = QTextDocument()
         text = options.text
         if "<span" not in text:
             text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        doc.setHtml(text)
-        doc.setDocumentMargin(4)
-        return QSize(int(doc.idealWidth()), 30)
+        self.doc.setHtml(text)
+        return QSize(int(self.doc.idealWidth()), 30)
 
 class CsvTableModel(QAbstractTableModel):
 
@@ -735,7 +735,7 @@ class TranslationStudio(QMainWindow):
         self.current_source_row = -1
         self.current_zoom = 0
         self.threadpool = QThreadPool()
-        self._workers = []  # Keep references to prevent premature garbage collection
+        self._workers = {}  # Keep references to prevent premature garbage collection
         self.csv_path = CSV_PATH
         self.project_path = project_path
         self.csv_encoding = CSV_ENCODING
@@ -772,6 +772,7 @@ class TranslationStudio(QMainWindow):
         self.tlm_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
         self.tlm_dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetMovable | QDockWidget.DockWidgetFeature.DockWidgetFloatable)
         self.tlm_dock.hide()
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.tlm_dock)
 
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.glossary_dock)
         self.glossary_dock.hide()
@@ -2715,9 +2716,10 @@ class TranslationStudio(QMainWindow):
         )
         worker.signals.finished.connect(forwarder.handle_finished)
         worker.signals.error.connect(forwarder.handle_error)
-        worker.signals.finished.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        worker.signals.error.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        self._workers.append(worker)
+        wid = id(worker)
+        worker.signals.finished.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        worker.signals.error.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        self._workers[wid] = worker
         self.threadpool.start(worker)
 
     def _on_name_success(self, reply):
@@ -2780,9 +2782,10 @@ class TranslationStudio(QMainWindow):
         )
         worker.signals.finished.connect(forwarder.handle_finished)
         worker.signals.error.connect(forwarder.handle_error)
-        worker.signals.finished.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        worker.signals.error.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        self._workers.append(worker)
+        wid = id(worker)
+        worker.signals.finished.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        worker.signals.error.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        self._workers[wid] = worker
         self.threadpool.start(worker)
 
     def _on_single_success(self, reply):
@@ -2867,9 +2870,10 @@ class TranslationStudio(QMainWindow):
         )
         worker.signals.finished.connect(forwarder.handle_finished)
         worker.signals.error.connect(forwarder.handle_error)
-        worker.signals.finished.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        worker.signals.error.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        self._workers.append(worker)
+        wid = id(worker)
+        worker.signals.finished.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        worker.signals.error.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        self._workers[wid] = worker
         self.threadpool.start(worker)
 
     def _on_special_success(self, reply, mode):
@@ -2913,9 +2917,10 @@ class TranslationStudio(QMainWindow):
         )
         worker.signals.finished.connect(forwarder.handle_finished)
         worker.signals.error.connect(forwarder.handle_error)
-        worker.signals.finished.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        worker.signals.error.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        self._workers.append(worker)
+        wid = id(worker)
+        worker.signals.finished.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        worker.signals.error.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        self._workers[wid] = worker
         self.threadpool.start(worker)
 
     def _on_options_success(self, reply):
@@ -2960,9 +2965,10 @@ class TranslationStudio(QMainWindow):
         )
         worker.signals.finished.connect(forwarder.handle_finished)
         worker.signals.error.connect(forwarder.handle_error)
-        worker.signals.finished.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        worker.signals.error.connect(lambda _: self._workers.remove(worker) if worker in self._workers else None)
-        self._workers.append(worker)
+        wid = id(worker)
+        worker.signals.finished.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        worker.signals.error.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+        self._workers[wid] = worker
         self.threadpool.start(worker)
 
     def _on_local_success(self, reply):
@@ -3066,10 +3072,10 @@ class TranslationStudio(QMainWindow):
             )
             worker.signals.finished.connect(forwarder.handle_finished)
             worker.signals.error.connect(forwarder.handle_error)
-            worker.signals.finished.connect(lambda _, w=worker: self._workers.remove(w) if w in self._workers else None)
-            worker.signals.error.connect(lambda _, w=worker: self._workers.remove(w) if w in self._workers else None)
-            
-            self._workers.append(worker)
+            wid = id(worker)
+            worker.signals.finished.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+            worker.signals.error.connect(lambda _, w_id=wid: self._workers.pop(w_id, None))
+            self._workers[wid] = worker
             self.threadpool.start(worker)
 
     def _on_batch_row_success(self, reply, row):

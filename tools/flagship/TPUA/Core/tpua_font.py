@@ -75,8 +75,8 @@ class TPUAFontEngine:
                     components.append((glyph_name, 0, 0))
                 else:
                     # All non-base characters (vowels, tone marks, etc.)
-                    # Shift x by base_advance
-                    components.append((glyph_name, base_advance, 0))
+                    # Do not shift x by base_advance
+                    components.append((glyph_name, 0, 0))
 
             if not base_name:
                 continue

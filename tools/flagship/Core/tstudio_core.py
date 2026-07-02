@@ -228,7 +228,6 @@ class TStudioCore:
         return profiles["presets"].get(active, {"single": "", "opt": "", "batch": "", "glossary": {}})
 
 class CoreAI:
-    _session = requests.Session()
 
 
     @staticmethod
@@ -265,9 +264,14 @@ class CoreAI:
                 "contents": [{"parts": [{"text": prompt}]}],
                 "generationConfig": {"temperature": temp_val, "maxOutputTokens": max_tokens_val}
             }
-            res = CoreAI._session.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=timeout_val)
+            res = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=timeout_val)
             if res.status_code == 200:
-                content = res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+                try:
+                    content = res.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+                except (KeyError, IndexError) as e:
+                    j_data = res.json()
+                    finish_reason = j_data.get("candidates", [{}])[0].get("finishReason", "UNKNOWN")
+                    raise Exception(f"Gemini API Error: Missing content (Safety block?). FinishReason: {finish_reason}, Data: {j_data}")
             else:
                 raise Exception(f"Gemini API Error {res.status_code}: {res.text}")
 
@@ -280,7 +284,7 @@ class CoreAI:
                 "model": model, "max_tokens": max_tokens_val, "temperature": temp_val,
                 "messages": [{"role": "user", "content": prompt}]
             }
-            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
+            res = requests.post(url, json=payload, headers=headers, timeout=timeout_val)
             if res.status_code == 200:
                 content = res.json()["content"][0]["text"].strip()
             else:
@@ -295,7 +299,7 @@ class CoreAI:
                 "model": model, "temperature": temp_val, "max_tokens": max_tokens_val,
                 "messages": [{"role": "user", "content": prompt}]
             }
-            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
+            res = requests.post(url, json=payload, headers=headers, timeout=timeout_val)
             if res.status_code == 200:
                 content = res.json()["choices"][0]["message"]["content"].strip()
             else:
@@ -312,7 +316,7 @@ class CoreAI:
                 "messages": [{"role": "user", "content": prompt}]
             }
             try:
-                res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
+                res = requests.post(url, json=payload, headers=headers, timeout=timeout_val)
                 if res.status_code == 200:
                     content = res.json()["choices"][0]["message"]["content"].strip()
                 else:
@@ -330,7 +334,7 @@ class CoreAI:
                 "model": model, "temperature": temp_val, "max_tokens": max_tokens_val,
                 "messages": [{"role": "user", "content": prompt}]
             }
-            res = CoreAI._session.post(url, json=payload, headers=headers, timeout=timeout_val)
+            res = requests.post(url, json=payload, headers=headers, timeout=timeout_val)
             if res.status_code == 200:
                 content = res.json()["choices"][0]["message"]["content"].strip()
             else:
