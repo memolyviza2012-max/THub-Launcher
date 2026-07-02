@@ -26,6 +26,7 @@ from PIL import Image
 import markdown
 import webbrowser
 import sys
+from packaging import version
 from i18n_helper import _
 
 # ── Bootstrap language from config BEFORE any _() calls ──────────────────────
@@ -267,7 +268,7 @@ class ProjectWizardWindow(ctk.CTkToplevel):
         messagebox.showinfo(_("Saved"), _("บันทึกค่าเริ่มต้นสำเร็จ!"), parent=self)
         
     def browse_workspace(self):
-        folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์สำหรับสร้างพื้นที่ทำงาน (Workspace)"))
+        folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์สำหรับสร้างพื้นที่ทำงาน (Workspace)"), parent=self)
         if folder:
             self.base_workspace_dir = folder
             self.update_path_preview()
@@ -295,13 +296,13 @@ class ProjectWizardWindow(ctk.CTkToplevel):
         self.ent_path.insert(0, target_path)
             
     def browse_game_dir(self):
-        folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ติดตั้งเกม (Game Directory)"))
+        folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ติดตั้งเกม (Game Directory)"), parent=self)
         if folder:
             self.ent_game_dir.delete(0, 'end')
             self.ent_game_dir.insert(0, folder)
             
     def browse_tool_dir(self):
-        folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์เครื่องมือม็อด (Tool Directory)"))
+        folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์เครื่องมือม็อด (Tool Directory)"), parent=self)
         if folder:
             self.ent_tool_dir.delete(0, 'end')
             self.ent_tool_dir.insert(0, folder)
@@ -1522,8 +1523,10 @@ class ModderHubApp(ctk.CTk):
 
     def save_local_config(self):
         try:
-            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            tmp_file = CONFIG_FILE + ".tmp"
+            with open(tmp_file, 'w', encoding='utf-8') as f:
                 json.dump(self.config, f, indent=4)
+            os.replace(tmp_file, CONFIG_FILE)
         except (PermissionError, OSError) as e:
             from tkinter import messagebox
             messagebox.showerror(_("Error"), _("ไม่สามารถบันทึกการตั้งค่าได้: ") + str(e))
@@ -1885,17 +1888,29 @@ class ModderHubApp(ctk.CTk):
         if not hasattr(self, '_drag_start_y'): return
         dy = event.y_root - self._drag_start_y
         
-        # If dragged more than 50px up or down, swap
-        projects = self.config.get("projects", [])
         if abs(dy) > 100:
-            swap_idx = index + 1 if dy > 0 else index - 1
-            if 0 <= swap_idx < len(projects):
-                # Only allow swapping if both have same pin status, or we force swap
-                projects[index], projects[swap_idx] = projects[swap_idx], projects[index]
-                self.save_local_config()
-                self._drag_start_y = event.y_root # Reset drag origin
-                self._drag_index = swap_idx
-                self.show_home()
+            projects = self.config.get("projects", [])
+            
+            query = getattr(self, "search_var", ctk.StringVar()).get().lower() if hasattr(self, "search_var") else ""
+            is_archived_tab = getattr(self, "current_archive_tab", "Active") == "Archived"
+            visual_map = [(i, p) for i, p in enumerate(projects) if (query in p.get("name", "").lower() or query in p.get("path", "").lower()) and p.get("is_archived", False) == is_archived_tab]
+            
+            sort_choice = getattr(self, "sort_var", ctk.StringVar(value=_("เรียงตาม: ล่าสุด"))).get() if hasattr(self, "sort_var") else _("เรียงตาม: ล่าสุด")
+            if sort_choice == _("เรียงตาม: A-Z"):
+                visual_map.sort(key=lambda x: x[1].get("name", "").lower())
+            elif sort_choice == _("เรียงตาม: Z-A"):
+                visual_map.sort(key=lambda x: x[1].get("name", "").lower(), reverse=True)
+                
+            visual_idx = next((v_idx for v_idx, (abs_idx, _) in enumerate(visual_map) if abs_idx == index), -1)
+            
+            if visual_idx != -1:
+                swap_visual_idx = visual_idx + 1 if dy > 0 else visual_idx - 1
+                if 0 <= swap_visual_idx < len(visual_map):
+                    swap_idx = visual_map[swap_visual_idx][0]
+                    projects[index], projects[swap_idx] = projects[swap_idx], projects[index]
+                    self.save_local_config()
+                    self._drag_start_y = event.y_root
+                    self.show_home()
         
 
                 
@@ -2221,7 +2236,7 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             messagebox.showerror(_("Error"), f"สร้างโปรเจกต์ล้มเหลว: {e}")
 
     def import_project_wizard(self):
-        folder_path = filedialog.askdirectory(title=_("เลือกโฟลเดอร์โปรเจกต์ที่ต้องการนำเข้า"))
+        folder_path = filedialog.askdirectory(title=_("เลือกโฟลเดอร์โปรเจกต์ที่ต้องการนำเข้า"), parent=self)
         if not folder_path:
             return
             
@@ -2480,7 +2495,7 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             ent_game_dir.insert(0, proj.get("game_dir", meta.get("game_path", "")))
             
             def browse_game_dir():
-                folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ติดตั้งเกม (Game Directory)"))
+                folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ติดตั้งเกม (Game Directory)"), parent=top)
                 if folder:
                     ent_game_dir.delete(0, 'end')
                     ent_game_dir.insert(0, folder)
@@ -2495,7 +2510,7 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             ent_tool_dir.insert(0, proj.get("tool_dir", meta.get("tool_path", "")))
             
             def browse_tool_dir():
-                folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์เครื่องมือม็อด (Tool Directory)"))
+                folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์เครื่องมือม็อด (Tool Directory)"), parent=top)
                 if folder:
                     ent_tool_dir.delete(0, 'end')
                     ent_tool_dir.insert(0, folder)
@@ -2700,7 +2715,7 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
                 latest_version = tag_name.replace("v", "")
                 body = data.get("body", _("ไม่มีข้อมูลอัปเดต"))
                 
-                if latest_version > CURRENT_VERSION:
+                if version.parse(latest_version) > version.parse(CURRENT_VERSION):
                     # Find download url (look for .zip asset)
                     assets = data.get("assets", [])
                     zip_asset = next((a for a in assets if a["name"].endswith(".zip")), None)
@@ -2711,6 +2726,10 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
                         self.after(0, self.update_status, f"{_('มีเวอร์ชันใหม่')} (v{latest_version}) {_('แต่ไม่พบไฟล์ .zip')}", "orange")
                 else:
                     self.after(0, self.update_status, f"{_('คุณใช้งานเวอร์ชันล่าสุดแล้ว')} (v{CURRENT_VERSION})", "gray")
+            elif response.status_code in (403, 429):
+                self.after(0, self.update_status, _("ตรวจสอบอัปเดตไม่สำเร็จ (Rate Limit ติดลิมิต)"), "orange")
+            else:
+                self.after(0, self.update_status, f"{_('ตรวจสอบอัปเดตไม่สำเร็จ')} (HTTP {response.status_code})", "orange")
         except Exception as e:
             print(f"Update check error: {e}")
             self.after(0, self.update_status, _("ไม่สามารถตรวจสอบอัปเดตได้ (เครือข่ายมีปัญหา)"), "orange")
@@ -3103,7 +3122,7 @@ del "%~f0"
                 if cval == _("พ่วงโปรเจกต์: ไม่มี"):
                     self.launch_linked_tool(p)
                 elif cval == _("พ่วงโปรเจกต์: เลือกโฟลเดอร์..."):
-                    folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ที่จะส่งเข้าโปรแกรม"))
+                    folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ที่จะส่งเข้าโปรแกรม"), parent=self)
                     if folder:
                         self.launch_linked_tool(p, folder)
                 else:
@@ -3151,6 +3170,13 @@ del "%~f0"
 
     def check_tool_updates_bg(self):
         if not self.config.get("auto_update", False): return
+        
+        if not hasattr(self, "_update_thread_running") or not self._update_thread_running:
+            self._update_thread_running = True
+            import threading
+            threading.Thread(target=self._do_check_tool_updates_bg, daemon=True).start()
+
+    def _do_check_tool_updates_bg(self):
         import urllib.request
         import json
         
@@ -3175,13 +3201,7 @@ del "%~f0"
                                 self.main_frame.after(0, self.show_tool_update_btn, name, latest_tag, t["github"])
                     except Exception:
                         pass
-        # NOTE: Never call UI methods directly from a background thread (not thread-safe)
-        
-        # Start background update checker
-        if not hasattr(self, "_update_thread_running") or not self._update_thread_running:
-            self._update_thread_running = True
-            import threading
-            threading.Thread(target=self.check_tool_updates_bg, daemon=True).start()
+        self._update_thread_running = False
 
     def show_tool_category(self, tab_name, categories, is_fav_tab=False):
         self.clear_main_frame()
