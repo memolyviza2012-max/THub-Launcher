@@ -142,10 +142,18 @@ class TBundleManager:
         return None
 
     @staticmethod
-    def deploy_csv_to_bundle(csv_path):
+    def deploy_csv_to_bundle(csv_path, original_meta_path=None):
         """Reads the CSV, updates the structure, and repacks it back into the original bundle."""
         base_dir = os.path.dirname(csv_path)
-        json_path = os.path.join(base_dir, f"{os.path.basename(csv_path).replace('.csv', '')}_meta.json")
+        stem = os.path.basename(csv_path).replace('.csv', '')
+        
+        if original_meta_path and os.path.exists(original_meta_path):
+            json_path = original_meta_path
+        else:
+            possible_stem = stem.replace('_translated', '')
+            json_path = os.path.join(base_dir, f"{possible_stem}_meta.json")
+            if not os.path.exists(json_path):
+                json_path = os.path.join(base_dir, f"{stem}_meta.json")
         
         if not os.path.exists(json_path):
             return False, "Metadata file missing. Cannot deploy."

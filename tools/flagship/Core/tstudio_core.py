@@ -417,14 +417,21 @@ class TFormatManager:
         return standard_path
 
     @staticmethod
-    def export_original(translation_csv_path):
+    def export_original(translation_csv_path, original_meta_path=None):
         base_dir = os.path.dirname(translation_csv_path)
-        # Use stem-based meta filename instead of hardcoded 'original_data.json' (BUG 2 fix)
         stem = os.path.splitext(os.path.basename(translation_csv_path))[0]
-        json_path = os.path.join(base_dir, f'{stem}_meta.json')
+        
+        if original_meta_path and os.path.exists(original_meta_path):
+            json_path = original_meta_path
+        else:
+            # Fallback for single-file mode: remove '_translated' or similar suffixes if needed
+            possible_stem = stem.replace('_translated', '')
+            json_path = os.path.join(base_dir, f'{possible_stem}_meta.json')
+            if not os.path.exists(json_path):
+                json_path = os.path.join(base_dir, f'{stem}_meta.json')
         
         if not os.path.exists(json_path):
-            return False, f"No {stem}_meta.json found. Cannot export back to original format."
+            return False, f"No meta json found at {json_path}. Cannot export back to original format."
             
         with open(json_path, 'r', encoding='utf-8') as f:
             wrapper = json.load(f)
