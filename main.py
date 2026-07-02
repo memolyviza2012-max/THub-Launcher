@@ -1963,7 +1963,11 @@ class ModderHubApp(ctk.CTk):
                 "author": res["author"],
                 "contributors": res["contributors"],
                 "project_link": res["link"],
-                "game_path": "",
+                "game_path": res.get("game_dir", ""),
+                "tool_path": res.get("tool_dir", ""),
+                "source_lang": res.get("source_lang", "English"),
+                "target_lang": res.get("target_lang", "Thai"),
+                "profile_name": res.get("profile_name", ""),
                 "notes": res["notes"]
             }
             with open(os.path.join(project_path, "thub_project.json"), "w", encoding="utf-8") as f:
@@ -1997,6 +2001,11 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             self.config.setdefault("projects", []).insert(0, {
                 "name": game_name,
                 "path": project_path,
+                "game_dir": res.get("game_dir", ""),
+                "tool_dir": res.get("tool_dir", ""),
+                "source_lang": res.get("source_lang", "English"),
+                "target_lang": res.get("target_lang", "Thai"),
+                "profile_name": res.get("profile_name", ""),
                 "translation_folders": ["02_Translation_Workspace"],
                 "status": "In Progress"
             })
@@ -2020,6 +2029,11 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
         json_path = os.path.join(folder_path, "thub_project.json")
         project_name = os.path.basename(folder_path)
         author_name = ""
+        game_dir = ""
+        tool_dir = ""
+        source_lang = "English"
+        target_lang = "Thai"
+        profile_name = ""
         
         if os.path.exists(json_path):
             try:
@@ -2027,6 +2041,11 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
                     meta = json.load(f)
                     project_name = meta.get("project_name", project_name)
                     author_name = meta.get("author", "")
+                    game_dir = meta.get("game_path", "")
+                    tool_dir = meta.get("tool_path", "")
+                    source_lang = meta.get("source_lang", "English")
+                    target_lang = meta.get("target_lang", "Thai")
+                    profile_name = meta.get("profile_name", "")
             except Exception:
                 pass
         else:
@@ -2038,6 +2057,11 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             res = wizard.result
             project_name = res["name"]
             author_name = res["author"]
+            game_dir = res.get("game_dir", "")
+            tool_dir = res.get("tool_dir", "")
+            source_lang = res.get("source_lang", "English")
+            target_lang = res.get("target_lang", "Thai")
+            profile_name = res.get("profile_name", "")
             
             try:
                 project_meta = {
@@ -2046,7 +2070,11 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
                     "author": author_name,
                     "contributors": res["contributors"],
                     "project_link": res["link"],
-                    "game_path": "",
+                    "game_path": game_dir,
+                    "tool_path": tool_dir,
+                    "source_lang": source_lang,
+                    "target_lang": target_lang,
+                    "profile_name": profile_name,
                     "notes": res["notes"]
                 }
                 with open(json_path, "w", encoding="utf-8") as f:
@@ -2092,6 +2120,11 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             self.config.setdefault("projects", []).insert(0, {
                 "name": project_name,
                 "path": folder_path,
+                "game_dir": game_dir,
+                "tool_dir": tool_dir,
+                "source_lang": source_lang,
+                "target_lang": target_lang,
+                "profile_name": profile_name,
                 "status": "Imported"
             })
             self.save_local_config()
