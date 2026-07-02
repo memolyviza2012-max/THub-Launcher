@@ -4,7 +4,8 @@ import zipfile
 def is_excluded(path):
     exclusions = [
         '.git', '__pycache__', '.vscode', 'temp', 'Releases', 'THub_1.0.9.zip',
-        'build_release.py', '.bak', 'scratch', 'recovered'
+        'build_release.py', '.bak', 'scratch', 'recovered',
+        'hub_config.json', 'config.json'
     ]
     basename = os.path.basename(path)
     # Exclude files by extension
