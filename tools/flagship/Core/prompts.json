@@ -1,5 +1,5 @@
 {
-    "active_preset": "Default",
+    "active_preset": "Outpost Infinity Siege",
     "presets": {
         "Default": {
             "single": "\n\nSTRICT LENGTH & CONTENT RULES (NON-NEGOTIABLE):\n- Your translation MUST match the length and structure of the source text as closely as possible.\n- If the source is a short UI label (e.g. 'ID:', 'Rank', 'Mass'), return ONLY its short Thai equivalent. Do NOT write a full sentence.\n- If the source is 1-3 words, return 1-5 words maximum.\n- Do NOT expand, elaborate, invent, or add any content that is not explicitly in the source text.\n- Do NOT use your knowledge of the game's story or lore to add context or flavor text.\n- Do NOT add colons, notes, parentheses, backstory, or any extra characters not present in the source.",
