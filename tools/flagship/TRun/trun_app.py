@@ -211,6 +211,8 @@ class TRunWorker(QRunnable):
                         self.signals.log.emit(f"Successfully restored {restored} translated rows! Continuing from where it left off...", "#a6e3a1")
                 except Exception as resume_err:
                     self.signals.log.emit(f"Could not read previous output file for resume: {resume_err}", "#f38ba8")
+                    self.signals.error.emit(f"Failed to resume from existing output: {resume_err}")
+                    return
             # --------------------------
             
         except Exception as e:
@@ -316,7 +318,9 @@ class TRunWorker(QRunnable):
                         results[parts[0].strip().strip('"')] = parts[1].strip().strip('"')
                         
                     # Apply results
-                    for i, game_id, placeholders in batch_tasks:
+                    remaining_tasks = []
+                    remaining_lines = []
+                    for idx_zip, (i, game_id, placeholders) in enumerate(batch_tasks):
                         if game_id in results:
                             translated = results[game_id]
                             if self.use_mask:
@@ -334,12 +338,22 @@ class TRunWorker(QRunnable):
                             self.signals.log.emit(f"  ✅ Done: [{game_id}] {tsnippet}", "#a6e3a1")
                         else:
                             self.signals.log.emit(f"  [Warning] Missing ID in response: {game_id}", "#f38ba8")
+                            remaining_tasks.append((i, game_id, placeholders))
+                            remaining_lines.append(lines_to_send[idx_zip])
                             
-                    if len(results) == 0:
-                        self.signals.log.emit(f"  [Warning] AI response parsed but no tab-separated results found (attempt {attempt}). Retrying...", "#f38ba8")
-                    else:
+                    batch_tasks = remaining_tasks
+                    lines_to_send = remaining_lines
+                            
+                    if len(batch_tasks) == 0:
                         success = True
                         break
+                    elif len(results) == 0:
+                        self.signals.log.emit(f"  [Warning] AI response parsed but no tab-separated results found (attempt {attempt}). Retrying...", "#f38ba8")
+                        time.sleep(2)
+                    else:
+                        self.signals.log.emit(f"  [Warning] Partial success. Retrying {len(batch_tasks)} missing lines (attempt {attempt})...", "#f9e2af")
+                        user_prompt = "Translate these entries:\n" + "\n".join(lines_to_send)
+                        full_prompt = batch_system_prompt + "\n\n" + user_prompt
                     
                 except Exception as e:
                     self.signals.log.emit(f"  [Error] {e}", "#f38ba8")
@@ -1101,29 +1115,31 @@ class TRunApp(QMainWindow):
 
         # Input folder is where the original source files and meta JSONs live (BUG 4 fix)
         input_folder = self.txt_input.text()
+        if not input_folder:
+            QMessageBox.warning(self, "No Input Folder", "Input folder path is empty. Please select an input folder first.")
+            return
         
         success_count = 0
         fail_count = 0
         
         for csv_file in csv_files:
             try:
+                stem = os.path.splitext(os.path.basename(csv_file))[0]
+                json_path = os.path.join(input_folder, f'{stem}_meta.json')
+                pak_path = os.path.join(input_folder, f'{stem}.pak')
+
                 # Check PAK deployment first
-                from tstudio_core import TStudioCore, TPakManager
-                cfg = TStudioCore.load_config()
-                origin_file = cfg.get("origin_file", "")
-                if origin_file and origin_file.lower().endswith('.pak'):
+                from tstudio_core import TPakManager
+                if os.path.exists(pak_path):
                     try:
-                        TPakManager.reconstruct_pak_file(origin_file, csv_file, origin_file)
+                        TPakManager.reconstruct_pak_file(pak_path, csv_file, pak_path)
                         success_count += 1
-                        self.log(f"Successfully deployed to PAK file at: {origin_file}", "#a6e3a1")
+                        self.log(f"Successfully deployed to PAK file at: {pak_path}", "#a6e3a1")
                         continue
                     except Exception as e:
                         fail_count += 1
                         self.log(f"Failed to deploy PAK file: {e}", "#f38ba8")
                         continue
-
-                stem = os.path.splitext(os.path.basename(csv_file))[0]
-                json_path = os.path.join(input_folder, f'{stem}_meta.json')
 
                 # Check Bundle first
                 if os.path.exists(json_path):

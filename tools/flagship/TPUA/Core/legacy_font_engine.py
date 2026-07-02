@@ -1,7 +1,7 @@
 import os
 from fontTools.ttLib import TTFont
-from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphComponent
 from fontTools.pens.boundsPen import BoundsPen
+from fontTools.pens.ttGlyphPen import TTGlyphPen
 
 class LegacyFontEngine:
     def __init__(self):
@@ -41,25 +41,18 @@ class LegacyFontEngine:
                 bounds_uee = self.get_exact_bounds(glyf_table, g_uee)
                 bounds_tho = self.get_exact_bounds(glyf_table, g_tho)
                 if bounds_uee and bounds_tho:
-                    uee_ymax = bounds_uee[3] # yMax
-                    tho_ymin = bounds_tho[1] # yMin
-                    
-                    padding = int(upm * 0.03) # 3% of UPM for safe visual padding
+                    uee_ymax = bounds_uee[3]
+                    tho_ymin = bounds_tho[1]
+                    padding = int(upm * 0.03)
                     calc_raise = (uee_ymax - tho_ymin) + padding
-                    
-                    # Ensure minimum raise to prevent negative shifts if tone mark is drawn extremely low
                     min_raise = int(upm * 0.1) 
                     y_raise = max(min_raise, int(calc_raise))
-                    
                     if callback: callback(f"Auto Y Raise calculated: {y_raise} (UPM: {upm}, Padding: {padding})")
                 else:
                     y_raise = int(upm * 0.17)
-                    if callback: callback(f"Bounds failed, fallback Y Raise to {y_raise}")
             else:
                 y_raise = int(upm * 0.17)
-                if callback: callback(f"Missing base glyphs, fallback Y Raise to {y_raise}")
 
-        # Mapping: PUA Code -> (Base Unicode, dx multiplier, dy multiplier, ddown multiplier)
         mapping = {
             0xF700: (0x0E10, 0, 0, 0), # ฐ
             0xF701: (0x0E34, 1, 0, 0), # ิ left
@@ -93,29 +86,32 @@ class LegacyFontEngine:
         for pua_cp, (base_cp, mx, my, mdown) in mapping.items():
             base_gname = cmap.get(base_cp)
             if not base_gname or base_gname not in glyf_table:
-                if callback: callback(f"Warning: Base glyph for {hex(base_cp)} not found, skipping {hex(pua_cp)}.")
+                if callback: callback(f"Warning: Base glyph {hex(base_cp)} not found, skipping {hex(pua_cp)}.")
                 continue
 
-            dx = mx * x_left
-            dy = (my * y_raise) + (mdown * y_down)
+            dx = int(mx * x_left)
+            dy = int((my * y_raise) + (mdown * y_down))
 
-            new_glyph = Glyph()
-            new_glyph.components = []
-            
-            comp = GlyphComponent()
-            comp.glyphName = base_gname
-            comp.x = dx
-            comp.y = int(dy)
-            comp.flags = 0 
-            new_glyph.components.append(comp)
+            # Decompose the original glyph into raw contours
+            g_orig = glyf_table[base_gname]
+            pen = TTGlyphPen(glyf_table)
+            g_orig.draw(pen, glyf_table)
+            g_flat = pen.glyph()
 
-            new_glyph.numberOfContours = -1
+            # Physically shift coordinates
+            if hasattr(g_flat, 'coordinates'):
+                for i in range(len(g_flat.coordinates)):
+                    x, y = g_flat.coordinates[i]
+                    g_flat.coordinates[i] = (x + dx, y + dy)
+                # Recalculate bounds manually after shifting
+                g_flat.recalcBounds(glyf_table)
             
             pua_hex = f"{pua_cp:04X}"
             pua_glyph_name = f"uni{pua_hex.upper()}"
             
-            glyf_table[pua_glyph_name] = new_glyph
+            glyf_table[pua_glyph_name] = g_flat
             
+            # Zero Advance Width
             if pua_cp in (0xF700, 0xF70F):
                 orig_adv = hmtx_table.metrics[base_gname][0]
                 hmtx_table[pua_glyph_name] = (orig_adv, 0)

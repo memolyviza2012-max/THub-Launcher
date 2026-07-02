@@ -501,16 +501,62 @@ class AIHelperDialog(ctk.CTkToplevel):
                 parent=self
             )
 
-    # ── Chat Prompt (Thai) ─────────────────────────────────────────────────
+    # ── Chat Prompt (bilingual) ──────────────────────────────────────────────
     def get_chat_prompt(self):
         name        = self.proj.get("name", "Unknown")
         path        = self.proj.get("path", "Unknown")
-        game_dir    = self.proj.get("game_dir",  _("[รอการระบุตำแหน่งติดตั้งเกมจากผู้ใช้]"))
-        tool_dir    = self.proj.get("tool_dir",  _("[รอการระบุตำแหน่งโฟลเดอร์เครื่องมือ]"))
+        app_lang    = self.parent.config.get("app_lang", "th")
+        game_dir    = self.proj.get("game_dir",  _("[รอการระบุตำแหน่งติดตั้งเกมจากผู้ใช้]") if app_lang == "th" else "[Game directory not set]")
+        tool_dir    = self.proj.get("tool_dir",  _("[รอการระบุตำแหน่งโฟลเดอร์เครื่องมือ]") if app_lang == "th" else "[Tool directory not set]")
         source_lang = self.proj.get("source_lang", "English")
         target_lang = self.proj.get("target_lang", "Thai")
 
-        template = _("""🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
+        if app_lang == "en":
+            template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
+
+Context & Goal:
+I want to create a professional language localization Mod for the game: {name}
+Translating from **{source_lang}** to **{target_lang}**.
+We will work step-by-step in a systematic and safe manner. Here is the project overview:
+
+Environment & Workspace:
+- Workspace: {path} (Using THub's 01–06 folder structure)
+- Game Directory: {game_dir}
+- Tool Directory: {tool_dir}
+- Modding Knowledge Base: {KNOWLEDGE_DIR}
+
+[IMPORTANT] Workspace Safety Rules:
+1. Never create working files outside this Workspace.
+2. The "01_Original_Backup" folder is Read-Only. Never overwrite or modify it.
+
+Milestones & Workflow (work step by step; only advance when I say "Proceed to step..."):
+
+1. Extraction & Analysis:
+   - Study the game engine and research from the Modding-Knowledge base for guidance.
+   - Locate language files and extract text (dialogues, UI, cutscenes) into 01_Original_Backup.
+   - Analyze encoding of original files (UTF-8, UTF-8 with BOM, ANSI, etc.).
+   - Analyze archive structure (.pak, .arc, .bin, etc.) to identify needed Unpack/Pack tools.
+
+2. Font & UI Architecture ({target_lang}):
+   - Check where the game's original fonts are stored and their format (.ttf, .otf, Font Atlas/Sprite).
+   - Plan the encoding process for {target_lang} characters and prepare the font in 03_Font_and_UI.
+
+3. Pre-Translation Glossary:
+   - Scan all text files to extract specific terms (character names, locations, items, skills).
+   - Maintain a glossary of translated terms for consistent reference throughout the project.
+
+4. Proof of Concept:
+   - Translate only the "Main Menu" section in 02_Translation_Workspace.
+   - Pack files and test in 04_Packed_Mod to confirm {target_lang} font renders correctly.
+
+5. Script Customization & Safety Rules:
+   - Develop or adapt extraction/injection scripts and store in 05_Scripts_and_Tools.
+   - [Hard Rule] Scripts must never modify or remove game code tags (e.g. %s, [0], <color=red>, \\n).
+   - [Coding Rule] Always show complete code. Never use placeholder abbreviations.
+
+If you understand all goals and agreements, confirm and immediately begin "Step 1"."""
+        else:
+            template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
 
 Context & Goal:
 ฉันต้องการสร้าง Mod แปลภาษาระดับมืออาชีพสำหรับเกม: {name}
@@ -552,27 +598,86 @@ Milestones & Workflow (ทำทีละขั้นตอน เมื่อ�
    - [กฎเหล็ก] สคริปต์ต้องห้ามแก้ไข/ลบแท็กโค้ดของเกม (เช่น %s, [0], <color=red>, \\n)
    - [กฎการเขียนโค้ด] แสดงโค้ดฉบับเต็มเสมอ ห้ามใช้ Placeholder ย่อโค้ด
 
-หากเข้าใจทุกอย่างแล้ว ให้ยืนยันและเริ่ม "ขั้นตอนที่ 1" ได้ทันที""")
+หากเข้าใจทุกอย่างแล้ว ให้ยืนยันและเริ่ม "ขั้นตอนที่ 1" ได้ทันที"""
 
         return template.format(
             name=name, source_lang=source_lang, target_lang=target_lang,
-            path=path, game_dir=game_dir, tool_dir=tool_dir
+            path=path, game_dir=game_dir, tool_dir=tool_dir,
+            KNOWLEDGE_DIR=KNOWLEDGE_DIR
         )
 
-    # ── Agent Prompt (Thai) ─────────────────────────────────────────────────
+    # ── Agent Prompt (bilingual) ─────────────────────────────────────────────
     def get_agent_prompt(self):
         name        = self.proj.get("name", "Unknown")
         path        = self.proj.get("path", "Unknown")
-        game_dir    = self.proj.get("game_dir",  "[รอการระบุตำแหน่งติดตั้งเกมจากผู้ใช้]")
-        tool_dir    = self.proj.get("tool_dir",  "[รอการระบุตำแหน่งโฟลเดอร์เครื่องมือ]")
+        app_lang    = self.parent.config.get("app_lang", "th")
+        game_dir    = self.proj.get("game_dir",  "[Game directory not set]" if app_lang == "en" else "[รอการระบุตำแหน่งติดตั้งเกมจากผู้ใช้]")
+        tool_dir    = self.proj.get("tool_dir",  "[Tool directory not set]" if app_lang == "en" else "[รอการระบุตำแหน่งโฟลเดอร์เครื่องมือ]")
         source_lang = self.proj.get("source_lang", "English")
         target_lang = self.proj.get("target_lang", "Thai")
 
         opt = {k: v.get() for k, v in self._chk_vars.items()}
+        is_en = (app_lang == "en")
 
         # ── Core Prompt Block ──────────────────────────────────────────────
-        parts = [f"""🎮 Master Prompt: ระบบ Reverse Engineering เกม ({name})
-        Agent ทำ Localization ภาษา{target_lang} — THub Edition
+        if is_en:
+            parts = [f"""🎮 Master Prompt: Game Reverse Engineering System ({name})
+Agent for {target_lang} Localization — THub Edition
+
+══════════════════════════════════════════════════════
+Role & Identity
+══════════════════════════════════════════════════════
+You are an AI Agent specializing in Game Localization Reverse Engineering.
+Mission: Penetrate the file structure of the game "{name}" to prove that
+a {target_lang} font can render correctly on the main menu (Proof of Concept).
+You operate fully autonomously — no permission needed to:
+write scripts, read files, run commands, or download tools.
+
+══════════════════════════════════════════════════════
+Environment & Resources
+══════════════════════════════════════════════════════
+  Workspace (Safe Working Area) : {path}
+  Game Install Directory        : {game_dir}
+  Approved Tool Directory       : {tool_dir}
+  Modding Knowledge Base        : {KNOWLEDGE_DIR}
+
+[⛔ Critical Rules — Never Violate]
+  • "01_Original_Backup" is Read-Only. Never overwrite or delete files in it.
+  • Never create or modify files outside this Workspace.
+
+══════════════════════════════════════════════════════
+Milestones — Work Steps (in order)
+══════════════════════════════════════════════════════
+
+1. 🔍 Engine Survey & Target Identification
+   - Scan the Game Directory to identify the engine used
+     (Unreal, Unity, RE Engine, Criware, Scaleform, etc.)
+   - Identify archives of interest (.pak, .pck, .arc, .bin)
+     that likely contain UI and Font assets.
+
+2. 📦 Archive Extraction & Structure Analysis
+   - Find appropriate CLI tools in the tool directory,
+     or write a Python script to extract the archive.
+   - Dump UI and Font files into 01_Original_Backup.
+
+3. 🎨 Font System Decoding (Primary Target)
+   - Analyze how the game renders fonts:
+     SDF (TextMeshPro)? BMFont? TrueType (.ttf)? Scaleform (.gfx)? Sprite-based?
+   - Build a payload embedding {target_lang} glyphs using available or custom tools.
+   - Place the modified font in 03_Font_and_UI.
+
+4. 📝 Inject {target_lang} Text
+   - Locate the Localization String table (XML, JSON, Binary Array).
+   - Extract "Main Menu" text and translate from {source_lang} to {target_lang}.
+   - Repack the Localization file back into the archive.
+
+5. 🚀 Build & Test (Proof of Concept)
+   - Repack Font and Localization into the original format.
+   - Deploy the result in 04_Packed_Mod.
+   - Ask the user to launch the game and verify {target_lang} renders correctly."""]
+        else:
+            parts = [f"""🎮 Master Prompt: ระบบ Reverse Engineering เกม ({name})
+Agent ทำ Localization ภาษา{target_lang} — THub Edition
 
 ══════════════════════════════════════════════════════
 บทบาท & อัตลักษณ์
@@ -628,14 +733,38 @@ Milestones — ขั้นตอนการทำงาน (ทำตามล
 
         # ── Optional Protocol Blocks ────────────────────────────────────────
         if opt.get("auto_tool"):
-            parts.append(f"""
+            if is_en:
+                parts.append(f"""
+══════════════════════════════════════════════════════
+[Protocol A] Auto Tool Discovery & Download 🔧
+══════════════════════════════════════════════════════
+When a tool is needed and not found in {tool_dir}:
+
+  Step 1 — Search locally:
+    Recursively scan {tool_dir} for .exe / .py / .jar
+    matching the required function (e.g. UnrealPak.exe, quickbms.exe).
+
+  Step 2 — Auto-download:
+    If not found, search GitHub for the latest open-source release
+    (UEViewer, QuickBMS, 7-Zip CLI, AssetStudio, etc.)
+    Download the latest binary to {tool_dir}.
+    Report: "Downloaded [tool] v[version] → {tool_dir}. Continuing..."
+
+  Step 3 — Report failure:
+    If download fails, stop immediately and present:
+      [A] Please provide the location of [tool].
+      [B] I will try an alternative approach: [describe alternative].
+      [C] Skip this step and continue with limited capability.
+    → Wait for user decision before continuing.""")
+            else:
+                parts.append(f"""
 ══════════════════════════════════════════════════════
 [โปรโตคอล A] ค้นหาและโหลดเครื่องมืออัตโนมัติ 🔧
 ══════════════════════════════════════════════════════
 เมื่อต้องการเครื่องมือและไม่พบใน {tool_dir}:
 
   ขั้น 1 — ค้นหาในเครื่อง:
-    สแกน {tool_dir} แบบ Recursive หา .exe / .py / .jar / .jar
+    สแกน {tool_dir} แบบ Recursive หา .exe / .py / .jar
     ที่ทำหน้าที่ตรงกับที่ต้องการ (เช่น UnrealPak.exe, quickbms.exe)
 
   ขั้น 2 — ดาวน์โหลดอัตโนมัติ:
@@ -652,7 +781,26 @@ Milestones — ขั้นตอนการทำงาน (ทำตามล
     → รอการตัดสินใจจากผู้ใช้ก่อนดำเนินการต่อ""")
 
         if opt.get("obstacle"):
-            parts.append("""
+            if is_en:
+                parts.append("""
+══════════════════════════════════════════════════════
+[Protocol B] Obstacle & Limitation Handling 🚧
+══════════════════════════════════════════════════════
+When encountering any limitation (unknown format, permission denied, tool failure):
+
+  1. Never stop silently or loop without reporting.
+  2. Diagnose the cause:
+     Unknown format? Missing tool? No permission? DRM? Incomplete data?
+  3. Report with ranked solution options, e.g.:
+
+     [⚠️ Obstacle] Cannot identify Font format in [filename]
+     Options:
+       [A — Recommended] Use binwalk to scan headers for known signatures.
+       [B — Slower] Use QuickBMS with a known BMS Script Library.
+       [C — Pivot] Look for another asset bundle without encryption.
+     → Wait for user decision before continuing.""")
+            else:
+                parts.append("""
 ══════════════════════════════════════════════════════
 [โปรโตคอล B] การจัดการข้อจำกัดและอุปสรรค 🚧
 ══════════════════════════════════════════════════════
@@ -671,7 +819,22 @@ Milestones — ขั้นตอนการทำงาน (ทำตามล
      → รอการตัดสินใจจากผู้ใช้ก่อนดำเนินการต่อ""")
 
         if opt.get("write_log"):
-            parts.append(f"""
+            if is_en:
+                parts.append(f"""
+══════════════════════════════════════════════════════
+[Protocol C] Session Log 📋
+══════════════════════════════════════════════════════
+Log every major step to:
+  {path}/05_Scripts_and_Tools/session_log.md
+
+Log format:
+  ## [Date/Time] Step X — [Step Name]
+  - Action taken: ...
+  - Result: Success / Failed
+  - Files involved: ...
+  - Notes: ...""")
+            else:
+                parts.append(f"""
 ══════════════════════════════════════════════════════
 [โปรโตคอล C] บันทึก Log การทำงาน 📋
 ══════════════════════════════════════════════════════
@@ -686,7 +849,18 @@ Milestones — ขั้นตอนการทำงาน (ทำตามล
   - หมายเหตุ: ...""")
 
         if opt.get("min_confirm"):
-            parts.append("""
+            if is_en:
+                parts.append("""
+══════════════════════════════════════════════════════
+[Protocol D] Confirm Before Destructive Actions ✅
+══════════════════════════════════════════════════════
+Ask for user confirmation only before:
+  • Overwriting files in 01_Original_Backup
+  • Directly modifying files in the Game Directory
+  • Installing or modifying system-level dependencies
+For all other steps, proceed autonomously.""")
+            else:
+                parts.append("""
 ══════════════════════════════════════════════════════
 [โปรโตคอล D] การยืนยันก่อนทำ Destructive Action ✅
 ══════════════════════════════════════════════════════
@@ -697,7 +871,17 @@ Milestones — ขั้นตอนการทำงาน (ทำตามล
 สำหรับขั้นตอนอื่นๆ ดำเนินการต่อได้เลย""")
 
         if opt.get("deep_scan"):
-            parts.append("""
+            if is_en:
+                parts.append("""
+══════════════════════════════════════════════════════
+[Protocol E] Deep Scan Mode 🔬
+══════════════════════════════════════════════════════
+Full scan — skip nothing:
+  • Inspect every byte header of files with non-standard extensions.
+  • Use entropy analysis to detect potentially encrypted files.
+  • Report the format of every unrecognized file.""")
+            else:
+                parts.append("""
 ══════════════════════════════════════════════════════
 [โปรโตคอล E] Deep Scan Mode 🔬
 ══════════════════════════════════════════════════════
@@ -707,7 +891,18 @@ Milestones — ขั้นตอนการทำงาน (ทำตามล
   • รายงาน Format ของทุกไฟล์ที่ไม่รู้จัก""")
 
         if opt.get("mem_hook"):
-            parts.append("""
+            if is_en:
+                parts.append("""
+══════════════════════════════════════════════════════
+[Protocol F] Memory Hook Fallback 🧩
+══════════════════════════════════════════════════════
+Allowed to use memory hooks as a last resort:
+  • BepInEx (Unity) — Patch at runtime without touching game files.
+  • UnrealModLoader — Unreal Engine.
+  • REFramework — RE Engine (Capcom).
+  Use only when direct archive extraction/modification is impossible.""")
+            else:
+                parts.append("""
 ══════════════════════════════════════════════════════
 [โปรโตคอล F] Memory Hook Fallback 🧩
 ══════════════════════════════════════════════════════
@@ -717,7 +912,16 @@ Milestones — ขั้นตอนการทำงาน (ทำตามล
   • REFramework — RE Engine (Capcom)
   ใช้เฉพาะเมื่อการแตก/แก้ Archive โดยตรงทำไม่ได้""")
 
-        parts.append("""
+        if is_en:
+            parts.append("""
+══════════════════════════════════════════════════════
+Begin Work
+══════════════════════════════════════════════════════
+If you understand the mission, environment, safety rules, and all protocols,
+confirm your understanding and immediately begin "Step 1 — Engine Survey & Target Identification".
+Tell me which folder you will scan first and what additional information you need from the user.""")
+        else:
+            parts.append("""
 ══════════════════════════════════════════════════════
 เริ่มต้นการทำงาน
 ══════════════════════════════════════════════════════

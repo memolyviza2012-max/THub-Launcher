@@ -26,6 +26,11 @@ try:
 except ImportError:
     LegacyFontEngine = None
 
+try:
+    from visual_tuner_widget import VisualTunerWidget
+except ImportError:
+    VisualTunerWidget = None
+
 DARK_SS = """
 QMainWindow, QWidget, QDialog { background: #1e1e2e; color: #cdd6f4; }
 QLineEdit, QTextEdit { background: #313244; color: #cdd6f4; border: 1px solid #45475a; border-radius: 4px; padding: 6px; font-size: 14px; }
@@ -123,6 +128,11 @@ class TPUAApp(QMainWindow):
         self.tab_legacy = QWidget()
         self.init_legacy_tab()
         self.tabs.addTab(self.tab_legacy, _("tab_legacy_font") if hasattr(sys.modules[__name__], '_') else "F700 Legacy Font")
+        
+        # --- TAB 4: Visual Font Tuner ---
+        if VisualTunerWidget:
+            self.visual_tuner_tab = VisualTunerWidget(self.legacy_engine, self.log)
+            self.tabs.addTab(self.visual_tuner_tab, _("tab_visual_tuner") if hasattr(sys.modules[__name__], '_') else "Visual Font Tuner")
         
         # Log Window (Shared)
         self.txt_log = QTextEdit()
