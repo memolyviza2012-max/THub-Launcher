@@ -344,6 +344,33 @@ class CoreAI:
         thai_to_arabic = str.maketrans('๑๒๓๔๕๖๗๘๙๐', '1234567890')
         return content.translate(thai_to_arabic)
 
+    @staticmethod
+    def generate_format_parser(cfg, sample_text, ext):
+        prompt = f"""You are an expert Python developer.
+I need a Python script to parse a custom file format ({ext}) into a TStudio CSV.
+The script MUST contain a function `convert_to_csv(filepath, parent_widget=None)`.
+It should read the file at `filepath`, extract translatable strings, and write them to a new CSV file in the same directory.
+The CSV MUST use `utf-8-sig` encoding and have exactly these columns: ['ID', 'Source', 'Translation', 'AI_Reference'].
+If successful, the function MUST return the absolute path to the generated CSV file.
+
+Here is a sample of the {ext} file:
+{sample_text}
+
+Return ONLY valid Python code. Do not include markdown code blocks like ```python. Just the code."""
+        
+        raw_code = CoreAI.generate_content(cfg, prompt)
+        
+        # Strip markdown if AI still adds it
+        if raw_code.startswith("```"):
+            lines = raw_code.split('\n')
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            raw_code = "\n".join(lines)
+            
+        return raw_code.strip()
+
 
 class TFormatManager:
     @staticmethod

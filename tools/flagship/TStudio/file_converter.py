@@ -2,10 +2,26 @@ from tstudio_i18n import _
 import os
 import subprocess
 import csv
-from PyQt6.QtWidgets import QMessageBox
+import importlib.util
+import requests
+import sys
+from PyQt6.QtWidgets import QMessageBox, QProgressDialog
+from PyQt6.QtCore import Qt
+
+if getattr(sys, 'frozen', False):
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
+CUSTOM_PARSERS_DIR = os.path.join(BASE_DIR, "TStudio", "CustomParsers")
+os.makedirs(CUSTOM_PARSERS_DIR, exist_ok=True)
+
+GITHUB_REPO_URL = "https://raw.githubusercontent.com/memolyviza2012-max/TFormat-Plugins/main/"
 
 def auto_convert_to_csv(filepath, parent_widget=None):
     ext = os.path.splitext(filepath)[1].lower()
+    
+    # 1. Built-in parsers
     if ext in ['.locres', '.lor']:
         return convert_locres_to_tstudio_csv(filepath, parent_widget)
     elif ext == '.pak':
@@ -16,8 +32,96 @@ def auto_convert_to_csv(filepath, parent_widget=None):
         raise ValueError("ไม่พบข้อความที่สามารถแปลได้ในไฟล์ .pak นี้ หรือไม่ใช่ Chromium PAK v5")
     elif ext == '.csv':
         return filepath # Already a CSV
-    else:
-        raise ValueError(f"ยังไม่รองรับไฟล์นามสกุล: {ext}")
+        
+    # 2. Dynamic Custom Parsers
+    ext_clean = ext.replace('.', '')
+    parser_filename = f"{ext_clean}_parser.py"
+    parser_path = os.path.join(CUSTOM_PARSERS_DIR, parser_filename)
+    
+    if os.path.exists(parser_path):
+        return load_and_run_parser(parser_path, filepath, parent_widget)
+        
+    # 3. Check Cloud Repository
+    cloud_url = f"{GITHUB_REPO_URL}{parser_filename}"
+    progress = None
+    try:
+        if parent_widget:
+            progress = QProgressDialog(f"กำลังค้นหาปลั๊กอินตัวอ่านไฟล์ {ext} บน Cloud...", "ยกเลิก", 0, 0, parent_widget)
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
+            progress.show()
+            
+        res = requests.get(cloud_url, timeout=5)
+        
+        if progress:
+            progress.close()
+            
+        if res.status_code == 200:
+            with open(parser_path, 'w', encoding='utf-8') as f:
+                f.write(res.text)
+            return load_and_run_parser(parser_path, filepath, parent_widget)
+    except Exception:
+        if progress:
+            progress.close()
+            
+    # 4. Ask AI to Generate
+    if parent_widget:
+        reply = QMessageBox.question(parent_widget, _("Unsupported Format"), 
+            f"ไม่รู้จักไฟล์นามสกุล '{ext}' และไม่พบปลั๊กอินบน Cloud.\nคุณต้องการให้ AI วิเคราะห์ไฟล์และพยายามเขียนสคริปต์ตัวอ่านไฟล์นี้ให้หรือไม่?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            
+        if reply == QMessageBox.StandardButton.Yes:
+            return generate_and_run_ai_parser(filepath, ext, parser_path, parent_widget)
+
+    raise ValueError(f"ยังไม่รองรับไฟล์นามสกุล: {ext}\nหากคุณมีปลั๊กอิน กรุณานำไปใส่ในโฟลเดอร์ CustomParsers")
+
+def load_and_run_parser(parser_path, filepath, parent_widget):
+    try:
+        spec = importlib.util.spec_from_file_location("custom_parser", parser_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        
+        if hasattr(module, 'convert_to_csv'):
+            return module.convert_to_csv(filepath, parent_widget)
+        else:
+            raise ValueError(f"ปลั๊กอิน {os.path.basename(parser_path)} ไม่มีฟังก์ชัน convert_to_csv")
+    except Exception as e:
+        raise ValueError(f"เกิดข้อผิดพลาดในการรันปลั๊กอิน {os.path.basename(parser_path)}: {e}")
+
+def generate_and_run_ai_parser(filepath, ext, parser_path, parent_widget):
+    from tstudio_core import TStudioCore, CoreAI
+    
+    # Read sample
+    sample_text = ""
+    try:
+        with open(filepath, 'rb') as f:
+            raw = f.read(3000)
+            sample_text = raw.decode('utf-8', errors='replace')
+    except Exception as e:
+        raise ValueError(f"ไม่สามารถอ่านไฟล์เพื่อส่งให้ AI ได้: {e}")
+        
+    cfg = TStudioCore.load_config()
+    
+    progress = QProgressDialog(f"AI กำลังวิเคราะห์และเขียนสคริปต์สำหรับไฟล์ {ext}...", "ยกเลิก", 0, 0, parent_widget)
+    progress.setWindowModality(Qt.WindowModality.WindowModal)
+    progress.show()
+    
+    try:
+        code = CoreAI.generate_format_parser(cfg, sample_text, ext)
+        progress.close()
+        
+        if not code or "convert_to_csv" not in code:
+             raise ValueError("AI ไม่สามารถสร้างโค้ดที่ถูกต้องได้")
+             
+        with open(parser_path, 'w', encoding='utf-8') as f:
+            f.write(code)
+            
+        QMessageBox.information(parent_widget, "AI Generator", "AI สร้างปลั๊กอินสำเร็จ! กำลังพยายามเปิดไฟล์...")
+        return load_and_run_parser(parser_path, filepath, parent_widget)
+        
+    except Exception as e:
+        if progress:
+            progress.close()
+        raise ValueError(f"AI Generator Error: {e}")
 
 def convert_locres_to_tstudio_csv(filepath, parent_widget=None):
     base_dir = os.path.dirname(filepath)
