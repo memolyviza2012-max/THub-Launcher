@@ -1256,21 +1256,26 @@ class ChangeCoverDialog(ctk.CTkToplevel):
                 
             ctk_img = ctk.CTkImage(light_image=img, size=(img.width, img.height))
             
-            if is_auto:
-                self.img_preview_lbl.configure(image=ctk_img, text="")
-                self.lbl_status.configure(text=_("✅ พรีวิวพร้อมใช้งาน!"))
-                self.btn_apply_auto.configure(state="normal")
-            else:
-                self.url_preview_lbl.configure(image=ctk_img, text="")
-                self.lbl_url_status.configure(text=_("✅ โหลดภาพสำเร็จ"))
-                self.btn_apply_url.configure(state="normal")
-                self.btn_url.configure(state="normal")
+            def update_ui_success():
+                if is_auto:
+                    self.img_preview_lbl.configure(image=ctk_img, text="")
+                    self.lbl_status.configure(text=_("✅ พรีวิวพร้อมใช้งาน!"))
+                    self.btn_apply_auto.configure(state="normal")
+                else:
+                    self.url_preview_lbl.configure(image=ctk_img, text="")
+                    self.lbl_url_status.configure(text=_("✅ โหลดภาพสำเร็จ"))
+                    self.btn_apply_url.configure(state="normal")
+                    self.btn_url.configure(state="normal")
+            
+            self.after(0, update_ui_success)
         except Exception as e:
-            if is_auto:
-                self.lbl_status.configure(text=f"❌ โหลดพรีวิวล้มเหลว: {e}")
-            else:
-                self.lbl_url_status.configure(text=f"❌ โหลดล้มเหลว: {e}")
-                self.btn_url.configure(state="normal")
+            def update_ui_error(err=e):
+                if is_auto:
+                    self.lbl_status.configure(text=f"❌ โหลดพรีวิวล้มเหลว: {err}")
+                else:
+                    self.lbl_url_status.configure(text=f"❌ โหลดล้มเหลว: {err}")
+                    self.btn_url.configure(state="normal")
+            self.after(0, update_ui_error)
         
     def apply_auto_image(self):
         if self.current_preview_image:
@@ -1525,7 +1530,7 @@ class ModderHubApp(ctk.CTk):
         try:
             tmp_file = CONFIG_FILE + ".tmp"
             with open(tmp_file, 'w', encoding='utf-8') as f:
-                json.dump(self.config, f, indent=4)
+                json.dump(self.config, f, indent=4, ensure_ascii=False)
             os.replace(tmp_file, CONFIG_FILE)
         except (PermissionError, OSError) as e:
             from tkinter import messagebox
@@ -2712,7 +2717,7 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             if response.status_code == 200:
                 data = response.json()
                 tag_name = data.get("tag_name", "v0.0.0")
-                latest_version = tag_name.replace("v", "")
+                latest_version = tag_name[1:] if tag_name.lower().startswith("v") else tag_name
                 body = data.get("body", _("ไม่มีข้อมูลอัปเดต"))
                 
                 if version.parse(latest_version) > version.parse(CURRENT_VERSION):

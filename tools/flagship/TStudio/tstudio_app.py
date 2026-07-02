@@ -407,9 +407,6 @@ from PyQt6.QtCore import QSize
 class HtmlDelegate(QStyledItemDelegate):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.doc = QTextDocument()
-        self.doc.setDefaultStyleSheet("body { color: #cdd6f4; font-family: inherit; font-size: 13px; }")
-        self.doc.setDocumentMargin(4)
 
     def paint(self, painter, option, index):
         from PyQt6.QtWidgets import QStyleOptionViewItem
@@ -434,7 +431,16 @@ class HtmlDelegate(QStyledItemDelegate):
             # simple escape
             text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             
-        self.doc.setHtml(f"<body>{text}</body>")
+        doc = QTextDocument(self)
+        doc.setDefaultStyleSheet("body { color: #cdd6f4; font-family: inherit; font-size: 13px; }")
+        
+        text = options.text
+        if "<span" not in text:
+            text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+            
+        doc.setTextWidth(option.rect.width())
+        doc.setHtml(f"<body>{text}</body>")
+        doc.setDocumentMargin(4)
 
         painter.translate(option.rect.left(), option.rect.top())
         clip = option.rect.translated(-option.rect.left(), -option.rect.top())
@@ -442,17 +448,22 @@ class HtmlDelegate(QStyledItemDelegate):
 
         ctx = QAbstractTextDocumentLayout.PaintContext()
         ctx.palette = option.palette
-        self.doc.documentLayout().draw(painter, ctx)
+        doc.documentLayout().draw(painter, ctx)
         painter.restore()
 
     def sizeHint(self, option, index):
         options = option
         self.initStyleOption(options, index)
+        doc = QTextDocument(self)
+        doc.setDefaultStyleSheet("body { color: #cdd6f4; font-family: inherit; font-size: 13px; }")
         text = options.text
         if "<span" not in text:
             text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        self.doc.setHtml(text)
-        return QSize(int(self.doc.idealWidth()), 30)
+        
+        doc.setTextWidth(option.rect.width())
+        doc.setHtml(f"<body>{text}</body>")
+        doc.setDocumentMargin(4)
+        return QSize(int(doc.idealWidth()), 30)
 
 class CsvTableModel(QAbstractTableModel):
 
@@ -842,8 +853,8 @@ class TranslationStudio(QMainWindow):
         self.search_input.setMinimumWidth(100)
         self._search_timer = QTimer(self)
         self._search_timer.setSingleShot(True)
-        self._search_timer.timeout.connect(lambda: self.proxy.set_search(self.search_input.text()))
-        self.search_input.textChanged.connect(lambda: self._search_timer.start(300))
+        self._search_timer.timeout.connect(lambda *args: self.proxy.set_search(self.search_input.text()))
+        self.search_input.textChanged.connect(lambda *args: self._search_timer.start(300))
         top_layout.addWidget(self.search_input)
 
         self.filter_combo = QComboBox()
@@ -968,37 +979,37 @@ class TranslationStudio(QMainWindow):
         
         act_sp_transliterate = self.special_menu.addAction(_("menu_transliterate"))
         act_sp_transliterate.setToolTip(_("tooltip_menu_transliterate"))
-        act_sp_transliterate.triggered.connect(lambda: self.retranslate_special("transliterate"))
+        act_sp_transliterate.triggered.connect(lambda *args: self.retranslate_special("transliterate"))
         self.special_menu.addSeparator()
         
         act_sp_idiom = self.special_menu.addAction(_("menu_idiom"))
         act_sp_idiom.setToolTip(_("tooltip_menu_idiom"))
-        act_sp_idiom.triggered.connect(lambda: self.retranslate_special("idiom"))
+        act_sp_idiom.triggered.connect(lambda *args: self.retranslate_special("idiom"))
         
         act_sp_poem = self.special_menu.addAction(_("menu_poem"))
         act_sp_poem.setToolTip(_("tooltip_menu_poem"))
-        act_sp_poem.triggered.connect(lambda: self.retranslate_special("poem"))
+        act_sp_poem.triggered.connect(lambda *args: self.retranslate_special("poem"))
         
         act_sp_quote = self.special_menu.addAction(_("menu_quote"))
         act_sp_quote.setToolTip(_("tooltip_menu_quote"))
-        act_sp_quote.triggered.connect(lambda: self.retranslate_special("quote"))
+        act_sp_quote.triggered.connect(lambda *args: self.retranslate_special("quote"))
         self.special_menu.addSeparator()
         
         act_sp_mature = self.special_menu.addAction(_("menu_mature"))
         act_sp_mature.setToolTip(_("tooltip_menu_mature"))
-        act_sp_mature.triggered.connect(lambda: self.retranslate_special("mature"))
+        act_sp_mature.triggered.connect(lambda *args: self.retranslate_special("mature"))
         
         act_sp_fantasy = self.special_menu.addAction(_("menu_fantasy"))
         act_sp_fantasy.setToolTip(_("tooltip_menu_fantasy"))
-        act_sp_fantasy.triggered.connect(lambda: self.retranslate_special("fantasy"))
+        act_sp_fantasy.triggered.connect(lambda *args: self.retranslate_special("fantasy"))
         
         act_sp_robotic = self.special_menu.addAction(_("menu_robotic"))
         act_sp_robotic.setToolTip(_("tooltip_menu_robotic"))
-        act_sp_robotic.triggered.connect(lambda: self.retranslate_special("robotic"))
+        act_sp_robotic.triggered.connect(lambda *args: self.retranslate_special("robotic"))
         
         act_sp_casual = self.special_menu.addAction(_("menu_casual"))
         act_sp_casual.setToolTip(_("tooltip_menu_casual"))
-        act_sp_casual.triggered.connect(lambda: self.retranslate_special("casual"))
+        act_sp_casual.triggered.connect(lambda *args: self.retranslate_special("casual"))
         
         self.btn_trans_special.setMenu(self.special_menu)
         btn_row.addWidget(self.btn_trans_special)
@@ -1023,7 +1034,7 @@ class TranslationStudio(QMainWindow):
         self._trans_save_timer = QTimer(self)
         self._trans_save_timer.setSingleShot(True)
         self._trans_save_timer.timeout.connect(self.on_trans_changed)
-        self.txt_trans.textChanged.connect(lambda: self._trans_save_timer.start(150))
+        self.txt_trans.textChanged.connect(lambda *args: self._trans_save_timer.start(150))
         # When table data changes (via double click edit), update text box if it's the current row
         self.model.dataChanged.connect(self._on_table_data_changed)
         
@@ -1165,13 +1176,13 @@ class TranslationStudio(QMainWindow):
         act_undo = QAction(_("act_undo"), self)
         act_undo.setToolTip(_("tooltip_act_undo"))
         act_undo.setShortcut("Ctrl+Z")
-        act_undo.triggered.connect(lambda: QApplication.focusWidget().undo() if hasattr(QApplication.focusWidget(), 'undo') else None)
+        act_undo.triggered.connect(lambda *args: QApplication.focusWidget().undo() if hasattr(QApplication.focusWidget(), 'undo') else None)
         edit_menu.addAction(act_undo)
         
         act_redo = QAction(_("act_redo"), self)
         act_redo.setToolTip(_("tooltip_act_redo"))
         act_redo.setShortcut("Ctrl+Y")
-        act_redo.triggered.connect(lambda: QApplication.focusWidget().redo() if hasattr(QApplication.focusWidget(), 'redo') else None)
+        act_redo.triggered.connect(lambda *args: QApplication.focusWidget().redo() if hasattr(QApplication.focusWidget(), 'redo') else None)
         edit_menu.addAction(act_redo)
         
         edit_menu.addSeparator()
@@ -1179,19 +1190,19 @@ class TranslationStudio(QMainWindow):
         act_cut = QAction(_("act_cut"), self)
         act_cut.setToolTip(_("tooltip_act_cut"))
         act_cut.setShortcut("Ctrl+X")
-        act_cut.triggered.connect(lambda: QApplication.focusWidget().cut() if hasattr(QApplication.focusWidget(), 'cut') else None)
+        act_cut.triggered.connect(lambda *args: QApplication.focusWidget().cut() if hasattr(QApplication.focusWidget(), 'cut') else None)
         edit_menu.addAction(act_cut)
         
         act_copy = QAction(_("act_copy"), self)
         act_copy.setToolTip(_("tooltip_act_copy"))
         act_copy.setShortcut("Ctrl+C")
-        act_copy.triggered.connect(lambda: QApplication.focusWidget().copy() if hasattr(QApplication.focusWidget(), 'copy') else None)
+        act_copy.triggered.connect(lambda *args: QApplication.focusWidget().copy() if hasattr(QApplication.focusWidget(), 'copy') else None)
         edit_menu.addAction(act_copy)
         
         act_paste = QAction(_("act_paste"), self)
         act_paste.setToolTip(_("tooltip_act_paste"))
         act_paste.setShortcut("Ctrl+V")
-        act_paste.triggered.connect(lambda: QApplication.focusWidget().paste() if hasattr(QApplication.focusWidget(), 'paste') else None)
+        act_paste.triggered.connect(lambda *args: QApplication.focusWidget().paste() if hasattr(QApplication.focusWidget(), 'paste') else None)
         edit_menu.addAction(act_paste)
         
         edit_menu.addSeparator()
@@ -1199,7 +1210,7 @@ class TranslationStudio(QMainWindow):
         act_fr = QAction(_("act_find_replace"), self)
         act_fr.setToolTip(_("tooltip_act_fr"))
         act_fr.setShortcut(QKeySequence("Ctrl+F"))
-        act_fr.triggered.connect(lambda: FindReplaceDialog(self).exec())
+        act_fr.triggered.connect(lambda *args: FindReplaceDialog(self).exec())
         edit_menu.addAction(act_fr)
         
         edit_menu.addSeparator()
@@ -1890,7 +1901,6 @@ class TranslationStudio(QMainWindow):
                     self.open_glossary()
                 self.tlm_widget = TLMLoreLibrary(self.glossary_widget, self)
                 self.tlm_dock.setWidget(self.tlm_widget)
-                self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.tlm_dock)
             except Exception as e:
                 import traceback
                 traceback.print_exc()
@@ -2106,19 +2116,23 @@ class TranslationStudio(QMainWindow):
         if hasattr(self, 'glossary_widget'):
             is_visible = self.glossary_dock.isVisible()
             if not getattr(self.glossary_widget, '_is_modified', False):
+                if hasattr(self, 'tlm_widget'):
+                    self.tlm_widget.setParent(None)
+                    self.tlm_widget.deleteLater()
+                    delattr(self, 'tlm_widget')
                 self.glossary_widget.setParent(None)
                 self.glossary_widget.deleteLater()
-                del self.glossary_widget
+                delattr(self, 'glossary_widget')
                 if is_visible:
                     self.glossary_widget = GlossaryWidget(self.glossary_dock)
                     self.glossary_dock.setWidget(self.glossary_widget)
-
-                    try:
-                        from tstudio_tlm_library import TLMLoreLibrary
-                        self.tlm_widget = TLMLoreLibrary(self.glossary_widget, self)
-                        self.tlm_dock.setWidget(self.tlm_widget)
-                    except Exception as e:
-                        print(f"Error initializing TLM: {e}")
+                    if hasattr(self, 'tlm_dock') and self.tlm_dock.isVisible():
+                        try:
+                            from tstudio_tlm_library import TLMLoreLibrary
+                            self.tlm_widget = TLMLoreLibrary(self.glossary_widget, self)
+                            self.tlm_dock.setWidget(self.tlm_widget)
+                        except Exception as e:
+                            print(f"Error initializing TLM: {e}")
             else:
                 self.statusBar().showMessage("Glossary has unsaved changes for the old profile. Please save them.", 4000)
 

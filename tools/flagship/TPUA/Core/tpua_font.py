@@ -61,9 +61,12 @@ class TPUAFontEngine:
             
             for i, char in enumerate(chars):
                 cp = ord(char)
-                # Handle Sara Am (0E33) -> Nikhahit (0E4D) for the composite
                 if cp == 0x0E33:
-                    cp = 0x0E4D
+                    n_name = cmap.get(0x0E4D)
+                    a_name = cmap.get(0x0E32)
+                    if n_name: components.append((n_name, 0, 0))
+                    if a_name: components.append((a_name, 0, 0))
+                    continue
                     
                 glyph_name = cmap.get(cp)
                 if not glyph_name:
@@ -93,8 +96,8 @@ class TPUAFontEngine:
                 comp.glyphName = gname
                 comp.x = dx
                 comp.y = dy
-                # Use 0x1000 (USE_MY_METRICS)
-                comp.flags = 0x1000
+                # Use ROUND_XY_TO_GRID (0x0004) and ARGS_ARE_XY_VALUES (0x0002)
+                comp.flags = 0x1006
                 new_glyph.components.append(comp)
 
             if not valid_components or not new_glyph.components:

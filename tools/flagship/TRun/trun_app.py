@@ -1073,17 +1073,37 @@ class TRunApp(QMainWindow):
             
         import os
         if not os.path.exists(output_path):
-            QMessageBox.warning(self, "Not Found", f"Output file does not exist yet:\\n{output_path}\\nPlease run the translation first.")
+            QMessageBox.warning(self, "Not Found", f"Output file does not exist yet:\n{output_path}\nPlease run the translation first.")
             return
+            
+        try:
+            from tstudio_core import TStudioCore, TPakManager
+            cfg = TStudioCore.load_config()
+            origin_file = cfg.get("origin_file", "")
+            if origin_file and origin_file.lower().endswith('.pak') and os.path.exists(origin_file):
+                try:
+                    TPakManager.reconstruct_pak_file(origin_file, output_path, origin_file)
+                    QMessageBox.information(self, "Deploy Success", f"Deployed successfully back to PAK file:\n{origin_file}")
+                    return
+                except Exception as e:
+                    QMessageBox.warning(self, "Deploy Failed", str(e))
+                    return
+        except Exception as e:
+            pass
             
         try:
             from tbundle_manager import TBundleManager
             base_dir = os.path.dirname(output_path)
-            json_path = os.path.join(base_dir, f"{os.path.basename(output_path).replace('.csv', '')}_meta.json")
+            stem = os.path.basename(output_path).replace('.csv', '')
+            possible_stem = stem.replace('_translated', '')
+            json_path = os.path.join(base_dir, f"{stem}_meta.json")
+            if not os.path.exists(json_path):
+                json_path = os.path.join(base_dir, f"{possible_stem}_meta.json")
+                
             if os.path.exists(json_path):
                 success, msg_or_path = TBundleManager.deploy_csv_to_bundle(output_path)
                 if success:
-                    QMessageBox.information(self, "Deploy Success", f"Deployed successfully back to Unity Bundle:\\n{msg_or_path}")
+                    QMessageBox.information(self, "Deploy Success", f"Deployed successfully back to Unity Bundle:\n{msg_or_path}")
                 else:
                     QMessageBox.warning(self, "Deploy Failed", msg_or_path)
                 return
@@ -1126,7 +1146,12 @@ class TRunApp(QMainWindow):
             try:
                 stem = os.path.splitext(os.path.basename(csv_file))[0]
                 json_path = os.path.join(input_folder, f'{stem}_meta.json')
+                if not os.path.exists(json_path) and os.path.exists(os.path.join(input_folder + "_formatted", f'{stem}_meta.json')):
+                    json_path = os.path.join(input_folder + "_formatted", f'{stem}_meta.json')
+                    
                 pak_path = os.path.join(input_folder, f'{stem}.pak')
+                if not os.path.exists(pak_path) and os.path.exists(os.path.join(input_folder + "_formatted", f'{stem}.pak')):
+                    pak_path = os.path.join(input_folder + "_formatted", f'{stem}.pak')
 
                 # Check PAK deployment first
                 from tstudio_core import TPakManager
@@ -1143,7 +1168,7 @@ class TRunApp(QMainWindow):
 
                 # Check Bundle first
                 if os.path.exists(json_path):
-                    success, msg = TBundleManager.deploy_csv_to_bundle(csv_file)
+                    success, msg = TBundleManager.deploy_csv_to_bundle(csv_file, original_meta_path=json_path)
                     if success:
                         success_count += 1
                     else:
@@ -1152,7 +1177,7 @@ class TRunApp(QMainWindow):
                     continue
                     
                 # Fallback to normal export_original
-                success, msg = TFormatManager.export_original(csv_file)
+                success, msg = TFormatManager.export_original(csv_file, original_meta_path=json_path)
                 if success:
                     success_count += 1
                 else:
