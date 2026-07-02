@@ -512,51 +512,7 @@ class AIHelperDialog(ctk.CTkToplevel):
         source_lang = self.proj.get("source_lang", "English")
         target_lang = self.proj.get("target_lang", "Thai")
 
-        if app_lang == "en":
-            template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
-
-Context & Goal:
-I want to create a professional language localization Mod for the game: {name}
-Translating from **{source_lang}** to **{target_lang}**.
-We will work step-by-step in a systematic and safe manner. Here is the project overview:
-
-Environment & Workspace:
-- Workspace: {path} (Using THub's 01–06 folder structure)
-- Game Directory: {game_dir}
-- Tool Directory: {tool_dir}
-- Modding Knowledge Base: {KNOWLEDGE_DIR}
-
-[IMPORTANT] Workspace Safety Rules:
-1. Never create working files outside this Workspace.
-2. The "01_Original_Backup" folder is Read-Only. Never overwrite or modify it.
-
-Milestones & Workflow (work step by step; only advance when I say "Proceed to step..."):
-
-1. Extraction & Analysis:
-   - Study the game engine and research from the Modding-Knowledge base for guidance.
-   - Locate language files and extract text (dialogues, UI, cutscenes) into 01_Original_Backup.
-   - Analyze encoding of original files (UTF-8, UTF-8 with BOM, ANSI, etc.).
-   - Analyze archive structure (.pak, .arc, .bin, etc.) to identify needed Unpack/Pack tools.
-
-2. Font & UI Architecture ({target_lang}):
-   - Check where the game's original fonts are stored and their format (.ttf, .otf, Font Atlas/Sprite).
-   - Plan the encoding process for {target_lang} characters and prepare the font in 03_Font_and_UI.
-
-3. Pre-Translation Glossary:
-   - Scan all text files to extract specific terms (character names, locations, items, skills).
-   - Maintain a glossary of translated terms for consistent reference throughout the project.
-
-4. Proof of Concept:
-   - Translate only the "Main Menu" section in 02_Translation_Workspace.
-   - Pack files and test in 04_Packed_Mod to confirm {target_lang} font renders correctly.
-
-5. Script Customization & Safety Rules:
-   - Develop or adapt extraction/injection scripts and store in 05_Scripts_and_Tools.
-   - [Hard Rule] Scripts must never modify or remove game code tags (e.g. %s, [0], <color=red>, \\n).
-   - [Coding Rule] Always show complete code. Never use placeholder abbreviations.
-
-If you understand all goals and agreements, confirm and immediately begin "Step 1"."""
-        else:
+        if app_lang == "th":
             template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
 
 Context & Goal:
@@ -600,6 +556,50 @@ Milestones & Workflow (ทำทีละขั้นตอน เมื่อ�
    - [กฎการเขียนโค้ด] แสดงโค้ดฉบับเต็มเสมอ ห้ามใช้ Placeholder ย่อโค้ด
 
 หากเข้าใจทุกอย่างแล้ว ให้ยืนยันและเริ่ม "ขั้นตอนที่ 1" ได้ทันที"""
+        else:
+            template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
+
+Context & Goal:
+I want to create a professional language localization Mod for the game: {name}
+Translating from **{source_lang}** to **{target_lang}**.
+We will work step-by-step in a systematic and safe manner. Here is the project overview:
+
+Environment & Workspace:
+- Workspace: {path} (Using THub's 01–06 folder structure)
+- Game Directory: {game_dir}
+- Tool Directory: {tool_dir}
+- Modding Knowledge Base: {KNOWLEDGE_DIR}
+
+[IMPORTANT] Workspace Safety Rules:
+1. Never create working files outside this Workspace.
+2. The "01_Original_Backup" folder is Read-Only. Never overwrite or modify it.
+
+Milestones & Workflow (work step by step; only advance when I say "Proceed to step..."):
+
+1. Extraction & Analysis:
+   - Study the game engine and research from the Modding-Knowledge base for guidance.
+   - Locate language files and extract text (dialogues, UI, cutscenes) into 01_Original_Backup.
+   - Analyze encoding of original files (UTF-8, UTF-8 with BOM, ANSI, etc.).
+   - Analyze archive structure (.pak, .arc, .bin, etc.) to identify needed Unpack/Pack tools.
+
+2. Font & UI Architecture ({target_lang}):
+   - Check where the game's original fonts are stored and their format (.ttf, .otf, Font Atlas/Sprite).
+   - Plan the encoding process for {target_lang} characters and prepare the font in 03_Font_and_UI.
+
+3. Pre-Translation Glossary:
+   - Scan all text files to extract specific terms (character names, locations, items, skills).
+   - Maintain a glossary of translated terms for consistent reference throughout the project.
+
+4. Proof of Concept:
+   - Translate only the "Main Menu" section in 02_Translation_Workspace.
+   - Pack files and test in 04_Packed_Mod to confirm {target_lang} font renders correctly.
+
+5. Script Customization & Safety Rules:
+   - Develop or adapt extraction/injection scripts and store in 05_Scripts_and_Tools.
+   - [Hard Rule] Scripts must never modify or remove game code tags (e.g. %s, [0], <color=red>, \\n).
+   - [Coding Rule] Always show complete code. Never use placeholder abbreviations.
+
+If you understand all goals and agreements, confirm and immediately begin "Step 1"."""
 
         return template.format(
             name=name, source_lang=source_lang, target_lang=target_lang,
@@ -612,13 +612,13 @@ Milestones & Workflow (ทำทีละขั้นตอน เมื่อ�
         name        = self.proj.get("name", "Unknown")
         path        = self.proj.get("path", "Unknown")
         app_lang    = self.parent.config.get("app_lang", "th")
-        game_dir    = self.proj.get("game_dir",  "[Game directory not set]" if app_lang == "en" else "[รอการระบุตำแหน่งติดตั้งเกมจากผู้ใช้]")
-        tool_dir    = self.proj.get("tool_dir",  "[Tool directory not set]" if app_lang == "en" else "[รอการระบุตำแหน่งโฟลเดอร์เครื่องมือ]")
+        game_dir    = self.proj.get("game_dir",  "[รอการระบุตำแหน่งติดตั้งเกมจากผู้ใช้]" if app_lang == "th" else "[Game directory not set]")
+        tool_dir    = self.proj.get("tool_dir",  "[รอการระบุตำแหน่งโฟลเดอร์เครื่องมือ]" if app_lang == "th" else "[Tool directory not set]")
         source_lang = self.proj.get("source_lang", "English")
         target_lang = self.proj.get("target_lang", "Thai")
 
         opt = {k: v.get() for k, v in self._chk_vars.items()}
-        is_en = (app_lang == "en")
+        is_en = (app_lang != "th")
 
         # ── Core Prompt Block ──────────────────────────────────────────────
         if is_en:
