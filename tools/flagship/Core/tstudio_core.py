@@ -198,6 +198,22 @@ class TStudioCore:
             if "Default" not in data["presets"]:
                 data["presets"]["Default"] = {"single": "", "opt": "", "batch": "", "glossary": {}}
                 
+        # If we have a project path, auto-activate a preset matching the project name
+        if cls._PROJECT_PATH:
+            thub_meta = os.path.join(cls._PROJECT_PATH, "thub_project.json")
+            if os.path.exists(thub_meta):
+                try:
+                    with open(thub_meta, "r", encoding="utf-8") as f:
+                        meta = json.load(f)
+                    proj_name = meta.get("project_name", "")
+                    if proj_name:
+                        if proj_name not in data["presets"]:
+                            data["presets"][proj_name] = {"single": "", "opt": "", "batch": "", "glossary": {}}
+                        if data["active_preset"] != proj_name:
+                            data["active_preset"] = proj_name
+                except Exception as e:
+                    print(f"Error auto-activating project preset: {e}")
+
         # Auto-create the file if it doesn't exist
         if not os.path.exists(target_path):
             cls.save_profiles(data)
