@@ -402,10 +402,10 @@ class AIHelperDialog(ctk.CTkToplevel):
         self.lbl_desc.pack(pady=(0, 10))
 
         # --- Segmented Button (Tabs) ---
-        self.tab_var = ctk.StringVar(value=_("💬 โหมดแชท (ChatGPT / Claude)"))
+        self.tab_var = ctk.StringVar(value=_("💬 โหมดที่ปรึกษา (วางใน ChatGPT / Claude)"))
         self.seg_btn = ctk.CTkSegmentedButton(
             self,
-            values=[_("💬 โหมดแชท (ChatGPT / Claude)"), _("💻 โหมด Agent (Cline / Aider)")],
+            values=[_("💬 โหมดที่ปรึกษา (วางใน ChatGPT / Claude)"), _("💻 โหมดปฏิบัติการ (Codex / Claude Code / Antigravity)")],
             variable=self.tab_var,
             command=self.on_tab_change,
             font=ctk.CTkFont(weight="bold")
@@ -513,113 +513,85 @@ class AIHelperDialog(ctk.CTkToplevel):
         target_lang = self.proj.get("target_lang", "Thai")
 
         if app_lang == "th":
-            template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
+            template = """🎮 Master Prompt: Game Localization Consultant ({target_lang} Mod) - THub Edition
 
-Context & Goal: 
-ฉันต้องการสร้าง Mod แปลภาษาระดับมืออาชีพสำหรับเกม: {name} 
-โดยจะทำการแปลจากภาษา **{source_lang}** เป็นภาษา **{target_lang}**
-เราจะทำงานร่วมกันทีละขั้นตอนอย่างเป็นระบบและปลอดภัย นี่คือข้อมูลเบื้องต้นของโปรเจค:
+Context & Role: 
+ฉันกำลังสร้าง Mod แปลภาษาระดับมืออาชีพสำหรับเกม: {name} 
+โดยทำการแปลจากภาษา **{source_lang}** เป็นภาษา **{target_lang}**
+เนื่องจากคุณทำงานบน Web Chat (เบราว์เซอร์) คุณจะ **ไม่มีสิทธิ์เข้าถึงไฟล์ในเครื่องของฉัน** 
+ดังนั้น บทบาทของคุณคือ "ผู้เชี่ยวชาญให้คำปรึกษาและผู้เขียน Python Script" โดยฉันจะเป็นคนนำ Script ที่คุณเขียนไปรันบนเครื่องของฉันเอง
 
-Environment & Workspace:
+Environment & Workspace ของฉัน (เพื่อใช้อ้างอิงในการเขียนโค้ด):
 - Workspace: {path} (ใช้โครงสร้าง 01 ถึง 06 ของ THub)
 - Game Directory: {game_dir}
-- ตำแหน่งเครื่องมือ: {tool_dir}
-- แหล่งอ้างอิงข้อมูลม็อด: {KNOWLEDGE_DIR}
+- Tool Directory: {tool_dir}
+- Modding Knowledge Base: {KNOWLEDGE_DIR}
 
-[สำคัญ] กฎความปลอดภัยของ Workspace:
-1. ห้ามสร้างไฟล์ทำงานนอกเหนือจาก Workspace นี้เด็ดขาด
-2. โฟลเดอร์ "01_Original_Backup" ถือเป็นไฟล์ต้นฉบับดั้งเดิม (Read-Only) ห้ามทำการเขียนทับหรือแก้ไขเด็ดขาด ให้ใช้สำหรับการอ่านและแบ็คอัปเท่านั้น
+[สำคัญ] กฎการให้คำปรึกษาและเขียนโค้ด:
+1. การเขียน Script ทั้งหมด ต้องอ้างอิงตำแหน่งโฟลเดอร์ตาม Workspace ด้านบน
+2. โฟลเดอร์ "01_Original_Backup" ถือเป็นไฟล์ต้นฉบับดั้งเดิม (Read-Only) ห้ามเขียน Script ที่เข้าไปดัดแปลงไฟล์ในนั้น ให้เขียน Script คัดลอกออกมาก่อนเสมอ
+3. เมื่อคุณเขียนโค้ด Python โปรดแสดงโค้ดฉบับเต็มที่รันได้จริงเสมอ ห้ามใช้ Placeholder (เช่น # โค้ดส่วนที่เหลือ) ย่อโค้ดเด็ดขาด
+4. เมื่อฉันส่งข้อความสั้นๆ, โครงสร้างไฟล์, หรือ Error Code ไป ให้คุณวิเคราะห์ว่าต้องใช้เครื่องมืออะไร และเขียน Script ให้ฉันทีละขั้นตอน
 
-Milestones & Workflow (ทำทีละขั้นตอน เมื่อฉันบอกว่า "ผ่านขั้นตอนที่..." จึงจะย้ายไปข้อถัดไป):
+Milestones ที่คุณต้องคอยซัพพอร์ตและเขียน Script ให้ฉัน (เมื่อฉันบอกว่า "เริ่มขั้นตอนที่..." ค่อยให้คำแนะนำ):
 
-1. Extraction & Analysis (สกัดไฟล์และวิเคราะห์โครงสร้าง):
-   - ศึกษา Engine เกม และค้นหาข้อมูลจาก Modding-Knowledge เพื่อเป็นแนวทาง
-   - ค้นหาพิกัดไฟล์ภาษาและสกัดไฟล์ข้อความ (บทสนทนา, UI, คัทซีน) ออกมาเก็บไว้ใน 01_Original_Backup
-   - วิเคราะห์ Encoding ของไฟล์ดั้งเดิม (เช่น UTF-8, UTF-8 with BOM, หรือ ANSI) เพื่อรักษารหัสไฟล์ให้ตรงตามเดิมป้องกันสระภาษาไทยเสีย
-   - วิเคราะห์โครงสร้างก้อนไฟล์ (.pak, .arc, .bin ฯลฯ) เพื่อระบุเครื่องมือ Unpack/Pack ที่ต้องใช้
+1. Extraction & Analysis (วิเคราะห์และสกัดไฟล์ภาษา)
+   - ฉันจะส่งข้อมูล Engine ให้คุณวิเคราะห์ หรือขอให้คุณเขียน Script สำหรับค้นหาไฟล์ข้อความ
+2. Font & UI Architecture (ทำฟอนต์ภาษา {target_lang})
+   - ช่วยฉันวางแผนการทำฟอนต์แบบ PUA (สระหลบหลีก) และเขียนโค้ดคำนวณการเลื่อนสระ
+3. Pre-Translation Glossary (ดึงคำศัพท์เฉพาะ)
+   - เขียน Script สแกนไฟล์ข้อความทั้งหมดเพื่อดึง "คำเฉพาะ" ออกมาให้ฉันสร้าง Glossary
+4. Proof of Concept (แปลและทดสอบหน้าเมนูหลัก)
+   - เขียน Script ช่วยดึง/ใส่ข้อความกลับ เพื่อให้ฉันทดสอบหน้า Main Menu
+5. Script Customization & Safety Rules (พัฒนาเครื่องมือช่วยแปล)
+   - เขียน Script สำหรับดึง/ใส่ข้อความ โดยต้องมีระบบป้องกันไม่ให้แก้ไขแท็กโค้ดของเกม (เช่น %s, {{0}}, <color=red>) อย่างเด็ดขาด
+6. Mass Translation & Automated QA (สแกนข้อผิดพลาดก่อนแพ็ค)
+   - เขียน Validator Script เพื่อช่วยฉันเทียบเช็คความถูกต้องว่าแท็กโค้ดของไฟล์แปล หล่นหายไปหรือไม่
+7. Final Playtest & Release (ทดสอบและบิลด์ม็อด)
+   - เขียน Script สร้างไฟล์ .zip สำหรับแจกจ่ายงาน
 
-2. Font & UI Architecture (วิเคราะห์ระบบฟอนต์ภาษา {target_lang}):
-   - ตรวจสอบฟอนต์ดั้งเดิมของเกมว่าเก็บอยู่ที่ใดและเป็นฟอร์แมตไหน (.ttf, .otf, Font Atlas/Sprite)
-   - วางแผนกระบวนการเข้ารหัสวรรณยุกต์ไทย/สระลอย (เช่น การแปลงสระหลบหลีกเข้าช่วง PUA) และเตรียมฟอนต์ภาษา {target_lang} ให้พร้อมใช้ใน 03_Font_and_UI
-
-3. Pre-Translation Glossary (ดึงคำศัพท์เฉพาะ):
-   - ก่อนรันการแปล สแกนไฟล์ข้อความทั้งหมดเพื่อสกัด "คำเฉพาะ" (ชื่อตัวละคร, สถานที่, ไอเทม, ทักษะ) ออกมาแสดงเป็นลิสต์ให้ฉันกำหนดคำศัพท์มาตรฐาน (GLOSSARY)
-   - ลิสต์คำศัพท์ที่แปลเรียบร้อยแล้วต้องเก็บไว้ใช้อ้างอิงการแปลตลอดทั้งโปรเจค
-
-4. Proof of Concept (แปลและทดสอบหน้าเมนูหลัก):
-   - แปลข้อความเฉพาะส่วน "หน้าเมนูหลัก (Main Menu)" ใน 02_Translation_Workspace โดยเน้นความกระชับไม่ล้นกรอบ UI
-   - แพ็คไฟล์เมนูและฟอนต์ที่เตรียมไว้ไปวางทดสอบใน 04_Packed_Mod เพื่อยืนยันว่าฟอนต์ภาษา {target_lang} แสดงผลได้สระไม่เยื้อง/ไม่เป็นกล่องสี่เหลี่ยมเต้าหู้
-
-5. Script Customization & Safety Rules (พัฒนาเครื่องมือช่วยแปล):
-   - พัฒนาหรือดัดแปลงสคริปต์สำหรับช่วยดึง/ใส่ข้อความแปลเก็บไว้ใน 05_Scripts_and_Tools
-   - [กฎเหล็ก] สคริปต์ต้องห้ามแก้ไข ปรับเปลี่ยน หรือลบแท็กโค้ดและตัวแปรของเกมเด็ดขาด (เช่น %s, {{0}}, <color=red>, \\n, \\r)
-   - เมื่อเขียนสคริปต์เสร็จแล้ว ให้หยุดรอฉันป้อน API Key และอัปเดตไฟล์ Glossary ก่อนเริ่มกระบวนการถัดไป
-   - [กฎการเขียนโค้ด] เมื่อเขียนสคริปต์หรือโปรแกรม ให้แสดงโค้ดฉบับเต็มเสมอ ห้ามใช้ Placeholder ย่อโค้ดเด็ดขาด
-
-6. Mass Translation & Automated QA (แปลชุดใหญ่และสแกนข้อผิดพลาด):
-   - ทำการแปลข้อความที่เหลือทั้งหมดตามคำสั่ง
-   - ก่อนจะแพ็คไฟล์กลับ ให้เขียนสคริปต์สแกนตรวจสอบความถูกต้อง (Validator Script) เพื่อเช็คเทียบไฟล์ภาษา {target_lang} กับ {source_lang} ว่ามีตัวแปร (%s) หรือแท็กเปิด/ปิดใดๆ หล่นหายไปหรือไม่ หากตรวจพบ Error ให้แจ้งและหยุดทันที
-
-7. Final Playtest & Release (ทดสอบการเล่นจริงและส่งมอบ):
-   - ทำการรันเกมเพื่อทดสอบเล่นจริง ตรวจเช็คการแครชและสระต่างดาว
-   - หากพร้อมแจกจ่าย ให้สร้างไฟล์บิลด์สำเร็จรูป (.zip) ไปเก็บไว้ที่โฟลเดอร์ 06_Releases เพื่อส่งมอบงาน
-
-Instructions for AI: 
-หากเข้าใจเป้าหมาย โครงสร้างโฟลเดอร์ และข้อตกลงในการทำ Milestones ทั้งหมดแล้ว ให้ยืนยันความเข้าใจ และเริ่มทำงานใน "ขั้นตอนที่ 1 (Extraction & Analysis)" ได้ทันที โดยบอกฉันว่าคุณจะสแกนโฟลเดอร์ใดและต้องการข้อมูลอะไรเพิ่มเติมบ้างเพื่อระบุ Engine ของเกม"""
+Instructions for AI:
+หากเข้าใจบทบาทของคุณแล้ว ให้ตอบกลับสั้นๆ ว่า "รับทราบ! กรุณาบอกข้อมูล Engine ของเกม หรือส่งตัวอย่างไฟล์มาให้ฉันวิเคราะห์เพื่อเขียน Script ให้คุณในขั้นตอนที่ 1 ได้เลยครับ\""""
         else:
-            template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
+            template = """🎮 Master Prompt: Game Localization Consultant ({target_lang} Mod) - THub Edition
 
-Context & Goal: 
-I want to create a professional localization Mod for the game: {name} 
+Context & Role: 
+I am creating a professional localization Mod for the game: {name} 
 Translating from **{source_lang}** to **{target_lang}**.
-We will work together step-by-step in a systematic and safe manner. Here is the project overview:
+Since you are operating in a Web Chat environment (browser), you **DO NOT have access to my local files**. 
+Therefore, your role is strictly an "Expert Consultant & Python Script Writer". I will run the scripts you write on my local machine.
 
-Environment & Workspace:
+My Environment & Workspace (Reference for writing code):
 - Workspace: {path} (Using THub's 01 to 06 folder structure)
 - Game Directory: {game_dir}
 - Tool Directory: {tool_dir}
 - Modding Knowledge Base: {KNOWLEDGE_DIR}
 
-[IMPORTANT] Workspace Safety Rules:
-1. Never create working files outside this Workspace.
-2. The "01_Original_Backup" folder is the original backup (Read-Only). Never overwrite or modify it. Use it for reading and backup only.
+[IMPORTANT] Consulting & Coding Rules:
+1. All scripts you write must output files within the Workspace defined above.
+2. The "01_Original_Backup" folder is Read-Only. Never write scripts that modify it. Always copy files out first.
+3. When providing Python code, always write the FULL, runnable script. Never use placeholders (like `# rest of the code`).
+4. When I provide short context, hex dumps, or error logs, analyze what tools/methods are needed and write a step-by-step script for me to execute.
 
-Milestones & Workflow (Execute step-by-step. Only move to the next step when I say "Proceed to step..."):
+Milestones to Support Me (Give advice when I say "Start Step..."):
 
-1. Extraction & Analysis:
-   - Study the game Engine and search the Modding-Knowledge base for guidance.
-   - Locate language files and extract text (dialogues, UI, cutscenes) into 01_Original_Backup.
-   - Analyze original file Encoding (e.g., UTF-8, UTF-8 with BOM, or ANSI) to maintain exact encoding.
-   - Analyze archive structures (.pak, .arc, .bin, etc.) to identify required Unpack/Pack tools.
-
-2. Font & UI Architecture ({target_lang}):
-   - Check where original fonts are stored and their format (.ttf, .otf, Font Atlas/Sprite).
-   - Plan character encoding/PUA mapping and prepare the {target_lang} font in 03_Font_and_UI.
-
-3. Pre-Translation Glossary:
-   - Scan all text files to extract specific terms (character names, locations, items, skills) into a list for me to define as a standard GLOSSARY.
-   - Translated terms must be maintained for reference throughout the project.
-
-4. Proof of Concept (Main Menu translation and test):
-   - Translate only the "Main Menu" text in 02_Translation_Workspace, keeping it concise for UI fit.
-   - Pack the menu files and fonts, then test in 04_Packed_Mod to confirm font rendering is correct.
-
-5. Script Customization & Safety Rules:
-   - Develop or modify scripts to extract/inject translated text, storing them in 05_Scripts_and_Tools.
-   - [Hard Rule] Scripts must never modify or delete game tags/variables (e.g. %s, {{0}}, <color=red>, \\n, \\r).
-   - After writing scripts, wait for me to provide API Keys and update the Glossary before proceeding.
-   - [Coding Rule] Always provide full, runnable code. Never use placeholders.
-
-6. Mass Translation & Automated QA:
-   - Translate all remaining text as instructed.
-   - Before packing, write a Validator Script to cross-check {target_lang} vs {source_lang} files for missing variables (%s) or mismatched tags. Report errors and stop if found.
-
-7. Final Playtest & Release:
-   - Run the game for a real playtest, checking for crashes or font glitches.
-   - When ready for release, create a final build (.zip) in the 06_Releases folder.
+1. Extraction & Analysis
+   - I will provide Engine info, or you will write scripts for me to scan for language files.
+2. Font & UI Architecture ({target_lang})
+   - Help plan PUA character encoding and write scripts to calculate font bounds/rendering.
+3. Pre-Translation Glossary
+   - Write a script to scan all text files and extract specific terms to help me build a Glossary.
+4. Proof of Concept
+   - Write scripts to extract/inject text specifically for the Main Menu to test rendering.
+5. Script Customization & Safety Rules
+   - Write extraction/injection scripts. [Hard Rule] Scripts must never modify or delete game tags/variables (e.g., %s, {{0}}, <color=red>).
+6. Mass Translation & Automated QA
+   - Write a Validator Script for me to cross-check {target_lang} vs {source_lang} files for missing variables/tags.
+7. Final Playtest & Release
+   - Write a script to build the final .zip release file.
 
 Instructions for AI: 
-If you understand the goals, folder structure, and Milestone agreements, confirm your understanding and immediately begin "Step 1 (Extraction & Analysis)" by telling me which folder you will scan and what additional information you need to identify the game Engine."""
+If you understand your role, reply briefly with: "Understood! Please provide the game's Engine information or send me a sample file to analyze so I can write the Script for Step 1.\""""
 
         return template.format(
             name=name, source_lang=source_lang, target_lang=target_lang,
