@@ -1523,6 +1523,9 @@ class ModderHubApp(ctk.CTk):
     def migrate_project_profiles(self):
         import shutil
         projects = self.config.get("projects", [])
+        core_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "flagship", "Core")
+        global_prompts = os.path.join(core_dir, "prompts.json")
+        
         for proj in projects:
             proj_path = proj.get("path", "")
             if not proj_path or not os.path.exists(proj_path):
@@ -1531,6 +1534,13 @@ class ModderHubApp(ctk.CTk):
             # Check if project already has local profile
             local_profile_dir = os.path.join(proj_path, ".thub", "profile")
             if os.path.exists(local_profile_dir):
+                # If local profile exists, just ensure prompts.json exists
+                local_prompts = os.path.join(local_profile_dir, "prompts.json")
+                if not os.path.exists(local_prompts) and os.path.exists(global_prompts):
+                    try:
+                        shutil.copy2(global_prompts, local_prompts)
+                    except Exception as e:
+                        print(f"Error copying prompts.json for {proj_path}: {e}")
                 continue
                 
             # Check for legacy profile
@@ -1541,12 +1551,17 @@ class ModderHubApp(ctk.CTk):
                         meta = json.load(f)
                     
                     profile_name = meta.get("profile_name", "").strip()
+                    os.makedirs(local_profile_dir, exist_ok=True)
+                    
+                    # 1. Always copy global prompts.json as the baseline
+                    local_prompts = os.path.join(local_profile_dir, "prompts.json")
+                    if os.path.exists(global_prompts):
+                        shutil.copy2(global_prompts, local_prompts)
+                    
+                    # 2. Copy legacy profile folder (Translation Memory / Lore) if exists
                     if profile_name:
-                        # Legacy global profile path
-                        legacy_profile_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "flagship", "Core", "profiles", profile_name)
+                        legacy_profile_path = os.path.join(core_dir, "profiles", profile_name)
                         if os.path.exists(legacy_profile_path):
-                            # Migrate it!
-                            os.makedirs(local_profile_dir, exist_ok=True)
                             for item in os.listdir(legacy_profile_path):
                                 s = os.path.join(legacy_profile_path, item)
                                 d = os.path.join(local_profile_dir, item)
@@ -1964,10 +1979,11 @@ class ModderHubApp(ctk.CTk):
         proj_path = proj.get("path", "")
         # Run subprocess
         try:
-            if abs_target.endswith(".py"):
-                subprocess.Popen(["python", abs_target, "--project", proj_path])
+            if abs_target.lower().endswith(".py"):
+                import sys
+                subprocess.Popen([sys.executable, abs_target, proj_path])
             else:
-                subprocess.Popen([abs_target, "--project", proj_path])
+                subprocess.Popen([abs_target, proj_path])
         except Exception as e:
             messagebox.showerror(_("Error"), f"ไม่สามารถรันโปรแกรมได้: {e}")
             
