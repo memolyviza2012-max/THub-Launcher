@@ -515,8 +515,8 @@ class AIHelperDialog(ctk.CTkToplevel):
         if app_lang == "th":
             template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
 
-Context & Goal:
-ฉันต้องการสร้าง Mod แปลภาษาระดับมืออาชีพสำหรับเกม: {name}
+Context & Goal: 
+ฉันต้องการสร้าง Mod แปลภาษาระดับมืออาชีพสำหรับเกม: {name} 
 โดยจะทำการแปลจากภาษา **{source_lang}** เป็นภาษา **{target_lang}**
 เราจะทำงานร่วมกันทีละขั้นตอนอย่างเป็นระบบและปลอดภัย นี่คือข้อมูลเบื้องต้นของโปรเจค:
 
@@ -528,78 +528,98 @@ Environment & Workspace:
 
 [สำคัญ] กฎความปลอดภัยของ Workspace:
 1. ห้ามสร้างไฟล์ทำงานนอกเหนือจาก Workspace นี้เด็ดขาด
-2. โฟลเดอร์ "01_Original_Backup" ถือเป็นไฟล์ต้นฉบับดั้งเดิม (Read-Only) ห้ามทำการเขียนทับหรือแก้ไขเด็ดขาด
+2. โฟลเดอร์ "01_Original_Backup" ถือเป็นไฟล์ต้นฉบับดั้งเดิม (Read-Only) ห้ามทำการเขียนทับหรือแก้ไขเด็ดขาด ให้ใช้สำหรับการอ่านและแบ็คอัปเท่านั้น
 
 Milestones & Workflow (ทำทีละขั้นตอน เมื่อฉันบอกว่า "ผ่านขั้นตอนที่..." จึงจะย้ายไปข้อถัดไป):
 
 1. Extraction & Analysis (สกัดไฟล์และวิเคราะห์โครงสร้าง):
    - ศึกษา Engine เกม และค้นหาข้อมูลจาก Modding-Knowledge เพื่อเป็นแนวทาง
    - ค้นหาพิกัดไฟล์ภาษาและสกัดไฟล์ข้อความ (บทสนทนา, UI, คัทซีน) ออกมาเก็บไว้ใน 01_Original_Backup
-   - วิเคราะห์ Encoding ของไฟล์ดั้งเดิม (เช่น UTF-8, UTF-8 with BOM, หรือ ANSI)
+   - วิเคราะห์ Encoding ของไฟล์ดั้งเดิม (เช่น UTF-8, UTF-8 with BOM, หรือ ANSI) เพื่อรักษารหัสไฟล์ให้ตรงตามเดิมป้องกันสระภาษาไทยเสีย
    - วิเคราะห์โครงสร้างก้อนไฟล์ (.pak, .arc, .bin ฯลฯ) เพื่อระบุเครื่องมือ Unpack/Pack ที่ต้องใช้
 
-2. Font & UI Architecture (วิเคราะห์ระบบฟอนต์ ({target_lang})):
+2. Font & UI Architecture (วิเคราะห์ระบบฟอนต์ภาษา {target_lang}):
    - ตรวจสอบฟอนต์ดั้งเดิมของเกมว่าเก็บอยู่ที่ใดและเป็นฟอร์แมตไหน (.ttf, .otf, Font Atlas/Sprite)
-   - วางแผนกระบวนการเข้ารหัสวรรณยุกต์ไทย/สระลอย และเตรียมฟอนต์ {target_lang} ให้พร้อมใช้ใน 03_Font_and_UI
+   - วางแผนกระบวนการเข้ารหัสวรรณยุกต์ไทย/สระลอย (เช่น การแปลงสระหลบหลีกเข้าช่วง PUA) และเตรียมฟอนต์ภาษา {target_lang} ให้พร้อมใช้ใน 03_Font_and_UI
 
 3. Pre-Translation Glossary (ดึงคำศัพท์เฉพาะ):
-   - สแกนไฟล์ข้อความทั้งหมดเพื่อสกัด "คำเฉพาะ" (ชื่อตัวละคร, สถานที่, ไอเทม, ทักษะ)
+   - ก่อนรันการแปล สแกนไฟล์ข้อความทั้งหมดเพื่อสกัด "คำเฉพาะ" (ชื่อตัวละคร, สถานที่, ไอเทม, ทักษะ) ออกมาแสดงเป็นลิสต์ให้ฉันกำหนดคำศัพท์มาตรฐาน (GLOSSARY)
    - ลิสต์คำศัพท์ที่แปลเรียบร้อยแล้วต้องเก็บไว้ใช้อ้างอิงการแปลตลอดทั้งโปรเจค
 
 4. Proof of Concept (แปลและทดสอบหน้าเมนูหลัก):
-   - แปลข้อความส่วน "หน้าเมนูหลัก" ใน 02_Translation_Workspace
-   - แพ็คไฟล์ไปวางทดสอบใน 04_Packed_Mod เพื่อยืนยันว่าฟอนต์ {target_lang} แสดงผลถูกต้อง
+   - แปลข้อความเฉพาะส่วน "หน้าเมนูหลัก (Main Menu)" ใน 02_Translation_Workspace โดยเน้นความกระชับไม่ล้นกรอบ UI
+   - แพ็คไฟล์เมนูและฟอนต์ที่เตรียมไว้ไปวางทดสอบใน 04_Packed_Mod เพื่อยืนยันว่าฟอนต์ภาษา {target_lang} แสดงผลได้สระไม่เยื้อง/ไม่เป็นกล่องสี่เหลี่ยมเต้าหู้
 
 5. Script Customization & Safety Rules (พัฒนาเครื่องมือช่วยแปล):
-   - พัฒนาหรือดัดแปลงสคริปต์ช่วยดึง/ใส่ข้อความแปลเก็บไว้ใน 05_Scripts_and_Tools
-   - [กฎเหล็ก] สคริปต์ต้องห้ามแก้ไข/ลบแท็กโค้ดของเกม (เช่น %s, [0], <color=red>, \\n)
-   - [กฎการเขียนโค้ด] แสดงโค้ดฉบับเต็มเสมอ ห้ามใช้ Placeholder ย่อโค้ด
+   - พัฒนาหรือดัดแปลงสคริปต์สำหรับช่วยดึง/ใส่ข้อความแปลเก็บไว้ใน 05_Scripts_and_Tools
+   - [กฎเหล็ก] สคริปต์ต้องห้ามแก้ไข ปรับเปลี่ยน หรือลบแท็กโค้ดและตัวแปรของเกมเด็ดขาด (เช่น %s, {{0}}, <color=red>, \\n, \\r)
+   - เมื่อเขียนสคริปต์เสร็จแล้ว ให้หยุดรอฉันป้อน API Key และอัปเดตไฟล์ Glossary ก่อนเริ่มกระบวนการถัดไป
+   - [กฎการเขียนโค้ด] เมื่อเขียนสคริปต์หรือโปรแกรม ให้แสดงโค้ดฉบับเต็มเสมอ ห้ามใช้ Placeholder ย่อโค้ดเด็ดขาด
 
-หากเข้าใจทุกอย่างแล้ว ให้ยืนยันและเริ่ม "ขั้นตอนที่ 1" ได้ทันที"""
+6. Mass Translation & Automated QA (แปลชุดใหญ่และสแกนข้อผิดพลาด):
+   - ทำการแปลข้อความที่เหลือทั้งหมดตามคำสั่ง
+   - ก่อนจะแพ็คไฟล์กลับ ให้เขียนสคริปต์สแกนตรวจสอบความถูกต้อง (Validator Script) เพื่อเช็คเทียบไฟล์ภาษา {target_lang} กับ {source_lang} ว่ามีตัวแปร (%s) หรือแท็กเปิด/ปิดใดๆ หล่นหายไปหรือไม่ หากตรวจพบ Error ให้แจ้งและหยุดทันที
+
+7. Final Playtest & Release (ทดสอบการเล่นจริงและส่งมอบ):
+   - ทำการรันเกมเพื่อทดสอบเล่นจริง ตรวจเช็คการแครชและสระต่างดาว
+   - หากพร้อมแจกจ่าย ให้สร้างไฟล์บิลด์สำเร็จรูป (.zip) ไปเก็บไว้ที่โฟลเดอร์ 06_Releases เพื่อส่งมอบงาน
+
+Instructions for AI: 
+หากเข้าใจเป้าหมาย โครงสร้างโฟลเดอร์ และข้อตกลงในการทำ Milestones ทั้งหมดแล้ว ให้ยืนยันความเข้าใจ และเริ่มทำงานใน "ขั้นตอนที่ 1 (Extraction & Analysis)" ได้ทันที โดยบอกฉันว่าคุณจะสแกนโฟลเดอร์ใดและต้องการข้อมูลอะไรเพิ่มเติมบ้างเพื่อระบุ Engine ของเกม"""
         else:
             template = """🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
 
-Context & Goal:
-I want to create a professional language localization Mod for the game: {name}
+Context & Goal: 
+I want to create a professional localization Mod for the game: {name} 
 Translating from **{source_lang}** to **{target_lang}**.
-We will work step-by-step in a systematic and safe manner. Here is the project overview:
+We will work together step-by-step in a systematic and safe manner. Here is the project overview:
 
 Environment & Workspace:
-- Workspace: {path} (Using THub's 01–06 folder structure)
+- Workspace: {path} (Using THub's 01 to 06 folder structure)
 - Game Directory: {game_dir}
 - Tool Directory: {tool_dir}
 - Modding Knowledge Base: {KNOWLEDGE_DIR}
 
 [IMPORTANT] Workspace Safety Rules:
 1. Never create working files outside this Workspace.
-2. The "01_Original_Backup" folder is Read-Only. Never overwrite or modify it.
+2. The "01_Original_Backup" folder is the original backup (Read-Only). Never overwrite or modify it. Use it for reading and backup only.
 
-Milestones & Workflow (work step by step; only advance when I say "Proceed to step..."):
+Milestones & Workflow (Execute step-by-step. Only move to the next step when I say "Proceed to step..."):
 
 1. Extraction & Analysis:
-   - Study the game engine and research from the Modding-Knowledge base for guidance.
+   - Study the game Engine and search the Modding-Knowledge base for guidance.
    - Locate language files and extract text (dialogues, UI, cutscenes) into 01_Original_Backup.
-   - Analyze encoding of original files (UTF-8, UTF-8 with BOM, ANSI, etc.).
-   - Analyze archive structure (.pak, .arc, .bin, etc.) to identify needed Unpack/Pack tools.
+   - Analyze original file Encoding (e.g., UTF-8, UTF-8 with BOM, or ANSI) to maintain exact encoding.
+   - Analyze archive structures (.pak, .arc, .bin, etc.) to identify required Unpack/Pack tools.
 
 2. Font & UI Architecture ({target_lang}):
-   - Check where the game's original fonts are stored and their format (.ttf, .otf, Font Atlas/Sprite).
-   - Plan the encoding process for {target_lang} characters and prepare the font in 03_Font_and_UI.
+   - Check where original fonts are stored and their format (.ttf, .otf, Font Atlas/Sprite).
+   - Plan character encoding/PUA mapping and prepare the {target_lang} font in 03_Font_and_UI.
 
 3. Pre-Translation Glossary:
-   - Scan all text files to extract specific terms (character names, locations, items, skills).
-   - Maintain a glossary of translated terms for consistent reference throughout the project.
+   - Scan all text files to extract specific terms (character names, locations, items, skills) into a list for me to define as a standard GLOSSARY.
+   - Translated terms must be maintained for reference throughout the project.
 
-4. Proof of Concept:
-   - Translate only the "Main Menu" section in 02_Translation_Workspace.
-   - Pack files and test in 04_Packed_Mod to confirm {target_lang} font renders correctly.
+4. Proof of Concept (Main Menu translation and test):
+   - Translate only the "Main Menu" text in 02_Translation_Workspace, keeping it concise for UI fit.
+   - Pack the menu files and fonts, then test in 04_Packed_Mod to confirm font rendering is correct.
 
 5. Script Customization & Safety Rules:
-   - Develop or adapt extraction/injection scripts and store in 05_Scripts_and_Tools.
-   - [Hard Rule] Scripts must never modify or remove game code tags (e.g. %s, [0], <color=red>, \\n).
-   - [Coding Rule] Always show complete code. Never use placeholder abbreviations.
+   - Develop or modify scripts to extract/inject translated text, storing them in 05_Scripts_and_Tools.
+   - [Hard Rule] Scripts must never modify or delete game tags/variables (e.g. %s, {{0}}, <color=red>, \\n, \\r).
+   - After writing scripts, wait for me to provide API Keys and update the Glossary before proceeding.
+   - [Coding Rule] Always provide full, runnable code. Never use placeholders.
 
-If you understand all goals and agreements, confirm and immediately begin "Step 1"."""
+6. Mass Translation & Automated QA:
+   - Translate all remaining text as instructed.
+   - Before packing, write a Validator Script to cross-check {target_lang} vs {source_lang} files for missing variables (%s) or mismatched tags. Report errors and stop if found.
+
+7. Final Playtest & Release:
+   - Run the game for a real playtest, checking for crashes or font glitches.
+   - When ready for release, create a final build (.zip) in the 06_Releases folder.
+
+Instructions for AI: 
+If you understand the goals, folder structure, and Milestone agreements, confirm your understanding and immediately begin "Step 1 (Extraction & Analysis)" by telling me which folder you will scan and what additional information you need to identify the game Engine."""
 
         return template.format(
             name=name, source_lang=source_lang, target_lang=target_lang,
