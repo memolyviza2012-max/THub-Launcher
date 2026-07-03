@@ -45,7 +45,7 @@ class TStudioCore:
     @classmethod
     def get_prompts_path(cls):
         if cls._PROJECT_PATH:
-            p = os.path.join(cls._PROJECT_PATH, "07_TLM_Lore", "project_tlm.json")
+            p = os.path.join(cls._PROJECT_PATH, ".thub", "profile", "prompts.json")
             if not os.path.exists(os.path.dirname(p)):
                 os.makedirs(os.path.dirname(p), exist_ok=True)
             return p
@@ -198,6 +198,10 @@ class TStudioCore:
             if "Default" not in data["presets"]:
                 data["presets"]["Default"] = {"single": "", "opt": "", "batch": "", "glossary": {}}
                 
+        # Auto-create the file if it doesn't exist
+        if not os.path.exists(target_path):
+            cls.save_profiles(data)
+            
         return data
 
     @classmethod

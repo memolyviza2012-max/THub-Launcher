@@ -3439,10 +3439,16 @@ del "%~f0"
             # Resolve relative paths against the directory containing main.py (or _internal in PyInstaller)
             abs_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), path))
             
+            cmd = []
+            if abs_path.lower().endswith(".py"):
+                import sys
+                cmd.append(sys.executable)
+            cmd.append(abs_path)
+            
             if target_path:
-                subprocess.Popen([abs_path, target_path], cwd=os.path.dirname(abs_path), creationflags=0x00000008)
-            else:
-                subprocess.Popen(abs_path, cwd=os.path.dirname(abs_path), creationflags=0x00000008)
+                cmd.append(target_path)
+                
+            subprocess.Popen(cmd, cwd=os.path.dirname(abs_path), creationflags=0x00000008)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to launch:\n{e}", parent=self)
 
