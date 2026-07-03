@@ -1368,6 +1368,9 @@ class ModderHubApp(ctk.CTk):
         # Load local configuration (for Tool Library paths)
         self.config = self.load_local_config()
         os.environ["THUB_LANG"] = self.config.get("app_lang", "th")
+        
+        # Migrate legacy global profiles to Project-bound profiles
+        self.migrate_project_profiles()
 
         # Grid Layout: 1 row, 2 cols
         self.grid_rowconfigure(0, weight=1)
@@ -1516,6 +1519,43 @@ class ModderHubApp(ctk.CTk):
                 if "auto_update" not in config: config["auto_update"] = True
                 return config
         return {"tools": {}, "projects": [], "auto_update": True}
+
+    def migrate_project_profiles(self):
+        import shutil
+        projects = self.config.get("projects", [])
+        for proj in projects:
+            proj_path = proj.get("path", "")
+            if not proj_path or not os.path.exists(proj_path):
+                continue
+            
+            # Check if project already has local profile
+            local_profile_dir = os.path.join(proj_path, ".thub", "profile")
+            if os.path.exists(local_profile_dir):
+                continue
+                
+            # Check for legacy profile
+            thub_meta_path = os.path.join(proj_path, "thub_project.json")
+            if os.path.exists(thub_meta_path):
+                try:
+                    with open(thub_meta_path, "r", encoding="utf-8") as f:
+                        meta = json.load(f)
+                    
+                    profile_name = meta.get("profile_name", "").strip()
+                    if profile_name:
+                        # Legacy global profile path
+                        legacy_profile_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools", "flagship", "Core", "profiles", profile_name)
+                        if os.path.exists(legacy_profile_path):
+                            # Migrate it!
+                            os.makedirs(local_profile_dir, exist_ok=True)
+                            for item in os.listdir(legacy_profile_path):
+                                s = os.path.join(legacy_profile_path, item)
+                                d = os.path.join(local_profile_dir, item)
+                                if os.path.isdir(s):
+                                    shutil.copytree(s, d, dirs_exist_ok=True)
+                                else:
+                                    shutil.copy2(s, d)
+                except Exception as e:
+                    print(f"Error migrating profile for {proj_path}: {e}")
 
     def save_local_config(self):
         try:
@@ -2170,6 +2210,9 @@ class ModderHubApp(ctk.CTk):
             os.makedirs(os.path.join(project_path, "05_Scripts_and_Tools"), exist_ok=True)
             os.makedirs(os.path.join(project_path, "06_Releases"), exist_ok=True)
             
+            # Create Project-Bound Profile folder
+            os.makedirs(os.path.join(project_path, ".thub", "profile"), exist_ok=True)
+            
             
             # Create thub_project.json
             project_meta = {
@@ -2420,12 +2463,8 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             ent_name.insert(0, proj.get("name", ""))
             row += 1
             
-            # 1.5 Profile Name
-            ctk.CTkLabel(form_frame, text=_("ชื่อโปรไฟล์ (Profile Name):"), font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
-            ent_profile = ctk.CTkEntry(form_frame)
-            ent_profile.grid(row=row, column=1, columnspan=2, sticky="ew", pady=10)
-            ent_profile.insert(0, meta.get("profile_name", proj.get("name", "")))
-            row += 1
+            # 1.5 Profile Name (Removed - using Project-Bound Profiles)
+            
             
             # 2. Languages
             ctk.CTkLabel(form_frame, text=_("ภาษา (ต้นฉบับ -> แปล):"), font=ctk.CTkFont(weight="bold"), anchor="w").grid(row=row, column=0, sticky="w", pady=10)
