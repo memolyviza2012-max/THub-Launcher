@@ -463,7 +463,8 @@ class AIHelperDialog(ctk.CTkToplevel):
 
     # ── Tab / Mode switching ────────────────────────────────────────────────
     def on_tab_change(self, value):
-        if "Agent" in value:
+        # We check for "Codex" or "Antigravity" to match the new Tab 2 name
+        if "Codex" in value or "Antigravity" in value:
             self.agent_options_frame.pack(fill="x", padx=20, pady=(0, 8), before=self.textbox)
             self.rebuild_agent_prompt()
         else:
