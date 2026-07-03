@@ -43,6 +43,15 @@ class TStudioCore:
             cls._PROJECT_PATH = path
             
     @classmethod
+    def get_profile_dir(cls, preset_name="Default"):
+        if cls._PROJECT_PATH:
+            p = os.path.join(cls._PROJECT_PATH, ".thub", "profile")
+            if not os.path.exists(p):
+                os.makedirs(p, exist_ok=True)
+            return p
+        return os.path.join(BASE_DIR, "profiles", preset_name)
+
+    @classmethod
     def get_prompts_path(cls):
         if cls._PROJECT_PATH:
             p = os.path.join(cls._PROJECT_PATH, ".thub", "profile", "prompts.json")

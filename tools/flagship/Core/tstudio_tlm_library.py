@@ -70,7 +70,8 @@ class TLMLoreLibrary(QWidget):
         self.active_profile = TStudioCore.load_profiles()["active_preset"]
         self.profile_data = TStudioCore.get_current_profile_data()
         
-        self.lore_dir = os.path.join(BASE_DIR, "profiles", self.active_profile, "TLM_Lore")
+        # Project-Bound Profile Support: use get_profile_dir instead of hardcoding BASE_DIR profiles
+        self.lore_dir = os.path.join(TStudioCore.get_profile_dir(self.active_profile), "TLM_Lore")
         os.makedirs(self.lore_dir, exist_ok=True)
         
         self.current_editing_file = None
