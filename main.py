@@ -2844,7 +2844,8 @@ del "%~f0"
             
         except Exception as e:
             print(f"Self-update error: {e}")
-            self.after(0, lambda: messagebox.showerror(_("Update Failed"), f"เกิดข้อผิดพลาดในการอัปเดต: {e}", parent=self))
+            err_msg = f"เกิดข้อผิดพลาดในการอัปเดต: {e}"
+            self.after(0, lambda m=err_msg: messagebox.showerror(_("Update Failed"), m, parent=self))
 
     
     # --- 2. Flagship Products ---
