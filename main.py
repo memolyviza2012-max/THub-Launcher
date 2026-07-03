@@ -3011,40 +3011,71 @@ del "%~f0"
         action_frame = ctk.CTkFrame(card, fg_color="transparent")
         action_frame.grid(row=3, column=0, pady=(0, 20))
         
-        btn_action = ctk.CTkButton(action_frame, text=_("🚀 เปิดโปรแกรม"), fg_color=item["color"], text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"))
-        btn_action.pack(side="left", padx=5)
+        # Context Selector
+        projects = self.config.get("projects", [])
+        proj_names = [_("พ่วงโปรเจกต์: ไม่มี"), _("พ่วงโปรเจกต์: เลือกโฟลเดอร์...")] + [f"พ่วง: {p['name']}" for p in projects]
+        context_var = ctk.StringVar(value=_("พ่วงโปรเจกต์: ไม่มี"))
         
+        opt_context = ctk.CTkOptionMenu(action_frame, values=proj_names, variable=context_var, width=140, fg_color="#313244", button_color="#45475a")
+        opt_context.pack(side="top", pady=(0, 10))
+        
+        btn_action = ctk.CTkButton(action_frame, text=_("🚀 เปิดโปรแกรม"), fg_color=item["color"], text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"))
+        btn_action.pack(side="top", padx=5)
+        
+        def do_launch(e=exe_path, b=icon_btn, i=orig_img, cvar=context_var):
+            cval = cvar.get()
+            if cval == _("พ่วงโปรเจกต์: ไม่มี"):
+                self.launch_script_with_loading(e, b, i)
+            elif cval == _("พ่วงโปรเจกต์: เลือกโฟลเดอร์..."):
+                folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ที่จะส่งเข้าโปรแกรม"), parent=self)
+                if folder:
+                    self.launch_script_with_loading(e, b, i, target_path=folder)
+            else:
+                pname = cval.replace(_("พ่วง: "), "")
+                proj_path = next((proj["path"] for proj in self.config.get("projects", []) if proj["name"] == pname), None)
+                self.launch_script_with_loading(e, b, i, target_path=proj_path)
+                
         if icon_btn:
-            # Bind the icon button to launch the script with loading animation
-            icon_btn.configure(cursor="hand2", command=lambda e=exe_path, b=icon_btn, i=orig_img: self.launch_script_with_loading(e, b, i))
-            btn_action.configure(command=lambda e=exe_path, b=icon_btn, i=orig_img: self.launch_script_with_loading(e, b, i))
+            icon_btn.configure(cursor="hand2", command=do_launch)
+            btn_action.configure(command=do_launch)
         else:
-            btn_action.configure(command=lambda e=exe_path: self.launch_script(e))
+            def fallback_launch(e=exe_path, cvar=context_var):
+                cval = cvar.get()
+                if cval == _("พ่วงโปรเจกต์: ไม่มี"):
+                    self.launch_script(e)
+                elif cval == _("พ่วงโปรเจกต์: เลือกโฟลเดอร์..."):
+                    folder = filedialog.askdirectory(title=_("เลือกโฟลเดอร์ที่จะส่งเข้าโปรแกรม"), parent=self)
+                    if folder:
+                        self.launch_script(e, target_path=folder)
+                else:
+                    pname = cval.replace(_("พ่วง: "), "")
+                    proj_path = next((proj["path"] for proj in self.config.get("projects", []) if proj["name"] == pname), None)
+                    self.launch_script(e, target_path=proj_path)
+            btn_action.configure(command=fallback_launch)
             
         return card
             
-    def launch_script_with_loading(self, path, icon_btn, orig_img):
+    def launch_script_with_loading(self, path, icon_btn, orig_img, target_path=None):
         # Show loading state
         icon_btn.configure(image="", text=_("⏳\nกำลังโหลด..."), font=ctk.CTkFont(size=16, weight="bold"))
         self.update()
         
         # Give UI a tiny bit of time to render the loading state before blocking
-        self.after(50, lambda: self._execute_launch(path, icon_btn, orig_img))
+        self.after(50, lambda: self._execute_launch(path, icon_btn, orig_img, target_path))
 
-    def _execute_launch(self, path, icon_btn, orig_img):
-        self.launch_script(path)
+    def _execute_launch(self, path, icon_btn, orig_img, target_path=None):
+        self.launch_script(path, target_path)
         # Revert UI state back to the original icon after a short delay
         self.after(800, lambda: icon_btn.configure(image=orig_img, text=""))
 
-    def launch_script(self, path):
+    def launch_script(self, path, target_path=None):
         import subprocess
         import sys
         try:
-            if path.endswith(".py"):
-                # Use our own THub.exe (sys.executable) to run the .py script!
-                subprocess.Popen([sys.executable, path], creationflags=0x00000008, cwd=os.path.dirname(path), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            else:
-                subprocess.Popen([path], creationflags=0x00000008, cwd=os.path.dirname(path), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            cmd = [sys.executable, path] if path.lower().endswith(".py") else [path]
+            if target_path:
+                cmd.append(target_path)
+            subprocess.Popen(cmd, creationflags=0x00000008, cwd=os.path.dirname(path), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             messagebox.showerror(_("Launch Error"), f"ไม่สามารถเปิดโปรแกรมได้:\n{path}\n\nข้อผิดพลาด:\n{e}", parent=self)
 
