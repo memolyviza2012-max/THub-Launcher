@@ -541,6 +541,32 @@ class CsvTableModel(QAbstractTableModel):
         self.endResetModel()
         return len(self._data)
 
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if not index.isValid(): return None
+        r, c = index.row(), index.column()
+        item = self._data[r]
+        if role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole):
+            val = ""
+            if c == 0: val = item.get("tag", "?")
+            elif c == 1: val = item["id"]
+            elif c == 2:
+                if (hasattr(self, 'app')
+                    and hasattr(self.app, 'act_toggle_qa_marker')
+                    and self.app.act_toggle_qa_marker.isChecked()
+                    and 'html_source' in item):
+                    val = item['html_source']
+                else:
+                    val = item["source"]
+            elif c == 3: val = item.get("ai_ref", "")
+            elif c == 4: val = item["trans"]
+            
+            if role == Qt.ItemDataRole.DisplayRole and isinstance(val, str):
+                if len(val) > 2000:
+                    val = val[:2000] + "\n... <TRUNCATED - TEXT TOO LARGE FOR UI>"
+                if '\x00' in val:
+                    val = val.replace('\x00', '[NUL]')
+            return val
+
     def rowCount(self, parent=QModelIndex()): return len(self._data)
     def columnCount(self, parent=QModelIndex()): return 5
 
@@ -729,6 +755,53 @@ def reconstruct_lang_file(csv_path, meta_json_path, output_lang_path):
         f.writelines(out_lines)
 
 # =========================================================
+def reconstruct_mesg_json_file(csv_path, origin_file):
+    import json, csv
+    
+    # Load translation map
+    trans_map = {}
+    with open(csv_path, 'r', encoding='utf-8-sig', errors='replace') as f:
+        reader = csv.reader(f)
+        header = next(reader, None)
+        for row in reader:
+            if len(row) >= 3:
+                uid, source, trans = row[0], row[1], row[2]
+                if trans.strip():
+                    trans_map[uid] = trans.strip()
+                    
+    with open(origin_file, 'r', encoding='utf-8') as f:
+        odata = json.load(f)
+        
+    m_script = odata.get("m_Script", "")
+    parts = m_script.split('\u0000')
+    
+    for uid, trans in trans_map.items():
+        if uid.startswith("mesg_"):
+            try:
+                idx = int(uid.split('_')[1])
+                orig = parts[idx]
+                
+                # Match UTF-8 byte length
+                orig_bytes = orig.encode('utf-8')
+                trans_bytes = trans.encode('utf-8')
+                
+                if len(trans_bytes) < len(orig_bytes):
+                    trans_bytes = trans_bytes.ljust(len(orig_bytes), b' ')
+                elif len(trans_bytes) > len(orig_bytes):
+                    trans_bytes = trans_bytes[:len(orig_bytes)]
+                    trans = trans_bytes.decode('utf-8', errors='ignore')
+                    trans_bytes = trans.encode('utf-8').ljust(len(orig_bytes), b' ')
+                    
+                parts[idx] = trans_bytes.decode('utf-8')
+            except Exception:
+                pass
+            
+    odata["m_Script"] = '\u0000'.join(parts)
+    
+    with open(origin_file, 'w', encoding='utf-8') as f:
+        json.dump(odata, f, ensure_ascii=False, indent=2)
+
+# =========================================================
 # Main Window
 # =========================================================
 class TranslationStudio(QMainWindow):
@@ -752,21 +825,6 @@ class TranslationStudio(QMainWindow):
         self.csv_encoding = CSV_ENCODING
         self.current_workspace_name = "Default (ค่าเริ่มต้น)"
         
-        # Auto-create profile from THub project
-        if self.project_path and os.path.exists(os.path.join(self.project_path, "thub_project.json")):
-            try:
-                import json
-                with open(os.path.join(self.project_path, "thub_project.json"), "r", encoding="utf-8") as meta_f:
-                    meta = json.load(meta_f)
-                prof_name = meta.get("profile_name", meta.get("project_name"))
-                if prof_name:
-                    pdata = TStudioCore.load_profiles()
-                    if prof_name not in pdata.get("presets", {}):
-                        pdata.setdefault("presets", {})[prof_name] = {"single": "", "opt": "", "glossary": {}}
-                    pdata["active_preset"] = prof_name
-                    TStudioCore.save_profiles(pdata)
-            except:
-                pass
 
         self.model = CsvTableModel(self)
         self.proxy = FilterProxy(self)
@@ -1285,6 +1343,13 @@ class TranslationStudio(QMainWindow):
         act_tlm.setStatusTip("Open or Focus the TLM Extractor")
         act_tlm.triggered.connect(self.toggle_tlm_dock)
         tools_menu.addAction(act_tlm)
+        
+        tools_menu.addSeparator()
+        
+        act_plugins = QAction(_("plugin_menu_action"), self)
+        act_plugins.setToolTip(_("plugin_menu_tooltip"))
+        act_plugins.triggered.connect(self.open_plugin_manager)
+        tools_menu.addAction(act_plugins)
         
         # --- View Menu ---
         view_menu = menubar.addMenu(_("menu_view"))
@@ -1936,6 +2001,14 @@ class TranslationStudio(QMainWindow):
         PromptSettingsDialog(self).exec()
         self._profiles_data = TStudioCore.load_profiles()
 
+    def open_plugin_manager(self):
+        try:
+            import plugin_manager_ui
+            dlg = plugin_manager_ui.PluginManagerDialog(self)
+            dlg.exec()
+        except Exception as e:
+            QMessageBox.critical(self, _("error_title"), _("plugin_err_open_manager", msg=str(e)))
+
     def open_settings(self):
         SettingsDialog(self).exec()
         self.setup_menu_bar()
@@ -2372,46 +2445,7 @@ class TranslationStudio(QMainWindow):
                 except Exception as e:
                     print(f"TellTale txt parse error: {e}")
 
-                try:
-                    if file_path.lower().endswith('.json'):
-                        import json as _json, csv as _csv, os as _os
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            jdata = _json.load(f)
-                            
-                        entries = []
-                        # 1. c2dictionary (Construct 2/3)
-                        if isinstance(jdata, dict) and jdata.get("c2dictionary") is True and "data" in jdata:
-                            for k, v in jdata["data"].items():
-                                entries.append((k, str(v)))
-                        # 2. Flat dict: {"key": "value"}
-                        elif isinstance(jdata, dict):
-                            for k, v in jdata.items():
-                                if isinstance(v, (str, int, float, bool)):
-                                    entries.append((k, str(v)))
-                        # 3. List of dicts
-                        elif isinstance(jdata, list):
-                            for i, item in enumerate(jdata):
-                                if isinstance(item, dict):
-                                    if "id" in item and "text" in item:
-                                        entries.append((str(item["id"]), str(item["text"])))
-                                    elif "key" in item and "value" in item:
-                                        entries.append((str(item["key"]), str(item["value"])))
-                                    else:
-                                        entries.append((f"row_{i}", _json.dumps(item, ensure_ascii=False)))
-                                elif isinstance(item, str):
-                                    entries.append((f"row_{i}", item))
-                                    
-                        if entries:
-                            base = _os.path.splitext(file_path)[0]
-                            csv_out = base + '_parsed.csv'
-                            with open(csv_out, 'w', encoding='utf-8-sig', newline='') as f:
-                                writer = _csv.writer(f)
-                                writer.writerow([_("col_id"), _("col_source"), _("col_translation"), 'AI_Reference'])
-                                for lid, text in entries:
-                                    writer.writerow([lid, text, '', ''])
-                            return csv_out
-                except Exception as e:
-                    print(f"JSON parse error: {e}")
+                # Hardcoded JSON parser removed to allow CustomParsers plugin system to handle .json
                     
                 return file_converter.auto_convert_to_csv(file_path, None) # Don't pass UI to thread
                 
@@ -3399,6 +3433,31 @@ class TranslationStudio(QMainWindow):
             cfg = TStudioCore.load_config()
             origin_file = cfg.get("origin_file", "")
             
+            # ── JSON MESG Deploy logic ──
+            if origin_file and origin_file.lower().endswith('.json'):
+                try:
+                    import json
+                    with open(origin_file, 'r', encoding='utf-8') as f:
+                        odata = json.load(f)
+                    if isinstance(odata, dict) and "m_Script" in odata and isinstance(odata["m_Script"], str) and odata["m_Script"].startswith("MESG"):
+                        self.save_csv()
+                        reply = QMessageBox.question(self, "Deploy MESG JSON", 
+                                                     f"Are you sure you want to overwrite the original JSON file at:\n{origin_file}?\n(Warning: Strings will be byte-padded/truncated to preserve pointers)",
+                                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+                        if reply == QMessageBox.StandardButton.Yes:
+                            self.statusBar().showMessage("Deploying to MESG JSON...")
+                            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+                            try:
+                                reconstruct_mesg_json_file(self.csv_path, origin_file)
+                                QApplication.restoreOverrideCursor()
+                                QMessageBox.information(self, "Success", f"Successfully deployed to MESG JSON at:\n{origin_file}")
+                            except Exception as e:
+                                QApplication.restoreOverrideCursor()
+                                QMessageBox.critical(self, "Error", f"Failed to deploy MESG JSON:\n{str(e)}")
+                        return
+                except:
+                    pass
+
             # ── LANG Deploy logic ──
             if origin_file and origin_file.lower().endswith('.lang'):
                 meta_path = self.csv_path.replace(".csv", "_meta.json")
@@ -3856,8 +3915,10 @@ if __name__ == '__main__':
     sys.excepthook = global_exception_handler
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project", type=str, help="Path to the active THub project", default=None)
+    parser.add_argument("project", nargs="?", type=str, help="Path to the THub project workspace", default=None)
     args, unknown = parser.parse_known_args()
+    
+    TStudioCore.set_project_path(args.project)
     
     app = QApplication(sys.argv)
     app.setStyle('Fusion')

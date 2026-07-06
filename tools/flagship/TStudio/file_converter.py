@@ -8,12 +8,18 @@ import sys
 from PyQt6.QtWidgets import QMessageBox, QProgressDialog
 from PyQt6.QtCore import Qt
 
-if getattr(sys, 'frozen', False):
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if "_internal" in current_dir:
+    BASE_DIR = current_dir.split("_internal")[0].rstrip("\\/")
+elif getattr(sys, 'frozen', False):
     BASE_DIR = os.path.dirname(sys.executable)
 else:
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BASE_DIR = os.path.dirname(os.path.dirname(current_dir))
     
-CUSTOM_PARSERS_DIR = os.path.join(BASE_DIR, "TStudio", "CustomParsers")
+if "_internal" in current_dir or getattr(sys, 'frozen', False):
+    CUSTOM_PARSERS_DIR = os.path.join(BASE_DIR, "TStudio", "CustomParsers")
+else:
+    CUSTOM_PARSERS_DIR = os.path.join(current_dir, "CustomParsers")
 os.makedirs(CUSTOM_PARSERS_DIR, exist_ok=True)
 
 GITHUB_REPO_URL = "https://raw.githubusercontent.com/memolyviza2012-max/TFormat-Plugins/main/"
@@ -39,18 +45,26 @@ def auto_convert_to_csv(filepath, parent_widget=None):
     parser_path = os.path.join(CUSTOM_PARSERS_DIR, parser_filename)
     
     if os.path.exists(parser_path):
-        return load_and_run_parser(parser_path, filepath, parent_widget)
+        try:
+            return load_and_run_parser(parser_path, filepath, parent_widget)
+        except Exception as local_e:
+            import traceback
+            traceback.print_exc()
+            if parent_widget:
+                QMessageBox.warning(parent_widget, _("plugin_error_title"), _("plugin_old_err_retry", msg=str(local_e)))
+            raise local_e
         
     # 3. Check Cloud Repository
-    cloud_url = f"{GITHUB_REPO_URL}{parser_filename}"
+    import time
+    cloud_url = f"{GITHUB_REPO_URL}{parser_filename}?t={int(time.time())}"
     progress = None
     try:
         if parent_widget:
-            progress = QProgressDialog(f"กำลังค้นหาปลั๊กอินตัวอ่านไฟล์ {ext} บน Cloud...", "ยกเลิก", 0, 0, parent_widget)
+            progress = QProgressDialog(_("plugin_cloud_searching", ext=ext), _("btn_cancel"), 0, 0, parent_widget)
             progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.show()
             
-        res = requests.get(cloud_url, timeout=5)
+        res = requests.get(cloud_url, timeout=10)
         
         if progress:
             progress.close()
@@ -59,9 +73,12 @@ def auto_convert_to_csv(filepath, parent_widget=None):
             with open(parser_path, 'w', encoding='utf-8') as f:
                 f.write(res.text)
             return load_and_run_parser(parser_path, filepath, parent_widget)
-    except Exception:
+        elif res.status_code != 404:
+            print(f"Cloud download failed with status {res.status_code}")
+    except Exception as e:
         if progress:
             progress.close()
+        print(f"Network error while fetching plugin: {e}")
             
     # 4. Ask AI to Generate
     if parent_widget:
