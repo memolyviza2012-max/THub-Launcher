@@ -1,4 +1,4 @@
-from i18n_helper import _
+from tglyph_i18n import _
 """
 i18n.py — Internationalization module for FONT PPFS
 Supports English (default) and Thai language switching.
@@ -265,7 +265,9 @@ class I18n:
     """Internationalization manager for FONT PPFS."""
     
     def __init__(self, lang: str = "en"):
+        import os
         self._lang = lang
+        os.environ['THUB_LANG'] = lang
     
     @property
     def lang(self) -> str:
@@ -273,18 +275,23 @@ class I18n:
     
     @lang.setter
     def lang(self, value: str):
-        if value in STRINGS:
-            self._lang = value
-        else:
-            raise ValueError(f"Unsupported language: {value}. Use 'en' or 'th'.")
+        import os
+        self._lang = value
+        os.environ['THUB_LANG'] = value
     
     def t(self, key: str) -> str:
         """Translate a key to the current language."""
-        return STRINGS.get(self._lang, STRINGS["en"]).get(key, key)
+        from tglyph_i18n import _ as json_t
+        val = json_t(key)
+        if val == key:
+            return STRINGS.get(self._lang, STRINGS["en"]).get(key, key)
+        return val
     
     def switch(self):
         """Toggle between EN and TH."""
+        import os
         self._lang = "th" if self._lang == "en" else "en"
+        os.environ['THUB_LANG'] = self._lang
         return self._lang
     
     def get_presets(self) -> dict[str, tuple[str, str]]:
@@ -293,7 +300,5 @@ class I18n:
             k: (self.t(k), v) for k, v in PRESET_TEXTS.items()
         }
 
-
-_global_i18n = I18n()
-def _(key: str) -> str:
-    return _global_i18n.t(key)
+# We remove the local `def _` so that `from i18n import _` exposes the 
+# `_` from `tglyph_i18n` imported at the top of the file!

@@ -1,4 +1,4 @@
-from i18n_helper import _
+from tfont_i18n import _
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Core')))

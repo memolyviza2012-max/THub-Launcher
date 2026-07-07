@@ -6,10 +6,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPen, QBrush, QColor, QTransform, QPainter
 import sys
 
-# Ensure parent path is in sys.path for i18n_helper
+# Ensure parent path is in sys.path for tfont_i18n
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 try:
-    from i18n_helper import _
+    from tfont_i18n import _
 except ImportError:
     _ = lambda x: x
 

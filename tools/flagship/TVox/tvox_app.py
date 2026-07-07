@@ -7,7 +7,7 @@ sys.path.append(os.path.join(flagship_dir, 'Core'))
 sys.path.append(os.path.join(flagship_dir, 'TStudio'))
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from i18n_helper import _
+from tvox_i18n import _
 
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,

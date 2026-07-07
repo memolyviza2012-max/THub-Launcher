@@ -1,4 +1,4 @@
-from i18n_helper import _
+from tvox_i18n import _
 import sys
 import os
 

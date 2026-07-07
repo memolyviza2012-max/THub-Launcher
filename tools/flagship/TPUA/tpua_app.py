@@ -1,4 +1,4 @@
-from i18n_helper import _
+from tpua_i18n import _, get_resource_path
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Core')))
@@ -70,7 +70,9 @@ class TPUAApp(QMainWindow):
         self.resize(750, 550)
         self.setStyleSheet(DARK_SS)
         
-        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TPUA.png"))
+        logo_path = str(get_resource_path(os.path.join("assets", "TPUA.png")))
+        if not os.path.exists(logo_path):
+            logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TPUA.png"))
         if os.path.exists(logo_path):
             self.setWindowIcon(QIcon(logo_path))
         
@@ -89,7 +91,9 @@ class TPUAApp(QMainWindow):
         # --- TAB 1: Text Converter ---
         self.tab_text = QWidget()
         self.init_text_tab()
-        tpua_logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TPUA.png"))
+        tpua_logo_path = str(get_resource_path(os.path.join("assets", "TPUA.png")))
+        if not os.path.exists(tpua_logo_path):
+            tpua_logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TPUA.png"))
         if os.path.exists(tpua_logo_path):
             self.tabs.addTab(self.tab_text, QIcon(tpua_logo_path), _("tab_text_converter"))
         else:

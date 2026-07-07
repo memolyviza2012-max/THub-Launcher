@@ -30,13 +30,26 @@ def unpack_txt_to_csv(input_txt, output_csv):
         print(f"No valid #Key and =Value pairs found in {input_txt}")
         return False
         
+    keymap = {}
+    base_dir = os.path.dirname(output_csv)
+    name = os.path.splitext(os.path.basename(output_csv))[0]
+    keymap_file = os.path.join(base_dir, f"{name}_keymap.json")
+        
     with open(output_csv, 'w', encoding='utf-8-sig', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(["ID", "Source", "Translation", "AI_Reference"])
-        for key, source in entries:
-            writer.writerow([key, source, "", ""])
+        
+        for idx, (key, source) in enumerate(entries):
+            short_id = f"WL2_{idx:06d}"
+            keymap[short_id] = key
+            writer.writerow([short_id, source, "", ""])
+            
+    import json
+    with open(keymap_file, 'w', encoding='utf-8') as f:
+        json.dump(keymap, f, ensure_ascii=False, indent=2)
             
     print(f"Successfully unpacked {len(entries)} strings to {output_csv}")
+    print(f"Key mapping saved to {keymap_file}")
     return True
 
 if __name__ == "__main__":
