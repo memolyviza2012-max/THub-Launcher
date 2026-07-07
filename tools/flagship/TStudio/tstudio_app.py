@@ -3382,10 +3382,27 @@ class TranslationStudio(QMainWindow):
             if ext == '.json':
                 import json
                 export_data = {}
+                part_buffers = {}
+                
                 for item in self.model._data:
                     uid = item["id"]
                     text = item["trans"].strip() if item["trans"].strip() else item["source"].strip()
-                    export_data[uid] = text
+                    
+                    if "_part" in uid:
+                        base_key, part_idx = uid.rsplit("_part", 1)
+                        if base_key not in part_buffers:
+                            part_buffers[base_key] = []
+                        part_buffers[base_key].append((int(part_idx), text))
+                    else:
+                        export_data[uid] = text
+                        
+                # Merge part buffers
+                for base_key, parts in part_buffers.items():
+                    # Sort by part index
+                    parts.sort(key=lambda x: x[0])
+                    merged_text = "".join(p[1] for p in parts)
+                    export_data[base_key] = merged_text
+                    
                 with open(file_path, 'w', encoding='utf-8') as f:
                     json.dump(export_data, f, ensure_ascii=False, indent=4)
             else:
