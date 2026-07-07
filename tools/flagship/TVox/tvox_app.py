@@ -43,8 +43,8 @@ if HAS_TSTUDIO:
         # TV-C4: Signals to safely route MPV callbacks to Qt UI thread
         time_pos_updated = pyqtSignal(float)
         duration_updated = pyqtSignal(float)
-        def __init__(self):
-            super().__init__()
+        def __init__(self, project_path=None):
+            super().__init__(project_path=project_path)
             self.setWindowTitle(_("window_title"))
             self.setGeometry(100, 100, 1400, 900)
 
@@ -109,10 +109,10 @@ if HAS_TSTUDIO:
             panel_layout.setSpacing(5)
 
             # Playback Controls
-            self.btn_open_video = QPushButton("📂")
+            self.btn_open_video = QPushButton("\U0001f4c2")
             self.btn_open_video.setToolTip(_("tooltip_open_video"))
             self.btn_open_video.clicked.connect(self.open_video)
-            self.btn_open_video.setStyleSheet("background: transparent; font-size: 16px; border: none;")
+            self.btn_open_video.setStyleSheet("background: transparent; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', sans-serif; font-size: 16px; border: none;")
             
             self.btn_seek_m1 = QPushButton("-1s")
             self.btn_seek_m1.setToolTip(_("tooltip_seek_m1"))
@@ -124,10 +124,10 @@ if HAS_TSTUDIO:
             self.btn_seek_m01.clicked.connect(lambda: self.seek_relative(-0.1))
             self.btn_seek_m01.setStyleSheet("background: transparent; color: #a6adc8; border: none;")
             
-            self.btn_play_pause = QPushButton("▶")
+            self.btn_play_pause = QPushButton("\u25b6")
             self.btn_play_pause.setToolTip(_("tooltip_play_pause"))
             self.btn_play_pause.clicked.connect(self.toggle_play)
-            self.btn_play_pause.setStyleSheet("background: transparent; color: #a6e3a1; font-weight: bold; font-size: 18px; border: none;")
+            self.btn_play_pause.setStyleSheet("background: transparent; color: #a6e3a1; font-family: 'Segoe UI Symbol', 'Segoe UI Emoji', sans-serif; font-weight: bold; font-size: 18px; border: none;")
             
             self.btn_seek_p01 = QPushButton("+.1s")
             self.btn_seek_p01.setToolTip(_("tooltip_seek_p01"))
@@ -182,7 +182,7 @@ if HAS_TSTUDIO:
             self.btn_mark_b.clicked.connect(self.set_mark_b)
             self.btn_mark_b.setStyleSheet("background: transparent; border: 1px solid #f38ba8; color: #f38ba8; font-weight: bold; padding: 2px 6px; border-radius: 4px;")
             
-            self.btn_loop = QPushButton("🔁")
+            self.btn_loop = QPushButton("\U0001f501")
             self.btn_loop.setToolTip(_("tooltip_loop"))
             self.btn_loop.clicked.connect(self.toggle_loop)
             self.btn_loop.setStyleSheet("background: #45475a; color: #cdd6f4; font-weight: bold; padding: 4px; border-radius: 4px;")
@@ -416,7 +416,7 @@ if HAS_TSTUDIO:
                             if extracted_video:
                                 self.player.play(extracted_video)
                                 self.player.pause = True
-                                self.btn_play_pause.setText("▶")
+                                self.btn_play_pause.setText("\u25b6")
                                 
                         from tstudio_ui_shared import ApiWorker
                         from PyQt6.QtCore import QThreadPool
@@ -431,7 +431,7 @@ if HAS_TSTUDIO:
                 
                 # Default to paused state
                 self.player.pause = True
-                self.btn_play_pause.setText("▶")
+                self.btn_play_pause.setText("\u25b6")
                 
                 # Refocus to video widget so spacebar works immediately
                 self.video_widget.setFocus()
@@ -531,14 +531,26 @@ if HAS_TSTUDIO:
 else:
     from PyQt6.QtWidgets import QMainWindow
     class TVoxApp(QMainWindow):
-        def __init__(self):
+        def __init__(self, project_path=None):
             super().__init__()
             self.setWindowTitle(_("window_title_error"))
             QMessageBox.critical(self, _("dlg_tstudio_missing_title"), _("dlg_tstudio_missing_msg"))
 
 def main():
+    import argparse
+    from tstudio_core import TStudioCore
+    parser = argparse.ArgumentParser()
+    parser.add_argument("project", nargs="?", type=str, help="Path to the THub project workspace", default=None)
+    args, unknown = parser.parse_known_args()
+    
+    TStudioCore.set_project_path(args.project)
+
     app = QApplication(sys.argv)
-    window = TVoxApp()
+    from PyQt6.QtGui import QFont
+    f = app.font()
+    f.setFamily("Segoe UI")
+    app.setFont(f)
+    window = TVoxApp(project_path=args.project)
     window.show()
     sys.exit(app.exec())
 

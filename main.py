@@ -349,7 +349,7 @@ class ProjectWizardWindow(ctk.CTkToplevel):
         self.destroy()
 
 # Constants
-CURRENT_VERSION = "1.0.9"
+CURRENT_VERSION = "1.1.0"
 UPDATE_FILE_PATH = os.path.join(os.path.dirname(__file__), "updates.json")
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hub_config.json")
 KNOWLEDGE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "Modding-Knowledge"))
@@ -2932,9 +2932,10 @@ del "%~f0"
         registry_data = [
             {"id": "TStudio", "name": "TStudio", "desc": "สุดยอดเครื่องมือแปลภาษาด้วย AI\n(วิเคราะห์บริบท & แก้ไขแบบ Line-by-Line)\nรองรับการทำงานกับไฟล์ Localization หลายรูปแบบ", "color": "#89b4fa", "exe": "tstudio_app.py", "icon": "assets/TStudio.png"},
             {"id": "TRun", "name": "TRun", "desc": "เครื่องมือแปลภาษาแบบ Batch อัตโนมัติ\n(รองรับไฟล์ขนาดใหญ่และปริมาณมหาศาล)\nแปลทั้งโปรเจกต์ได้อย่างรวดเร็วในคลิกเดียว", "color": "#a6e3a1", "exe": "trun_app.py", "icon": "assets/TRun.png"},
-            {"id": "TPUA", "name": "TPUA", "desc": "เครื่องมือจัดการอักขระพิเศษภาษาไทย\n(เข้ารหัส/ถอดรหัส PUA แบบ Drag & Drop)\nแก้ปัญหาสระลอย/จม ในเอนจิ้นเกมต่างๆ", "color": "#cba6f7", "exe": "tpua_app.py", "icon": "assets/TPUA.png"},
-            {"id": "TGlyph", "name": "TGlyph", "desc": "เครื่องมือสร้าง Texture ฟอนต์\n(Generate Texture และแผนที่ตัวอักษร)\nสำหรับดัดแปลงฟอนต์ Bitmap ในเกม", "color": "#fab387", "exe": "tglyph_app.py", "icon": "assets/TGlyph.png"},
-            {"id": "TVox", "name": "TVox", "desc": "เครื่องมือจัดการ FMV และซับไตเติ้ล\n(วิดีโอเพลเยอร์ & ดึงคลื่นเสียง Waveform)\nออกแบบมาเพื่อการแปลวิดีโอคัทซีนโดยเฉพาะ", "color": "#f38ba8", "exe": "tvox_app.py", "icon": "assets/TVox.png"}
+            {"id": "TVox", "name": "TVox", "desc": "เครื่องมือจัดการ FMV และซับไตเติ้ล\n(วิดีโอเพลเยอร์ & ดึงคลื่นเสียง Waveform)\nออกแบบมาเพื่อการแปลวิดีโอคัทซีนโดยเฉพาะ", "color": "#f38ba8", "exe": "tvox_app.py", "icon": "assets/TVox.png"},
+            {"id": "flagship.tfont", "folder": "TFont", "name": "TFont Generator", "desc": "เครื่องมือปรับแต่งและสร้างฟอนต์ PUA", "color": "#b4befe", "exe": "run_tfont.bat", "icon": "assets/TFONT.png", "no_project": True},
+            {"id": "flagship.tpua", "folder": "TPUA", "name": "TPUA Text Converter", "desc": "เครื่องมือแปลงข้อความภาษาไทยเข้าสู่ระบบ PUA", "color": "#cba6f7", "exe": "run_tpua.bat", "icon": "assets/TPUA.png", "no_project": True},
+            {"id": "TGlyph", "name": "TGlyph", "desc": "เครื่องมือสร้าง Texture ฟอนต์\n(Generate Texture และแผนที่ตัวอักษร)\nสำหรับดัดแปลงฟอนต์ Bitmap ในเกม", "color": "#fab387", "exe": "tglyph_app.py", "icon": "assets/TGlyph.png", "no_project": True}
         ]
             
         self.after(0, lambda: self.render_flagship_cards(parent_frame, registry_data))
@@ -2991,7 +2992,8 @@ del "%~f0"
         card = ctk.CTkFrame(parent, corner_radius=15)
         card.grid_columnconfigure(0, weight=1)
         
-        exe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "tools", "flagship", item["id"], item["exe"]))
+        folder_name = item.get("folder", item["id"])
+        exe_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "tools", "flagship", folder_name, item["exe"]))
         
         icon_btn = None
         orig_img = None
@@ -3031,7 +3033,7 @@ del "%~f0"
                 if folder:
                     self.launch_script_with_loading(e, b, i, target_path=folder)
             else:
-                pname = cval.replace(_("พ่วง: "), "")
+                pname = cval.replace(f"{_('พ่วง:')} ", "")
                 proj_path = next((proj["path"] for proj in self.config.get("projects", []) if proj["name"] == pname), None)
                 self.launch_script_with_loading(e, b, i, target_path=proj_path)
                 
@@ -3048,7 +3050,7 @@ del "%~f0"
                     if folder:
                         self.launch_script(e, target_path=folder)
                 else:
-                    pname = cval.replace(_("พ่วง: "), "")
+                    pname = cval.replace(f"{_('พ่วง:')} ", "")
                     proj_path = next((proj["path"] for proj in self.config.get("projects", []) if proj["name"] == pname), None)
                     self.launch_script(e, target_path=proj_path)
             btn_action.configure(command=fallback_launch)
@@ -3209,7 +3211,7 @@ del "%~f0"
                     if folder:
                         self.launch_linked_tool(p, folder)
                 else:
-                    pname = cval.replace(_("พ่วง: "), "")
+                    pname = cval.replace(f"{_('พ่วง:')} ", "")
                     proj_path = next((proj["path"] for proj in self.config.get("projects", []) if proj["name"] == pname), None)
                     self.launch_linked_tool(p, proj_path)
 

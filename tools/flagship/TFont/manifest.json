@@ -1,0 +1,10 @@
+{
+    "id": "flagship.tfont",
+    "name": "TFont Generator",
+    "version": "1.1.0",
+    "description": "Text encoding/decoding and Font Generator for PUA ecosystem.",
+    "author": "THub",
+    "main": "tfont_app.py",
+    "executable": "run_tfont.bat",
+    "type": "flagship_tool"
+}

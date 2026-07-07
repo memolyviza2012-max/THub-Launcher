@@ -870,7 +870,13 @@ class TranslationStudio(QMainWindow):
         top_layout = FlowLayout(top_widget)
         top_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
         
-        logo_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "assets", "TStudio.png"))
+        import sys
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".."))
+            
+        logo_path = os.path.join(base_path, "assets", "TStudio.png")
         if os.path.exists(logo_path):
             self.setWindowIcon(QIcon(logo_path))
         self._is_loading_profiles = True
@@ -3938,6 +3944,10 @@ if __name__ == '__main__':
     TStudioCore.set_project_path(args.project)
     
     app = QApplication(sys.argv)
+    from PyQt6.QtGui import QFont
+    f = app.font()
+    f.setFamily("Segoe UI")
+    app.setFont(f)
     app.setStyle('Fusion')
     win = TranslationStudio(project_path=args.project)
     win.show()

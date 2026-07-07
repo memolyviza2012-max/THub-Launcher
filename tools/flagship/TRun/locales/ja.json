@@ -87,5 +87,12 @@
     "lbl_peak_action": "アクション：",
     "opt_peak_pause": "翻訳の一時停止 (スリープ)",
     "opt_peak_fallback": "フォールバック プロファイルに切り替える",
-    "lbl_peak_fallback": "フォールバックプロファイル:"
+    "lbl_peak_fallback": "フォールバックプロファイル:",
+    "chk_auto_shutdown": "完了時に自動シャットダウン",
+    "btn_file_add": "📄 ファイル追加",
+    "btn_folder_add": "📁 フォルダ追加...",
+    "btn_remove_sel": "🗑️ 選択削除",
+    "btn_clear_all": "🧹 すべてクリア",
+    "lbl_file_path": "📂 ファイルパス",
+    "lbl_profile": "⚙️ プロファイル"
 }

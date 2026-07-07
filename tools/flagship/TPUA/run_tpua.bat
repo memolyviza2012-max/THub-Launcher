@@ -1,3 +1,3 @@
 @echo off
 cd /d "%~dp0"
-python tpua_app.py
+start "" pythonw tpua_app.py

@@ -106,12 +106,12 @@ if HAS_TSTUDIO:
             panel_layout.setSpacing(5)
 
             # Playback Controls
-            self.btn_open_video = QPushButton("📂")
+            self.btn_open_video = QPushButton("\U0001f4c2")
             self.btn_open_video.setToolTip(_("tooltip_open_video"))
             self.btn_open_video.clicked.connect(self.open_video)
             self.btn_open_video.setStyleSheet("background: transparent; font-size: 16px; border: none;")
             
-            self.btn_seek_prev_sub = QPushButton("⏮")
+            self.btn_seek_prev_sub = QPushButton("\u23ea")
             self.btn_seek_prev_sub.setToolTip(_("tooltip_prev_subtitle"))
             self.btn_seek_prev_sub.clicked.connect(self.seek_prev_sub)
             self.btn_seek_prev_sub.setStyleSheet("background: transparent; color: #a6adc8; font-size: 14px; border: none;")
@@ -126,7 +126,7 @@ if HAS_TSTUDIO:
             self.btn_seek_m01.clicked.connect(lambda: self.seek_relative(-0.1))
             self.btn_seek_m01.setStyleSheet("background: transparent; color: #a6adc8; border: none;")
             
-            self.btn_play_pause = QPushButton("▶")
+            self.btn_play_pause = QPushButton("\u25b6")
             self.btn_play_pause.setToolTip(_("tooltip_play_pause"))
             self.btn_play_pause.clicked.connect(self.toggle_play)
             self.btn_play_pause.setStyleSheet("background: transparent; color: #a6e3a1; font-weight: bold; font-size: 18px; border: none;")
@@ -141,7 +141,7 @@ if HAS_TSTUDIO:
             self.btn_seek_p1.clicked.connect(lambda: self.seek_relative(1.0))
             self.btn_seek_p1.setStyleSheet("background: transparent; color: #a6adc8; border: none;")
             
-            self.btn_seek_next_sub = QPushButton("⏭")
+            self.btn_seek_next_sub = QPushButton("\u23e9")
             self.btn_seek_next_sub.setToolTip(_("tooltip_next_subtitle"))
             self.btn_seek_next_sub.clicked.connect(self.seek_next_sub)
             self.btn_seek_next_sub.setStyleSheet("background: transparent; color: #a6adc8; font-size: 14px; border: none;")
@@ -191,7 +191,7 @@ if HAS_TSTUDIO:
             self.btn_mark_b.clicked.connect(self.set_mark_b)
             self.btn_mark_b.setStyleSheet("background: transparent; border: 1px solid #f38ba8; color: #f38ba8; font-weight: bold; padding: 2px 6px; border-radius: 4px;")
             
-            self.btn_loop = QPushButton("🔁")
+            self.btn_loop = QPushButton("\U0001f501")
             self.btn_loop.setToolTip(_("tooltip_loop"))
             self.btn_loop.clicked.connect(self.toggle_loop)
             self.btn_loop.setStyleSheet("background: #45475a; color: #cdd6f4; font-weight: bold; padding: 4px; border-radius: 4px;")
@@ -450,7 +450,7 @@ if HAS_TSTUDIO:
                 
                 # Default to paused state
                 self.player.pause = True
-                self.btn_play_pause.setText("▶")
+                self.btn_play_pause.setText("\u25b6")
                 
                 # Refocus to video widget so spacebar works immediately
                 self.video_widget.setFocus()
@@ -478,6 +478,7 @@ if HAS_TSTUDIO:
             if not self.player: return
             try:
                 self.player.pause = not self.player.pause
+                self.btn_play_pause.setText("\u23f8" if not self.player.pause else "\u25b6")
             except Exception:
                 pass
 
@@ -569,7 +570,7 @@ if HAS_TSTUDIO:
         def toggle_loop(self):
             self.loop_active = not self.loop_active
             if self.loop_active:
-                self.btn_loop.setText("🔁")
+                self.btn_loop.setText("\U0001f501")
                 self.btn_loop.setStyleSheet("background: #a6e3a1; color: #1e1e2e; font-weight: bold; padding: 4px; border-radius: 4px;")
                 # If we turn on loop but missed a mark, maybe auto set it?
                 if self.mark_a is not None and self.mark_b is None:
@@ -581,7 +582,7 @@ if HAS_TSTUDIO:
                         except Exception:
                             pass
             else:
-                self.btn_loop.setText("🔁")
+                self.btn_loop.setText("\U0001f501")
                 self.btn_loop.setStyleSheet("background: #45475a; color: #cdd6f4; font-weight: bold; padding: 4px; border-radius: 4px;")
 
         def toggle_auto_scroll(self):

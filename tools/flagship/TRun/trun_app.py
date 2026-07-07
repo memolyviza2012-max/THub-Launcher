@@ -2,9 +2,9 @@ from trun_i18n import _
 # -*- coding: utf-8 -*-
 import sys
 import os
+import re as _re_module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Core')))
 
-import os
 import csv
 import json
 import time
@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QSplitter, QGroupBox, QComboBox, 
     QMessageBox, QTextEdit, QFileDialog, QSpinBox, QCheckBox, QProgressBar, QSlider,
-    QTabWidget, QTableWidget, QTableWidgetItem, QTimeEdit
+    QTabWidget, QTableWidget, QTableWidgetItem, QTimeEdit, QListWidget, QAbstractItemView
 )
 from PyQt6.QtCore import Qt, QRunnable, QThreadPool, pyqtSignal, pyqtSlot, QObject, QLocale, QTime, QTimer
 from PyQt6.QtGui import QIcon
@@ -22,11 +22,12 @@ from tstudio_core import TStudioCore, CoreAI
 
 
 class TRunWorkerSignals(QObject):
-    progress = pyqtSignal(int, int) # current, total
+    progress = pyqtSignal(int, int)       # current, total
     batch_progress = pyqtSignal(int, int) # current_batch, total_batches
-    log = pyqtSignal(str, str) # text, color
-    finished = pyqtSignal()
-    error = pyqtSignal(str)
+    log = pyqtSignal(str, str)            # text, color
+    finished = pyqtSignal()               # completed normally
+    stopped = pyqtSignal()                # user-requested stop
+    error = pyqtSignal(str)               # fatal error
 
 class TRunWorker(QRunnable):
     def __init__(self, config, profile, input_csv, output_csv, batch_size, delay_ms, max_retries, use_mask, use_glossary, use_pua, peak_config=None):
@@ -45,15 +46,19 @@ class TRunWorker(QRunnable):
         self.peak_config = peak_config
         self._is_killed = False
 
+    # Pre-compiled regex patterns at class level to avoid re-compiling on every call
+    _RE_THAI = _re_module.compile(r'[\u0E00-\u0E7F]')
+    _RE_TAG = _re_module.compile(r'(<[^>]+>|\\n|\\r|\n|\r|%[sdiefg]|\{\d+\}|\[\[[^\]]+\]\])')
+    _RE_TSV_LINE = _re_module.compile(r'^"?([^"\t]+)"?\t(.*)')
+    _RE_CODE_FENCE_START = _re_module.compile(r'^```[^\n]*\n?', _re_module.MULTILINE)
+    _RE_CODE_FENCE_END = _re_module.compile(r'\n?```$', _re_module.MULTILINE)
+
     def is_translated(self, text):
-        import re
         if not text or not isinstance(text, str): return False
-        return bool(re.search(r'[฀-๿]', text))
+        return bool(self._RE_THAI.search(text))
 
     def mask_tags(self, text):
-        import re
-        tag_pattern = r'(<[^>]+>|\\n|\\r|\n|\r|%[sdiefg]|\{\d+\}|\[\[[^\]]+\]\])'
-        tags = re.findall(tag_pattern, text)
+        tags = self._RE_TAG.findall(text)
         masked_text = text
         placeholders = {}
         for idx, tag in enumerate(tags):
@@ -70,11 +75,16 @@ class TRunWorker(QRunnable):
         return unmasked
 
     def enforce_glossary(self, text):
+        # Fix 3: Use word boundary to avoid replacing substrings
         glossary = self.profile.get("glossary", {})
         for wrong_word, correct_word in glossary.items():
             if isinstance(correct_word, list):
                 correct_word = correct_word[0]
-            text = text.replace(wrong_word, correct_word)
+            try:
+                text = _re_module.sub(r'\b' + _re_module.escape(str(wrong_word)) + r'\b',
+                                      str(correct_word), text)
+            except _re_module.error:
+                text = text.replace(str(wrong_word), str(correct_word))
         return text
 
     def enforce_arabic_numerals(self, text):
@@ -88,21 +98,18 @@ class TRunWorker(QRunnable):
         return "".join(res)
 
     def _inject_glossary_to_prompt(self, prompt, source_text_batch):
-        if "[GLOSSARY TO USE]" not in prompt:
-            return prompt
-            
+        # Fix 1: Fallback injection — works even if [GLOSSARY TO USE] is absent from prompt
         glossary = self.profile.get("glossary", {})
         if not glossary:
-            return prompt.replace("[GLOSSARY TO USE]", "")
-            
+            return prompt.replace("[GLOSSARY TO USE]", "") if "[GLOSSARY TO USE]" in prompt else prompt
+
         matched_terms = []
         source_lower = source_text_batch.lower()
-        
-        import re as _re
+
         for eng, val in glossary.items():
             eng_str = eng.strip()
             if not eng_str: continue
-            if _re.search(r'\b' + _re.escape(eng_str.lower()) + r'\b', source_lower):
+            if _re_module.search(r'\b' + _re_module.escape(eng_str.lower()) + r'\b', source_lower):
                 if isinstance(val, list):
                     term_info = f"- {eng_str} = {val[0]}"
                     if len(val) > 1 and val[1]:
@@ -110,15 +117,39 @@ class TRunWorker(QRunnable):
                     matched_terms.append(term_info)
                 else:
                     matched_terms.append(f"- {eng_str} = {val}")
-                    
+
+        glossary_section = ""
         if matched_terms:
-            glossary_text = "GLOSSARY FOR THIS BATCH:\n" + "\n".join(matched_terms)
-            return prompt.replace("[GLOSSARY TO USE]", glossary_text)
+            glossary_section = "GLOSSARY FOR THIS BATCH:\n" + "\n".join(matched_terms)
+
+        if "[GLOSSARY TO USE]" in prompt:
+            return prompt.replace("[GLOSSARY TO USE]", glossary_section)
         else:
-            return prompt.replace("[GLOSSARY TO USE]", "")
+            # Fallback: append glossary section even when placeholder is missing
+            if glossary_section:
+                return prompt + "\n\n" + glossary_section
+            return prompt
 
     def stop(self):
         self._is_killed = True
+
+    def _interruptible_sleep(self, seconds):
+        """Sleep in 100ms chunks so Stop is responsive within 100ms."""
+        end_time = time.time() + seconds
+        while not self._is_killed and time.time() < end_time:
+            remaining = end_time - time.time()
+            time.sleep(min(0.1, max(0.0, remaining)))
+
+    def _strip_outer_quotes(self, s):
+        """Safely remove surrounding quotes if they exist, without breaking strings that just start or end with a quote."""
+        if s.startswith('"') and s.endswith('"') and len(s) >= 2:
+            return s[1:-1]
+        return s
+
+    def _normalize_id(self, s):
+        """Extract only alphanumeric characters to safely match IDs even if AI strips punctuation like # or { or quotes."""
+        import re
+        return re.sub(r'[^a-zA-Z0-9]', '', s).lower()
 
     def _check_peak_hour(self):
         if not self.peak_config:
@@ -243,8 +274,15 @@ class TRunWorker(QRunnable):
         # Replace {source_text} with rules in batch mode if the user didn't modify it properly
         if "{source_text}" in system_prompt:
             system_prompt = system_prompt.replace("{source_text}", "the user prompt text")
-            
-        system_prompt += "\n\nFORMAT RULE: Output MUST be tab-separated lines: ID [TAB] THAI_TRANSLATION"
+
+        # Optimized FORMAT RULE — concise but effective (~87 tokens instead of ~171)
+        system_prompt += (
+            "\n\nFORMAT: Reply ONLY as tab-separated lines, no headers/explanation/markdown.\n"
+            "Each line: ORIGINAL_ID[TAB]THAI_TRANSLATION\n"
+            "Copy ORIGINAL_ID exactly (same case, punctuation, {M}/{F} suffix). "
+            "Preserve [TAG_N] placeholders. Use real tab, not spaces.\n"
+            "Example: #Grenadier{M}\tมือระเบิด{ชาย}"
+        )
         
         batches = [untranslated[i:i + self.batch_size] for i in range(0, len(untranslated), self.batch_size)]
         total_batches = len(batches)
@@ -270,15 +308,17 @@ class TRunWorker(QRunnable):
                 
             self.signals.log.emit(f"Processing Batch {batch_idx+1}/{len(batches)} ({len(batch)} items)...", "#89b4fa")
             
-            # Prepare batch lines
+            # Build lines — use simple tab-only format (no outer quotes)
+            # This avoids breaking when game_id or source contains " characters
             batch_tasks = []
             lines_to_send = []
+            row_snippets = {}  # store snippets for post-result logging
             for i, row in batch:
                 game_id = row[col_id]
                 source_text = row[col_source]
                 
                 snippet = source_text[:40].replace("\\n", " ") + ("..." if len(source_text) > 40 else "")
-                self.signals.log.emit(f"  ⏳ Translating: [{game_id}] {snippet}", "#bac2de")
+                row_snippets[game_id] = snippet
                 
                 if self.use_mask:
                     masked, placeholders = self.mask_tags(source_text)
@@ -286,7 +326,8 @@ class TRunWorker(QRunnable):
                     masked, placeholders = source_text, {}
                     
                 batch_tasks.append((i, game_id, placeholders))
-                lines_to_send.append(f'"{game_id}"	"{masked}"')
+                # No outer quotes — avoids conflicts with content that has " chars
+                lines_to_send.append(f'{game_id}\t{masked}')
                 
             if not lines_to_send:
                 # Entire batch was resolved by TM, skip AI call
@@ -306,16 +347,55 @@ class TRunWorker(QRunnable):
                     self.signals.log.emit(f"  Attempt {attempt}/{self.max_retries}...", "#a6adc8")
                     reply = CoreAI.generate_content(self.config, full_prompt, is_local=is_local)
                     
-                    # Parse TSV reply
-                    reply = re.sub(r'^```[^\n]*\n?', '', reply.strip(), flags=re.MULTILINE)
-                    reply = re.sub(r'\n?```$', '', reply, flags=re.MULTILINE)
-                    
+                    # Parse TSV reply — strip markdown fences
+                    reply = self._RE_CODE_FENCE_START.sub('', reply.strip())
+                    reply = self._RE_CODE_FENCE_END.sub('', reply)
+
                     results = {}
+                    current_id = None
+                    valid_ids = {game_id for _, game_id, _ in batch_tasks}
+                    # Case-insensitive fallback: maps lowercased ID → original ID
+                    # Handles AI returning {m} instead of {M}, etc.
+                    valid_ids_ci = {gid.lower(): gid for _, gid, _ in batch_tasks}
+
                     for line in reply.split('\n'):
-                        line = line.strip()
-                        if '\t' not in line: continue
-                        parts = line.split('\t', 1)
-                        results[parts[0].strip().strip('"')] = parts[1].strip().strip('"')
+                        stripped = line.strip()
+                        if not stripped:
+                            continue  # skip blank lines entirely
+
+                        if '\t' in stripped:
+                            # Split on first tab — robust to IDs with quotes or special chars
+                            tab_pos = stripped.index('\t')
+                            candidate_id = stripped[:tab_pos].strip()
+                            candidate_id = self._strip_outer_quotes(candidate_id)
+                            
+                            candidate_val = stripped[tab_pos + 1:].strip()
+                            candidate_val = self._strip_outer_quotes(candidate_val)
+                                
+                            # 1) Exact match
+                            if candidate_id in valid_ids:
+                                current_id = candidate_id
+                                results[current_id] = candidate_val
+                            # 2) Case-insensitive fallback (AI changed {M}->{m} etc.)
+                            elif candidate_id.lower() in valid_ids_ci:
+                                current_id = valid_ids_ci[candidate_id.lower()]
+                                results[current_id] = candidate_val
+                            else:
+                                # 3) Robust alphanumeric prefix match (AI stripped punctuation like # or truncated long text)
+                                norm_candidate = self._normalize_id(candidate_id)
+                                matching_ids = []
+                                if len(norm_candidate) >= 3:
+                                    matching_ids = [gid for gid in valid_ids if self._normalize_id(gid).startswith(norm_candidate)]
+                                    
+                                if len(matching_ids) == 1:
+                                    current_id = matching_ids[0]
+                                    results[current_id] = candidate_val
+                                elif current_id is not None:
+                                    # Line has tab but unknown ID: treat as continuation
+                                    results[current_id] += '\n' + self._strip_outer_quotes(stripped)
+                        elif current_id is not None:
+                            # No tab — continuation of previous multi-line entry
+                            results[current_id] += '\n' + self._strip_outer_quotes(stripped)
                         
                     # Apply results
                     remaining_tasks = []
@@ -323,6 +403,8 @@ class TRunWorker(QRunnable):
                     for idx_zip, (i, game_id, placeholders) in enumerate(batch_tasks):
                         if game_id in results:
                             translated = results[game_id]
+                            # Bug A Fix: Convert literal \n escape sequences to real newlines
+                            translated = translated.replace('\\n', '\n')
                             if self.use_mask:
                                 translated = self.unmask_tags(translated, placeholders)
                             if self.use_glossary:
@@ -333,31 +415,42 @@ class TRunWorker(QRunnable):
                                 translated = tpua.encode(translated)
                             rows[i][col_trans] = translated
                             processed_count += 1
-                            
-                            tsnippet = translated[:40].replace("\\n", " ") + ("..." if len(translated) > 40 else "")
-                            self.signals.log.emit(f"  ✅ Done: [{game_id}] {tsnippet}", "#a6e3a1")
+
+                            # Fix 4: Log after result (with source snippet for context)
+                            src_snip = row_snippets.get(game_id, game_id)
+                            tsnippet = translated[:40].replace('\n', ' ') + ("..." if len(translated) > 40 else "")
+                            self.signals.log.emit(f"  ✅ [{game_id}] {src_snip} → {tsnippet}", "#a6e3a1")
                         else:
                             self.signals.log.emit(f"  [Warning] Missing ID in response: {game_id}", "#f38ba8")
                             remaining_tasks.append((i, game_id, placeholders))
                             remaining_lines.append(lines_to_send[idx_zip])
-                            
+
                     batch_tasks = remaining_tasks
                     lines_to_send = remaining_lines
-                            
+
                     if len(batch_tasks) == 0:
                         success = True
                         break
                     elif len(results) == 0:
-                        self.signals.log.emit(f"  [Warning] AI response parsed but no tab-separated results found (attempt {attempt}). Retrying...", "#f38ba8")
-                        time.sleep(2)
+                        # Exponential backoff — interruptible so Stop responds immediately
+                        wait_sec = min(2 ** attempt, 30)
+                        self.signals.log.emit(f"  [Warning] No results parsed (attempt {attempt}). Waiting {wait_sec}s...", "#f38ba8")
+                        self._interruptible_sleep(wait_sec)
                     else:
                         self.signals.log.emit(f"  [Warning] Partial success. Retrying {len(batch_tasks)} missing lines (attempt {attempt})...", "#f9e2af")
                         user_prompt = "Translate these entries:\n" + "\n".join(lines_to_send)
                         full_prompt = batch_system_prompt + "\n\n" + user_prompt
-                    
+
                 except Exception as e:
-                    self.signals.log.emit(f"  [Error] {e}", "#f38ba8")
-                    time.sleep(2)
+                    err_str = str(e).lower()
+                    if "429" in err_str or "quota" in err_str or "exhausted" in err_str:
+                        wait_sec = 65
+                        self.signals.log.emit(f"  [Rate Limit] API Quota exceeded. Waiting 65s for reset...", "#f9e2af")
+                    else:
+                        wait_sec = min(2 ** attempt, 30)
+                        self.signals.log.emit(f"  [Error] {e} — Waiting {wait_sec}s...", "#f38ba8")
+                    
+                    self._interruptible_sleep(wait_sec)
                     
             if not success and not self._is_killed:
                 self.signals.log.emit(f"Batch {batch_idx+1} failed after {self.max_retries} retries. Skipping...", "#f38ba8")
@@ -374,10 +467,37 @@ class TRunWorker(QRunnable):
                 self.signals.log.emit(f"Failed to save intermediate: {e}", "#f38ba8")
                 
             self.signals.progress.emit(processed_count, total_untrans)
-            time.sleep(self.delay_ms / 1000.0)
-            
+            # Inter-batch delay — interruptible so Stop responds immediately
+            self._interruptible_sleep(self.delay_ms / 1000.0)
+
+        # After batch loop: emit appropriate signal based on stop state
+        if self._is_killed:
+            # User-requested stop: save partial progress then signal stopped
+            try:
+                with open(self.output_csv, 'w', encoding='utf-8-sig', newline='') as f_stop:
+                    writer_stop = csv.writer(f_stop)
+                    writer_stop.writerow(headers)
+                    writer_stop.writerows(rows)
+                self.signals.log.emit("⏹ Stopped. Partial progress saved.", "#f9e2af")
+            except Exception as e_stop:
+                self.signals.log.emit(f"[Warning] Could not save partial progress: {e_stop}", "#f38ba8")
+            self.signals.stopped.emit()
+            time.sleep(0.2)  # Allow pending signals to be processed before QRunnable is deleted
+            return
+
+        # Bug B Fix: Final save after all batches done (ensures last batch is always persisted)
+        try:
+            with open(self.output_csv, 'w', encoding='utf-8-sig', newline='') as f_final:
+                writer_final = csv.writer(f_final)
+                writer_final.writerow(headers)
+                writer_final.writerows(rows)
+            self.signals.log.emit("✅ Final save complete.", "#a6e3a1")
+        except Exception as e_final:
+            self.signals.log.emit(f"[Warning] Final save failed: {e_final}", "#f38ba8")
+
         self.signals.log.emit(_("log_translation_finished"), "#a6e3a1")
         self.signals.finished.emit()
+        time.sleep(0.2)  # Allow pending signals to be processed before QRunnable is deleted
 
 
 from tstudio_ui_shared import SettingsDialog, PromptSettingsDialog, GlossaryWidget
@@ -464,10 +584,10 @@ class TRunApp(QMainWindow):
         header_layout.addWidget(btn_rename_profile)
         header_layout.addWidget(btn_del_profile)
         
-        btn_prompt = QPushButton(_("btn_prompts"))
+        btn_prompt = QPushButton(_("act_ai_prompt_settings"))
         btn_prompt.setToolTip(_("tooltip_prompt"))
         btn_prompt.clicked.connect(self.open_prompts)
-        btn_glossary = QPushButton(_("btn_glossary"))
+        btn_glossary = QPushButton(_("glossary_dock_title"))
         btn_glossary.setToolTip(_("tooltip_glossary"))
         btn_glossary.clicked.connect(self.open_glossary)
         btn_settings = QPushButton(_("btn_api_settings"))
@@ -493,29 +613,36 @@ class TRunApp(QMainWindow):
         grp_file = QGroupBox(_("grp_file_config"))
         l_file = QVBoxLayout(grp_file)
         
-        h1 = QHBoxLayout()
-        self.txt_input = QLineEdit()
-        self.txt_input.setPlaceholderText(_("placeholder_input"))
-        btn_in_file = QPushButton(_("btn_file"))
-        btn_in_file.setToolTip(_("tooltip_in_file"))
+        # New List Input
+        h_buttons = QHBoxLayout()
+        btn_in_file = QPushButton(_("btn_file_add") if '_' in globals() else "Add File(s)...")
         btn_in_file.clicked.connect(self.browse_input)
-        btn_in_folder = QPushButton(_("btn_folder"))
-        btn_in_folder.setToolTip(_("tooltip_in_folder"))
+        btn_in_folder = QPushButton(_("btn_folder_add") if '_' in globals() else "Add Folder...")
         btn_in_folder.clicked.connect(self.browse_input_folder)
-        h1.addWidget(self.txt_input)
-        h1.addWidget(btn_in_file)
-        h1.addWidget(btn_in_folder)
-        l_file.addLayout(h1)
+        btn_remove = QPushButton(_("btn_remove_sel") if '_' in globals() else "Remove Selected")
+        btn_remove.setStyleSheet("color: #f38ba8;")
+        btn_remove.clicked.connect(self.remove_selected_input)
+        btn_clear = QPushButton(_("btn_clear_all") if '_' in globals() else "Clear All")
+        btn_clear.setStyleSheet("color: #f38ba8;")
+        btn_clear.clicked.connect(self.clear_input_list)
         
-        h2 = QHBoxLayout()
-        self.txt_output = QLineEdit()
-        self.txt_output.setPlaceholderText(_("placeholder_output"))
-        btn_out = QPushButton(_("btn_browse"))
-        btn_out.setToolTip(_("tooltip_out"))
-        btn_out.clicked.connect(self.browse_output)
-        h2.addWidget(self.txt_output)
-        h2.addWidget(btn_out)
-        l_file.addLayout(h2)
+        h_buttons.addWidget(btn_in_file)
+        h_buttons.addWidget(btn_in_folder)
+        h_buttons.addWidget(btn_remove)
+        h_buttons.addWidget(btn_clear)
+        l_file.addLayout(h_buttons)
+        
+        from PyQt6.QtWidgets import QHeaderView
+        self.tbl_input = QTableWidget(0, 2)
+        self.tbl_input.setHorizontalHeaderLabels([_("lbl_file_path") if '_' in globals() else "File Path", _("lbl_profile") if '_' in globals() else "Profile"])
+        self.tbl_input.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.tbl_input.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.tbl_input.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.tbl_input.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.tbl_input.setFixedHeight(120)
+        self.tbl_input.model().rowsInserted.connect(self.update_preview)
+        self.tbl_input.model().rowsRemoved.connect(self.update_preview)
+        l_file.addWidget(self.tbl_input)
         
         self.lbl_file_progress = QLabel(_("lbl_file_progress_default"))
         self.lbl_file_progress.setStyleSheet("color: #a6adc8; font-weight: bold; font-size: 11px;")
@@ -542,11 +669,17 @@ class TRunApp(QMainWindow):
         self.slider_batch = QSlider(Qt.Orientation.Horizontal)
         self.slider_batch.setRange(1, 100)
         self.slider_batch.setValue(20)
-        self.lbl_batch_val = QLabel("20")
-        self.lbl_batch_val.setFixedWidth(30)
-        self.slider_batch.valueChanged.connect(lambda v: self.lbl_batch_val.setText(str(v)))
+        self.spin_batch_val = QSpinBox()
+        self.spin_batch_val.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
+        self.spin_batch_val.setRange(1, 100)
+        self.spin_batch_val.setValue(20)
+        self.spin_batch_val.setFixedWidth(70)
+        
+        self.slider_batch.valueChanged.connect(self.spin_batch_val.setValue)
+        self.spin_batch_val.valueChanged.connect(self.slider_batch.setValue)
+        
         h_batch.addWidget(self.slider_batch)
-        h_batch.addWidget(self.lbl_batch_val)
+        h_batch.addWidget(self.spin_batch_val)
         
         self.chk_unlock = QCheckBox(_("chk_unlock_risk"))
         self.chk_unlock.setStyleSheet("color: #f38ba8;")
@@ -559,7 +692,7 @@ class TRunApp(QMainWindow):
         self.spin_delay = QSpinBox()
         self.spin_delay.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
         self.spin_delay.setRange(0, 10000)
-        self.spin_delay.setValue(500)
+        self.spin_delay.setValue(200)
         h_delay.addWidget(self.spin_delay)
         l_engine.addLayout(h_delay)
         
@@ -601,12 +734,19 @@ class TRunApp(QMainWindow):
         h_sched = QHBoxLayout()
         self.chk_schedule = QCheckBox(_("chk_schedule_start") if '_' in globals() else "Schedule Start Time")
         self.time_schedule = QTimeEdit()
+        self.time_schedule.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
         self.time_schedule.setDisplayFormat("HH:mm")
         self.time_schedule.setEnabled(False)
         self.chk_schedule.toggled.connect(self.time_schedule.setEnabled)
         h_sched.addWidget(self.chk_schedule)
         h_sched.addWidget(self.time_schedule)
         l_peak.addLayout(h_sched)
+        
+        # Auto Shutdown
+        self.chk_auto_shutdown = QCheckBox(_("chk_auto_shutdown") if '_' in globals() else "Auto Shutdown when finished")
+        self.chk_auto_shutdown.setStyleSheet("color: #f38ba8; font-weight: bold;")
+        self.chk_auto_shutdown.setToolTip("Shutdown the computer when all items in the queue finish successfully.")
+        l_peak.addWidget(self.chk_auto_shutdown)
         
         # Peak-Hour Management
         self.chk_peak = QCheckBox(_("chk_enable_peak") if '_' in globals() else "Enable Peak-Hour Management")
@@ -620,12 +760,14 @@ class TRunApp(QMainWindow):
         
         h_peak_time = QHBoxLayout()
         self.time_peak_start = QTimeEdit()
+        self.time_peak_start.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
         self.time_peak_start.setDisplayFormat("HH:mm")
         self.time_peak_start.setTime(QTime(18, 0))
         h_peak_time.addWidget(QLabel("Peak Start:"))
         h_peak_time.addWidget(self.time_peak_start)
         
         self.time_peak_end = QTimeEdit()
+        self.time_peak_end.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
         self.time_peak_end.setDisplayFormat("HH:mm")
         self.time_peak_end.setTime(QTime(22, 0))
         h_peak_time.addWidget(QLabel("End:"))
@@ -743,7 +885,7 @@ class TRunApp(QMainWindow):
         splitter.addWidget(right_panel)
         splitter.setSizes([400, 700])
         
-        self.txt_input.textChanged.connect(self.update_preview)
+        self.slider_batch.valueChanged.connect(self.update_preview)
         self.slider_batch.valueChanged.connect(self.update_preview)
         self.spin_delay.valueChanged.connect(self.update_preview)
 
@@ -785,17 +927,21 @@ class TRunApp(QMainWindow):
         return bool(re.search(r'[฀-๿]', text))
 
     def update_preview(self, *args):
-        input_file = self.txt_input.text()
+        input_file = ""
+        if self.tbl_input.rowCount() > 0:
+            item = self.tbl_input.item(0, 0)
+            if item:
+                input_file = item.text()
         batch_size = self.slider_batch.value()
         delay_ms = self.spin_delay.value()
         
         if not input_file:
-            self.lbl_preview.setText(_("preview_select_valid"))
+            self.lbl_preview.setText(_("preview_select_valid") if '_' in globals() else "Please select input file")
             return
             
         import os
         if not os.path.exists(input_file):
-            self.lbl_preview.setText(_("preview_not_exist"))
+            self.lbl_preview.setText(_("preview_not_exist") if '_' in globals() else "File not found")
             return
             
         import csv
@@ -816,13 +962,14 @@ class TRunApp(QMainWindow):
             return
             
         batches = math.ceil(untranslated / batch_size) if batch_size > 0 else 0
-        avg_api_time = 7.0 
+        # Fix 6: Use observed batch time if available, else fallback to 7s estimate
+        avg_api_time = getattr(self, '_avg_batch_time_sec', 7.0)
         total_time_sec = batches * (avg_api_time + (delay_ms / 1000.0))
         m, s = divmod(int(total_time_sec), 60)
         h, m = divmod(m, 60)
         eta_str = f"{h}h {m}m" if h > 0 else f"{m}m {s}s"
-        
-        self.lbl_preview.setText(f"ℹ️ Preview: {untranslated:,} untranslated lines\n📦 Will process in {batches:,} batches\n⏱️ Est. Time: {eta_str} (Based on 7s/batch)")
+        note = "(observed avg)" if hasattr(self, '_avg_batch_time_sec') else "(est. 7s/batch)"
+        self.lbl_preview.setText(f"ℹ️ Preview: {untranslated:,} untranslated lines\n📦 Will process in {batches:,} batches\n⏱️ Est. Time: {eta_str} {note}")
 
     def log(self, text, color="#cdd6f4"):
         self.txt_log.append(f'<span style="color:{color};">{text}</span>')
@@ -866,6 +1013,58 @@ class TRunApp(QMainWindow):
                 self.refresh_profiles_combo()
             else:
                 self.cbo_preset.setCurrentText(name)
+
+    def remove_selected_input(self):
+        rows = sorted(set(item.row() for item in self.tbl_input.selectedItems()), reverse=True)
+        for row in rows:
+            self.tbl_input.removeRow(row)
+            
+    def clear_input_list(self):
+        self.tbl_input.setRowCount(0)
+        
+    def find_project_root(self, file_path):
+        import os
+        current_dir = os.path.dirname(os.path.abspath(file_path))
+        while current_dir and current_dir != os.path.dirname(current_dir):
+            if os.path.exists(os.path.join(current_dir, "thub_project.json")) or os.path.exists(os.path.join(current_dir, ".thub")):
+                return current_dir
+            current_dir = os.path.dirname(current_dir)
+        return None
+
+    def add_to_list_unique(self, path):
+        for i in range(self.tbl_input.rowCount()):
+            item = self.tbl_input.item(i, 0)
+            if item and item.text() == path:
+                return
+        row = self.tbl_input.rowCount()
+        self.tbl_input.insertRow(row)
+        item_path = QTableWidgetItem(path)
+        item_path.setFlags(item_path.flags() & ~Qt.ItemFlag.ItemIsEditable)
+        self.tbl_input.setItem(row, 0, item_path)
+        
+        project_root = self.find_project_root(path)
+        combo_profile = QComboBox()
+        
+        if project_root:
+            from tstudio_core import TStudioCore
+            orig_proj = getattr(TStudioCore, '_PROJECT_PATH', None)
+            TStudioCore.set_project_path(project_root)
+            proj_profiles = TStudioCore.load_profiles()
+            presets = list(proj_profiles.get("presets", {}).keys())
+            active = proj_profiles.get("active_preset", "Default")
+            if orig_proj:
+                TStudioCore.set_project_path(orig_proj)
+            else:
+                TStudioCore._PROJECT_PATH = None
+                
+            combo_profile.addItems(presets)
+            if active in presets:
+                combo_profile.setCurrentText(active)
+        else:
+            combo_profile.addItems([self.cbo_preset.itemText(i) for i in range(self.cbo_preset.count())])
+            combo_profile.setCurrentText(self.cbo_preset.currentText())
+            
+        self.tbl_input.setCellWidget(row, 1, combo_profile)
 
     def rename_profile(self):
         from PyQt6.QtWidgets import QInputDialog
@@ -928,47 +1127,44 @@ class TRunApp(QMainWindow):
             self.refresh_profiles_combo()
             
     def browse_input(self):
-        path, _ext = QFileDialog.getOpenFileName(self, _("Select Input CSV"), "", "Supported Files (*.csv *.bundle *.txt *.pak *.*);;CSV Files (*.csv);;Unity Bundles (*.bundle *.txt *.*);;PAK Files (*.pak);;All Files (*.*)")
-        if path:
-            def do_work():
-                try:
-                    if path.lower().endswith('.pak'):
-                        from tstudio_core import TPakManager, TStudioCore
-                        csv_out = TPakManager.extract_pak_to_csv(path)
-                        if csv_out:
-                            cfg = TStudioCore.load_config()
-                            cfg["origin_file"] = path
-                            TStudioCore.save_config(cfg)
-                            return csv_out
-                except Exception as e:
-                    print(f"PAK extract error: {e}")
-                try:
-                    from tbundle_manager import TBundleManager
-                    if TBundleManager.is_unity_bundle(path):
-                        csv_out = TBundleManager.extract_text_to_csv(path)
-                        if csv_out:
-                            return csv_out
-                except Exception as e:
-                    print(f"Bundle extract error: {e}")
-                return path
+        paths, _ext = QFileDialog.getOpenFileNames(self, _("Select Input CSV"), "", "Supported Files (*.csv *.bundle *.txt *.pak *.*);;CSV Files (*.csv);;Unity Bundles (*.bundle *.txt *.*);;PAK Files (*.pak);;All Files (*.*)")
+        if paths:
+            for path in paths:
+                def do_work(p=path):
+                    try:
+                        if p.lower().endswith('.pak'):
+                            from tstudio_core import TPakManager, TStudioCore
+                            csv_out = TPakManager.extract_pak_to_csv(p)
+                            if csv_out:
+                                cfg = TStudioCore.load_config()
+                                cfg["origin_file"] = p
+                                TStudioCore.save_config(cfg)
+                                return csv_out
+                    except Exception as e:
+                        print(f"PAK extract error: {e}")
+                    try:
+                        from tbundle_manager import TBundleManager
+                        if TBundleManager.is_unity_bundle(p):
+                            csv_out = TBundleManager.extract_text_to_csv(p)
+                            if csv_out:
+                                return csv_out
+                    except Exception as e:
+                        print(f"Bundle extract error: {e}")
+                    return p
 
-            def on_result(result_path):
-                self._process_input_path_ui(result_path)
+                def on_result(result_path):
+                    self._process_input_path_ui(result_path)
 
-            from tstudio_ui_shared import ApiWorker
-            from PyQt6.QtCore import QThreadPool
-            worker = ApiWorker(do_work)
-            worker.signals.finished.connect(on_result)
-            self._workers.append(worker)  # Prevent GC before thread executes
-            QThreadPool.globalInstance().start(worker)
+                from tstudio_ui_shared import ApiWorker
+                from PyQt6.QtCore import QThreadPool
+                worker = ApiWorker(do_work)
+                worker.signals.finished.connect(on_result)
+                self._workers.append(worker)  # Prevent GC before thread executes
+                QThreadPool.globalInstance().start(worker)
 
     def browse_input_folder(self):
         folder = QFileDialog.getExistingDirectory(self, "Select Input Folder (Contains CSVs)")
         if folder:
-            self.txt_input.setText(folder)
-            out_folder = folder + "_translated"
-            self.txt_output.setText(out_folder)
-            
             import glob, os
             csv_files = glob.glob(os.path.join(folder, "*.csv"))
             if not csv_files:
@@ -1003,25 +1199,12 @@ class TRunApp(QMainWindow):
                     csv_files = new_csv_files
                     self.log(f"Formatted {len(csv_files)} files successfully.", "#a6e3a1")
                 else:
-                    self.log("Batch Smart Import cancelled. Queueing original files (may fail).", "#f38ba8")
+                    self.log("Batch Smart Import cancelled. Adding original files (may fail).", "#f38ba8")
             
-            self.queue = [(f, os.path.join(out_folder, os.path.basename(f))) for f in csv_files]
-        
-        # Populate Queue Table
-        self.tbl_queue.setRowCount(0)
-        from PyQt6.QtWidgets import QTableWidgetItem
-        from PyQt6.QtCore import Qt
-        for i, (in_file, out_file) in enumerate(self.queue):
-            self.tbl_queue.insertRow(i)
-            item_name = QTableWidgetItem(os.path.basename(in_file))
-            item_status = QTableWidgetItem("Pending ⏳")
-            item_status.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.tbl_queue.setItem(i, 0, item_name)
-            self.tbl_queue.setItem(i, 1, item_status)
-            
-        # Log AFTER the loop, not inside it (was logging N times per iteration)
-        self.log(f"Selected Folder: {folder}", "#a6e3a1")
-        self.log(f"Found {len(self.queue)} CSV files to translate in queue.", "#89b4fa")
+            for f in csv_files:
+                self.add_to_list_unique(f)
+                
+            self.log(f"Added {len(csv_files)} CSV files from folder: {folder}", "#a6e3a1")
 
     def _process_input_path_ui(self, path):
         from tstudio_core import TFormatManager
@@ -1041,15 +1224,7 @@ class TRunApp(QMainWindow):
             else:
                 return
 
-        self.txt_input.setText(path)
-        self.queue = [] # Single file mode clears queue
-        if not self.txt_output.text():
-            self.txt_output.setText(path.replace(".csv", "_translated.csv"))
-            
-    def browse_output(self):
-        path, _ext = QFileDialog.getSaveFileName(self, _("fdlg_select_output_csv"), "", "CSV Files (*.csv)")
-        if path:
-            self.txt_output.setText(path)
+        self.add_to_list_unique(path)
 
     def toggle_risk(self, checked):
         if checked:
@@ -1058,106 +1233,56 @@ class TRunApp(QMainWindow):
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
             if reply == QMessageBox.StandardButton.Yes:
                 self.slider_batch.setRange(1, 500)
+                self.spin_batch_val.setRange(1, 500)
             else:
                 self.chk_unlock.setChecked(False)
         else:
             self.slider_batch.setRange(1, 100)
+            self.spin_batch_val.setRange(1, 100)
             if self.slider_batch.value() > 100:
                 self.slider_batch.setValue(100)
 
     def export_original(self):
-        output_path = self.txt_output.text()
-        if not output_path:
-            QMessageBox.warning(self, "No File", "Please specify an output file first, or run a translation.")
-            return
-            
-        import os
-        if not os.path.exists(output_path):
-            QMessageBox.warning(self, "Not Found", f"Output file does not exist yet:\n{output_path}\nPlease run the translation first.")
-            return
-            
-        try:
-            from tstudio_core import TStudioCore, TPakManager
-            cfg = TStudioCore.load_config()
-            origin_file = cfg.get("origin_file", "")
-            if origin_file and origin_file.lower().endswith('.pak') and os.path.exists(origin_file):
-                try:
-                    TPakManager.reconstruct_pak_file(origin_file, output_path, origin_file)
-                    QMessageBox.information(self, "Deploy Success", f"Deployed successfully back to PAK file:\n{origin_file}")
-                    return
-                except Exception as e:
-                    QMessageBox.warning(self, "Deploy Failed", str(e))
-                    return
-        except Exception as e:
-            pass
-            
-        try:
-            from tbundle_manager import TBundleManager
-            base_dir = os.path.dirname(output_path)
-            stem = os.path.basename(output_path).replace('.csv', '')
-            possible_stem = stem.replace('_translated', '')
-            json_path = os.path.join(base_dir, f"{stem}_meta.json")
-            if not os.path.exists(json_path):
-                json_path = os.path.join(base_dir, f"{possible_stem}_meta.json")
-                
-            if os.path.exists(json_path):
-                success, msg_or_path = TBundleManager.deploy_csv_to_bundle(output_path)
-                if success:
-                    QMessageBox.information(self, "Deploy Success", f"Deployed successfully back to Unity Bundle:\n{msg_or_path}")
-                else:
-                    QMessageBox.warning(self, "Deploy Failed", msg_or_path)
-                return
-        except Exception as e:
-            pass
-
-        from tstudio_core import TFormatManager
-        success, msg_or_path = TFormatManager.export_original(output_path)
-        if success:
-            QMessageBox.information(self, "Export Success", f"Exported successfully to:\n{msg_or_path}")
-        else:
-            QMessageBox.warning(self, "Export Failed", msg_or_path)
+        self.deploy_all()
 
     def deploy_all(self):
-        output_path = self.txt_output.text()
-        if not output_path or not os.path.isdir(output_path):
-            QMessageBox.warning(self, "Folder Mode Only", "Deploy All is only available for Batch Folder translation outputs. Please select an input folder first.")
+        import os
+        deploy_list = []
+        for i in range(self.tbl_input.rowCount()):
+            item = self.tbl_input.item(i, 0)
+            if item:
+                in_file = item.text()
+                out_file = in_file.replace(".csv", "_translated.csv")
+                deploy_list.append((in_file, out_file))
+                
+        if not deploy_list:
+            QMessageBox.warning(self, "No Queue", "No files found to deploy. Please add files to the input list.")
             return
             
-        import glob
-        csv_files = glob.glob(os.path.join(output_path, "*.csv"))
-        if not csv_files:
-            QMessageBox.warning(self, "No Files", f"No CSV files found in {output_path}")
-            return
-            
-        self.log(f"Starting Batch Deploy for {len(csv_files)} files...", "#fab387")
+        self.log(f"Starting Batch Deploy for {len(deploy_list)} files...", "#fab387")
         from tstudio_core import TFormatManager
         from tbundle_manager import TBundleManager
 
-        # Input folder is where the original source files and meta JSONs live (BUG 4 fix)
-        input_folder = self.txt_input.text()
-        if not input_folder:
-            QMessageBox.warning(self, "No Input Folder", "Input folder path is empty. Please select an input folder first.")
-            return
-        
         success_count = 0
         fail_count = 0
         
-        for csv_file in csv_files:
+        for in_file, out_file in deploy_list:
+            if not os.path.exists(out_file):
+                continue
+            
             try:
-                stem = os.path.splitext(os.path.basename(csv_file))[0]
-                json_path = os.path.join(input_folder, f'{stem}_meta.json')
-                if not os.path.exists(json_path) and os.path.exists(os.path.join(input_folder + "_formatted", f'{stem}_meta.json')):
-                    json_path = os.path.join(input_folder + "_formatted", f'{stem}_meta.json')
-                    
-                pak_path = os.path.join(input_folder, f'{stem}.pak')
-                if not os.path.exists(pak_path) and os.path.exists(os.path.join(input_folder + "_formatted", f'{stem}.pak')):
-                    pak_path = os.path.join(input_folder + "_formatted", f'{stem}.pak')
+                stem = os.path.splitext(os.path.basename(out_file))[0]
+                base_dir = os.path.dirname(in_file)
+                
+                real_stem = stem.replace("_translated", "")
+                json_path = os.path.join(base_dir, f'{real_stem}_meta.json')
+                pak_path = os.path.join(base_dir, f'{real_stem}.pak')
 
                 # Check PAK deployment first
                 from tstudio_core import TPakManager
                 if os.path.exists(pak_path):
                     try:
-                        TPakManager.reconstruct_pak_file(pak_path, csv_file, pak_path)
+                        TPakManager.reconstruct_pak_file(pak_path, out_file, pak_path)
                         success_count += 1
                         self.log(f"Successfully deployed to PAK file at: {pak_path}", "#a6e3a1")
                         continue
@@ -1168,55 +1293,62 @@ class TRunApp(QMainWindow):
 
                 # Check Bundle first
                 if os.path.exists(json_path):
-                    success, msg = TBundleManager.deploy_csv_to_bundle(csv_file, original_meta_path=json_path)
+                    success, msg = TBundleManager.deploy_csv_to_bundle(out_file, original_meta_path=json_path)
                     if success:
                         success_count += 1
                     else:
                         fail_count += 1
-                        self.log(f"Failed bundle deploy {os.path.basename(csv_file)}: {msg}", "#f38ba8")
+                        self.log(f"Failed bundle deploy {os.path.basename(out_file)}: {msg}", "#f38ba8")
                     continue
                     
                 # Fallback to normal export_original
-                success, msg = TFormatManager.export_original(csv_file, original_meta_path=json_path)
+                success, msg = TFormatManager.export_original(out_file, original_meta_path=json_path if os.path.exists(json_path) else None)
                 if success:
                     success_count += 1
                 else:
                     fail_count += 1
-                    self.log(f"Failed format deploy {os.path.basename(csv_file)}: {msg}", "#f38ba8")
+                    self.log(f"Failed format deploy {os.path.basename(out_file)}: {msg}", "#f38ba8")
 
             except Exception as deploy_err:
                 fail_count += 1
-                self.log(f"Error deploying {os.path.basename(csv_file)}: {deploy_err}", "#f38ba8")
+                self.log(f"Error deploying {os.path.basename(out_file)}: {deploy_err}", "#f38ba8")
                 
-            QApplication.processEvents()  # Keep UI responsive during batch deploy
+            QApplication.processEvents()
                 
         self.log(f"Batch Deploy Finished. Success: {success_count}, Failed: {fail_count}", "#a6e3a1")
         QMessageBox.information(self, "Deploy Complete", f"Batch Deploy finished.\nSuccess: {success_count}\nFailed: {fail_count}")
 
     def start_translation(self):
-        if not self.txt_input.text() or not self.txt_output.text():
-            QMessageBox.warning(self, _("warn_select_io_title") if '_' in globals() else "Warning", _("warn_select_io_msg") if '_' in globals() else "Please select input and output folders.")
+        if self.tbl_input.rowCount() == 0:
+            QMessageBox.warning(self, _("warn_select_io_title") if '_' in globals() else "Warning", _("warn_select_io_msg") if '_' in globals() else "Please add files or folders to translate.")
             return
 
         if self.is_running:
             return
             
-        # Initialize queue if not already set (for single file mode)
-        if not hasattr(self, 'queue') or not self.queue:
-            if os.path.isfile(self.txt_input.text()):
-                self.queue = [(self.txt_input.text(), self.txt_output.text())]
-                # Populate queue tracker table for single-file mode
-                self.tbl_queue.setRowCount(0)
-                self.tbl_queue.insertRow(0)
-                from PyQt6.QtWidgets import QTableWidgetItem
-                item_name = QTableWidgetItem(os.path.basename(self.txt_input.text()))
-                item_status = QTableWidgetItem("Pending ⏳")
-                item_status.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                self.tbl_queue.setItem(0, 0, item_name)
-                self.tbl_queue.setItem(0, 1, item_status)
-            else:
-                QMessageBox.warning(self, _("warn_select_io_title"), "Input is neither a file nor a valid folder queue.")
-                return
+        import os
+        self.queue = []
+        for i in range(self.tbl_input.rowCount()):
+            item = self.tbl_input.item(i, 0)
+            if not item:
+                continue
+            in_file = item.text()
+            out_file = in_file.replace(".csv", "_translated.csv")
+            combo = self.tbl_input.cellWidget(i, 1)
+            profile_name = combo.currentText() if combo else self.cbo_preset.currentText()
+            project_root = self.find_project_root(in_file)
+            self.queue.append((in_file, out_file, profile_name, project_root))
+            
+        self.tbl_queue.setRowCount(0)
+        from PyQt6.QtWidgets import QTableWidgetItem
+        from PyQt6.QtCore import Qt
+        for i, (in_file, out_file, _, _) in enumerate(self.queue):
+            self.tbl_queue.insertRow(i)
+            item_name = QTableWidgetItem(os.path.basename(in_file))
+            item_status = QTableWidgetItem("Pending ⏳")
+            item_status.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.tbl_queue.setItem(i, 0, item_name)
+            self.tbl_queue.setItem(i, 1, item_status)
 
         self.log(f"Batch Translation Engine starting with {len(self.queue)} files in queue...", "#89b4fa")
         self.is_running = True
@@ -1224,11 +1356,6 @@ class TRunApp(QMainWindow):
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
         self.cbo_preset.setEnabled(False)
-        
-        # Ensure output directory exists if in folder mode
-        if len(self.queue) > 1:
-            os.makedirs(self.txt_output.text(), exist_ok=True)
-            
         if hasattr(self, 'chk_schedule') and self.chk_schedule.isChecked():
             target_time = self.time_schedule.time()
             current_time = QTime.currentTime()
@@ -1237,7 +1364,7 @@ class TRunApp(QMainWindow):
                 msecs += 86400000 # Add 24 hours if target time is tomorrow
             
             self.log(f"Scheduled to start at {target_time.toString('HH:mm')} (in {msecs // 60000} minutes)...", "#f9e2af")
-            for filename, _ in self.queue:
+            for filename, _, _, _ in self.queue:
                 self._set_queue_status(os.path.basename(filename), "Waiting for Schedule ⏳")
             
             self.schedule_timer = QTimer(self)
@@ -1279,9 +1406,9 @@ class TRunApp(QMainWindow):
             self.log("Batch queue stopped.", "#f38ba8")
             return
             
-        self.current_in_file, self.current_out_file = self.queue.pop(0)
+        self.current_in_file, self.current_out_file, profile_name, project_root = self.queue.pop(0)
         base_name = os.path.basename(self.current_in_file)
-        self.log(f"Processing: {base_name}...", "#cba6f7")
+        self.log(f"Processing: {base_name} (Profile: {profile_name})...", "#cba6f7")
         self._set_queue_status(base_name, "Translating 🔄")
         
         import time
@@ -1293,8 +1420,16 @@ class TRunApp(QMainWindow):
         if hasattr(self, 'lbl_eta'):
             self.lbl_eta.setText("ETA: Calculating...")
         
+        from tstudio_core import TStudioCore
         cfg = TStudioCore.load_config()
-        profile = TStudioCore.get_current_profile_data()
+        if project_root:
+            TStudioCore.set_project_path(project_root)
+        profiles_data = TStudioCore.load_profiles()
+        presets = profiles_data.get("presets", {})
+        if profile_name in presets:
+            profile = presets[profile_name]
+        else:
+            profile = presets.get("Default", {})
         
         peak_config = None
         if hasattr(self, 'chk_peak') and self.chk_peak.isChecked():
@@ -1319,12 +1454,16 @@ class TRunApp(QMainWindow):
             peak_config=peak_config
         )
         
+        # Prevent QObject destruction race condition when QRunnable finishes
+        self.worker.signals.setParent(self)
+
         self.worker.signals.log.connect(self.log)
         self.worker.signals.progress.connect(self.update_progress)
         self.worker.signals.batch_progress.connect(self.update_batch_progress)
         self.worker.signals.finished.connect(self.on_file_finished)
+        self.worker.signals.stopped.connect(self.on_worker_stopped)  # user-stop → reset UI only
         self.worker.signals.error.connect(self.on_error)
-        
+
         self.threadpool.start(self.worker)
         
     def update_batch_progress(self, current, total):
@@ -1332,6 +1471,11 @@ class TRunApp(QMainWindow):
             pct = int((current / total) * 100)
             self.batch_progress_bar.setValue(pct)
             self.lbl_batch_progress.setText(f"Batch: {current} / {total} ({pct}%)")
+            # Fix 6: Track observed average time per batch for adaptive ETA preview
+            import time as _time
+            if hasattr(self, 'current_job_start_time') and current > 1:
+                elapsed = _time.time() - self.current_job_start_time
+                self._avg_batch_time_sec = elapsed / (current - 1)  # per batch
             
     def update_progress(self, current, total):
         if total > 0:
@@ -1360,6 +1504,23 @@ class TRunApp(QMainWindow):
         self._set_queue_status(base_name, "Completed ✅")
         if self.is_running:
             self._run_next_in_queue()
+
+    def on_worker_stopped(self):
+        """Called when user pressed Stop — resets UI without starting next file."""
+        self.is_running = False
+        self.queue = []  # Cancel remaining queue
+        self.btn_start.setEnabled(True)
+        self.btn_stop.setEnabled(False)
+        self.cbo_preset.setEnabled(True)
+        if hasattr(self, 'current_in_file'):
+            base_name = os.path.basename(self.current_in_file)
+            self._set_queue_status(base_name, "Stopped ⏹")
+            # Mark remaining queued files as cancelled
+        for row in range(self.tbl_queue.rowCount()):
+            item = self.tbl_queue.item(row, 1)
+            if item and item.text().startswith("Pending"):
+                item.setText("Cancelled ❌")
+        self.log("Translation stopped by user. Progress saved.", "#f9e2af")
             
     def on_all_queue_finished(self):
         self.is_running = False
@@ -1367,7 +1528,54 @@ class TRunApp(QMainWindow):
         self.btn_stop.setEnabled(False)
         self.cbo_preset.setEnabled(True)
         self.log("All files in queue completed successfully!", "#a6e3a1")
-        QMessageBox.information(self, "Done", "All translations completed successfully!")
+        
+        if hasattr(self, 'chk_auto_shutdown') and self.chk_auto_shutdown.isChecked():
+            self.trigger_shutdown()
+        else:
+            QMessageBox.information(self, "Done", "All translations completed successfully!")
+            
+    def trigger_shutdown(self):
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
+        from PyQt6.QtCore import QTimer
+        import os
+        
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Auto Shutdown")
+        dlg.setFixedSize(350, 150)
+        
+        layout = QVBoxLayout(dlg)
+        
+        self.shutdown_time_left = 60
+        lbl = QLabel(f"All translations finished.\nComputer will shutdown in {self.shutdown_time_left} seconds...")
+        lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl.setStyleSheet("font-size: 14px; color: #f38ba8; font-weight: bold;")
+        layout.addWidget(lbl)
+        
+        btn_layout = QHBoxLayout()
+        btn_cancel = QPushButton("Cancel Shutdown")
+        btn_cancel.setStyleSheet("background: #45475a;")
+        btn_cancel.clicked.connect(dlg.reject)
+        btn_layout.addWidget(btn_cancel)
+        layout.addLayout(btn_layout)
+        
+        timer = QTimer(dlg)
+        
+        def update_timer():
+            self.shutdown_time_left -= 1
+            if self.shutdown_time_left <= 0:
+                timer.stop()
+                dlg.accept()
+                os.system("shutdown /s /t 0")
+            else:
+                lbl.setText(f"All translations finished.\nComputer will shutdown in {self.shutdown_time_left} seconds...")
+                
+        timer.timeout.connect(update_timer)
+        timer.start(1000)
+        
+        if dlg.exec() == QDialog.DialogCode.Rejected:
+            timer.stop()
+            self.log("Auto Shutdown cancelled by user.", "#f9e2af")
+            QMessageBox.information(self, "Done", "All translations completed successfully!\n(Auto Shutdown Cancelled)")
         
     def on_finished(self):
         pass # Replaced by on_file_finished / on_all_queue_finished
@@ -1389,7 +1597,7 @@ class TRunApp(QMainWindow):
             self.btn_start.setEnabled(True)
             self.btn_stop.setEnabled(False)
             self.cbo_preset.setEnabled(True)
-            for filename, _ in self.queue:
+            for filename, _, _, _ in self.queue:
                 self._set_queue_status(os.path.basename(filename), "Cancelled ❌")
             return
             
@@ -1409,8 +1617,10 @@ class TRunApp(QMainWindow):
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("--project", type=str, help="Path to THub project", default=None)
+    parser.add_argument("project", nargs="?", type=str, help="Path to THub project", default=None)
     args, unknown = parser.parse_known_args()
+    
+    TStudioCore.set_project_path(args.project)
     
     app = QApplication(sys.argv)
     window = TRunApp(project_path=args.project)

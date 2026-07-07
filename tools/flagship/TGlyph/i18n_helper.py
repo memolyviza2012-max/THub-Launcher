@@ -2,8 +2,8 @@ import os
 import json
 from pathlib import Path
 
-_LOCALES = Path(__file__).parent / 'locales'
-_TSTUDIO_LOCALES = Path(__file__).parent.parent / 'TStudio' / 'locales'
+_LOCALES = Path(os.path.abspath(__file__)).parent / 'locales'
+_TSTUDIO_LOCALES = Path(os.path.abspath(__file__)).parent.parent / 'TStudio' / 'locales'
 _cache = {}
 
 def _load_lang(locales_path, lang):

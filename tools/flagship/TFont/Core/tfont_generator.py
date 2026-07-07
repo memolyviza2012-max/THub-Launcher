@@ -3,7 +3,7 @@ import json
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables._g_l_y_f import Glyph, GlyphComponent
 
-class TPUAFontEngine:
+class TFontGenerator:
     def __init__(self, mapping_path=None):
         self.mapping = {}
         if mapping_path and os.path.exists(mapping_path):

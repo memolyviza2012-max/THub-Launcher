@@ -87,5 +87,12 @@
     "lbl_peak_action": "Действие:",
     "opt_peak_pause": "Пауза перевода (сон)",
     "opt_peak_fallback": "Переключиться на резервный профиль",
-    "lbl_peak_fallback": "Резервный профиль:"
+    "lbl_peak_fallback": "Резервный профиль:",
+    "chk_auto_shutdown": "Автоматическое выключение по завершении",
+    "btn_file_add": "📄 Добавить файл(ы)",
+    "btn_folder_add": "📁 Добавить папку...",
+    "btn_remove_sel": "🗑️ Удалить выбранное",
+    "btn_clear_all": "🧹 Очистить всё",
+    "lbl_file_path": "📂 Путь к файлу",
+    "lbl_profile": "⚙️ Профиль"
 }

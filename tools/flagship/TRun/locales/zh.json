@@ -87,5 +87,12 @@
     "lbl_peak_action": "行动：",
     "opt_peak_pause": "暂停翻译（睡眠）",
     "opt_peak_fallback": "切换到后备配置文件",
-    "lbl_peak_fallback": "后备配置文件："
+    "lbl_peak_fallback": "后备配置文件：",
+    "chk_auto_shutdown": "完成后自动关机",
+    "btn_file_add": "📄 添加文件",
+    "btn_folder_add": "📁 添加文件夹...",
+    "btn_remove_sel": "🗑️ 删除所选",
+    "btn_clear_all": "🧹 清除全部",
+    "lbl_file_path": "📂 文件路径",
+    "lbl_profile": "⚙️ 配置文件"
 }

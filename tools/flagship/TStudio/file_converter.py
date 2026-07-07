@@ -202,3 +202,5 @@ def convert_locres_to_tstudio_csv(filepath, parent_widget=None):
                 os.remove(pylocres_csv)
             except:
                 pass
+
+

@@ -482,5 +482,6 @@
     "Dark": "Dark",
     "System": "System",
     "Auto Update": "Auto Update",
-    "พ่วง:": "Link:"
+    "พ่วง:": "Link:",
+    "chk_auto_shutdown": "Auto Shutdown when finished"
 }

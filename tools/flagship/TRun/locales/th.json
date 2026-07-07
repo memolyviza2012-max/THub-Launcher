@@ -87,5 +87,12 @@
     "lbl_peak_action": "เมื่อถึงช่วงเวลา:",
     "opt_peak_pause": "หยุดแปลชั่วคราว (Sleep)",
     "opt_peak_fallback": "สลับไปโปรไฟล์สำรอง",
-    "lbl_peak_fallback": "โปรไฟล์สำรอง:"
+    "lbl_peak_fallback": "โปรไฟล์สำรอง:",
+    "chk_auto_shutdown": "ปิดคอมพิวเตอร์เมื่อแปลเสร็จทั้งหมด (Auto Shutdown)",
+    "btn_file_add": "📄 เพิ่มไฟล์",
+    "btn_folder_add": "📁 เพิ่มโฟลเดอร์...",
+    "btn_remove_sel": "🗑️ ลบที่เลือก",
+    "btn_clear_all": "🧹 ล้างทั้งหมด",
+    "lbl_file_path": "📂 เส้นทางไฟล์",
+    "lbl_profile": "⚙️ โปรไฟล์"
 }

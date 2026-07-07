@@ -18,7 +18,8 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QTableWidget, 
     QTableWidgetItem, QHeaderView, QMessageBox, QLabel, QComboBox, 
     QLineEdit, QFileDialog, QDialog, QScrollArea, QButtonGroup, QRadioButton,
-    QFormLayout, QTextEdit, QGroupBox, QSpinBox, QDoubleSpinBox, QApplication
+    QFormLayout, QTextEdit, QGroupBox, QSpinBox, QDoubleSpinBox, QApplication,
+    QAbstractItemView
 )
 from PyQt6.QtCore import Qt, QLocale, QThreadPool, QRunnable, pyqtSignal, QObject, pyqtSlot
 from tstudio_core import TStudioCore, CoreAI, DEFAULT_SINGLE_PROMPT, DEFAULT_OPTIONS_PROMPT
@@ -858,7 +859,13 @@ class GlossaryWidget(QWidget):
         self.table.setHorizontalHeaderLabels([_("glossary_col_word"), _("glossary_col_thai"), _("glossary_col_tag")])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.table.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         layout.addWidget(self.table)
+        
+        self._history = []
+        self._history_index = -1
+        self._is_pushing_history = False
 
         btn_add = QPushButton(_("btn_add_row"))
         btn_add.setToolTip(_("tooltip_btn_add"))
@@ -900,6 +907,23 @@ class GlossaryWidget(QWidget):
         btn_del.setToolTip(_("tooltip_btn_delete_row"))
         btn_del.setStyleSheet("background-color: #313244; color: #cdd6f4; border: 1px solid #45475a; border-radius: 4px; padding: 4px 8px; min-height: 22px;")
         
+        self.btn_undo = QPushButton("↩️ Undo")
+        self.btn_undo.setToolTip("ย้อนกลับ (Ctrl+Z)")
+        self.btn_undo.clicked.connect(self.undo)
+        self.btn_undo.setStyleSheet("background-color: #313244; color: #cdd6f4; border: 1px solid #45475a; border-radius: 4px; padding: 4px 8px; min-height: 22px;")
+        self.btn_undo.setEnabled(False)
+        
+        self.btn_redo = QPushButton("↪️ Redo")
+        self.btn_redo.setToolTip("ทำซ้ำ (Ctrl+Y)")
+        self.btn_redo.clicked.connect(self.redo)
+        self.btn_redo.setStyleSheet("background-color: #313244; color: #cdd6f4; border: 1px solid #45475a; border-radius: 4px; padding: 4px 8px; min-height: 22px;")
+        self.btn_redo.setEnabled(False)
+        
+        from PyQt6.QtGui import QKeySequence, QShortcut
+        QShortcut(QKeySequence("Ctrl+Z"), self).activated.connect(self.undo)
+        QShortcut(QKeySequence("Ctrl+Y"), self).activated.connect(self.redo)
+        QShortcut(QKeySequence("Delete"), self.table).activated.connect(self.del_row)
+        
         btn_save = QPushButton(_("btn_save_to_profile"))
         btn_save.clicked.connect(lambda: self.save_glossary(True))
         btn_save.setToolTip(_("tooltip_btn_save_glossary"))
@@ -919,6 +943,8 @@ class GlossaryWidget(QWidget):
         btn_layout_top.setSpacing(6)
         btn_layout_top.addWidget(btn_add)
         btn_layout_top.addWidget(btn_auto_tag)
+        btn_layout_top.addWidget(self.btn_undo)
+        btn_layout_top.addWidget(self.btn_redo)
         btn_layout_top.addWidget(btn_del)
         
         btn_layout_bottom = QHBoxLayout()
@@ -948,8 +974,75 @@ class GlossaryWidget(QWidget):
 
     def mark_modified(self):
         self._is_modified = True
+        if not getattr(self, '_is_pushing_history', False):
+            self.push_history()
         if hasattr(self, 'save_timer'):
             self.save_timer.start(500) # Auto-save 500ms after user stops typing
+
+    def update_history_buttons(self):
+        if hasattr(self, 'btn_undo') and hasattr(self, 'btn_redo'):
+            self.btn_undo.setEnabled(self._history_index > 0)
+            self.btn_redo.setEnabled(self._history_index < len(self._history) - 1)
+
+    def push_history(self):
+        if getattr(self, '_is_pushing_history', False):
+            return
+            
+        snapshot = []
+        for r in range(self.table.rowCount()):
+            w_item = self.table.item(r, 0)
+            c_item = self.table.item(r, 1)
+            t_item = self.table.item(r, 2)
+            if w_item and c_item:
+                w = w_item.text()
+                c = c_item.text()
+                t = t_item.text() if t_item else "General"
+                snapshot.append((w, c, t))
+                
+        if self._history and 0 <= self._history_index < len(self._history):
+            if self._history[self._history_index] == snapshot:
+                return # No change
+                
+        self._history = self._history[:self._history_index + 1]
+        self._history.append(snapshot)
+        self._history_index += 1
+        self.update_history_buttons()
+
+    def undo(self):
+        if self._history_index > 0:
+            self._history_index -= 1
+            self.restore_history_snapshot()
+            
+    def redo(self):
+        if self._history_index < len(self._history) - 1:
+            self._history_index += 1
+            self.restore_history_snapshot()
+            
+    def restore_history_snapshot(self):
+        if self._history_index < 0 or self._history_index >= len(self._history):
+            return
+            
+        self._is_pushing_history = True
+        old_state = self.table.blockSignals(True)
+        self.table.setRowCount(0)
+        
+        snapshot = self._history[self._history_index]
+        for (w, c, t) in snapshot:
+            row = self.table.rowCount()
+            self.table.insertRow(row)
+            self.table.setItem(row, 0, QTableWidgetItem(w))
+            self.table.setItem(row, 1, QTableWidgetItem(c))
+            tag_item = QTableWidgetItem(t)
+            tag_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.table.setItem(row, 2, tag_item)
+            
+        self.table.blockSignals(old_state)
+        self._is_pushing_history = False
+        
+        self.update_history_buttons()
+        self._is_modified = True
+        if hasattr(self, 'save_timer'):
+            self.save_timer.start(0)
 
     def filter_glossary(self, *args, **kwargs):
         search_text = self.search_box.text().lower()
@@ -1007,24 +1100,28 @@ class GlossaryWidget(QWidget):
         if existing_words:
             anti_dup_prompt = f"\nCRITICAL: Do NOT extract any of the following terminology, as they already exist in the glossary:\n{json.dumps(existing_words, ensure_ascii=False)}\n"
             
+        source_lang = self.txt_source_lang.text().strip() or "English"
+        target_lang = self.txt_target_lang.text().strip() or "Thai"
+        
         tlm_text = self.txt_tlm_context.toPlainText().strip()
         if tlm_text:
             prompt = f"You are a video game localization expert. Your task is to extract exactly {amount} key terminology (names, places, items) from the following context for the game '{game_name}'.\n\n--- CONTEXT ---\n{tlm_text[:8000]}\n---------------\n\n" \
                      f"{anti_dup_prompt}" \
-                     "You MUST output ONLY a valid JSON array. Do not use any nested objects. Each object in the array must have exactly three string keys: 'en', 'th', and 'tag'.\n" \
-                     "- 'en': The English word.\n" \
-                     "- 'th': The Thai translation.\n" \
+                     "You MUST output ONLY a valid JSON array. Do not use any nested objects. Each object in the array must have exactly three string keys: 'source', 'target', and 'tag'.\n" \
+                     f"- 'source': The original word/term in {source_lang}.\n" \
+                     f"- 'target': The translated word/term in {target_lang}.\n" \
                      "- 'tag': MUST be exactly one of the following words: General, Person, Location, Weapon, Item, Faction, Quest, Other.\n" \
                      "Output ONLY the JSON array. Do NOT output markdown formatting like ```json."
         else:
             prompt = f"You are a video game localization expert. Your task is to extract exactly {amount} most common terminology for the game '{game_name}', {cat_prompt_part}.\n" \
+                     f"The source language is {source_lang} and the target language is {target_lang}.\n" \
                      f"{anti_dup_prompt}" \
-                     "You MUST output ONLY a valid JSON array. Do not use any nested objects. Each object in the array must have exactly three string keys: 'en', 'th', and 'tag'.\n" \
-                     "- 'en': The English word.\n" \
-                     "- 'th': The Thai translation.\n" \
+                     "You MUST output ONLY a valid JSON array. Do not use any nested objects. Each object in the array must have exactly three string keys: 'source', 'target', and 'tag'.\n" \
+                     f"- 'source': The original word/term in {source_lang}.\n" \
+                     f"- 'target': The translated word/term in {target_lang}.\n" \
                      "- 'tag': MUST be exactly one of the following words: General, Person, Location, Weapon, Item, Faction, Quest, Other.\n" \
                      "Example of expected output:\n" \
-                     '[\n  {"en": "Health Potion", "th": "ยาฟื้นฟูพลังชีวิต", "tag": "Item"},\n  {"en": "Sword", "th": "ดาบ", "tag": "Weapon"}\n]\n' \
+                     '[\n  {"source": "Health Potion", "target": "ยาฟื้นฟูพลังชีวิต", "tag": "Item"},\n  {"source": "Sword", "target": "ดาบ", "tag": "Weapon"}\n]\n' \
                      "Output ONLY the JSON array. Do NOT output markdown formatting like ```json."
                  
         is_local = (cfg.get("provider", "") == "Local LLM" or cfg.get("model", "") == "custom-local-llm")
@@ -1085,6 +1182,8 @@ class GlossaryWidget(QWidget):
         added_count = 0
         merged_count = 0
         
+        self._is_pushing_history = True
+        
         # Pre-fetch existing glossary items for deduplication
         existing_terms = {}
         for r in range(self.table.rowCount()):
@@ -1095,8 +1194,9 @@ class GlossaryWidget(QWidget):
                 
         for item in new_terms:
             if not isinstance(item, dict): continue
-            en = item.get("en", "").strip()
-            th = item.get("th", "").strip()
+            # Support both new ('source'/'target') and legacy ('en'/'th') JSON keys
+            en = (item.get("source") or item.get("en", "")).strip()
+            th = (item.get("target") or item.get("th", "")).strip()
             tag = item.get("tag", "General")
             if not en or not th: continue
             
@@ -1116,13 +1216,17 @@ class GlossaryWidget(QWidget):
                 added_count += 1
         
         if added_count == 0 and merged_count == 0:
+            self._is_pushing_history = False
             raise Exception("AI returned valid JSON, but no new or unique terms were extracted.")
             
+        self._is_pushing_history = False
+        self.push_history()
         self.save_glossary(show_msg=False)
         QMessageBox.information(self, "Success", f"Glossary terms updated!\nAdded: {added_count} terms\nMerged: {merged_count} duplicates")
 
     def load_glossary(self):
-        self.table.blockSignals(True)
+        self._is_pushing_history = True
+        old_state = self.table.blockSignals(True)
         self.table.setRowCount(0)
         
         target_lang = self.profile_data.get("target_language", "Target") if self.profile_data else "Target"
@@ -1150,11 +1254,16 @@ class GlossaryWidget(QWidget):
                 right = val
                 tag = "General"
             self.add_row(wrong, right, tag)
-        self.table.blockSignals(False)
+        self.table.blockSignals(old_state)
         self._is_modified = False
+        self._is_pushing_history = False
+        
+        self._history = []
+        self._history_index = -1
+        self.push_history()
 
     def add_row(self, wrong="", right="", tag="General"):
-        self.table.blockSignals(True)
+        old_state = self.table.blockSignals(True)
         row = self.table.rowCount()
         self.table.insertRow(row)
         self.table.setItem(row, 0, QTableWidgetItem(wrong))
@@ -1164,8 +1273,10 @@ class GlossaryWidget(QWidget):
         tag_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
         self.table.setItem(row, 2, tag_item)
         
-        self.table.blockSignals(False)
+        self.table.blockSignals(old_state)
         self._is_modified = True
+        if not getattr(self, '_is_pushing_history', False):
+            self.push_history()
 
     def export_glossary(self):
         from PyQt6.QtWidgets import QFileDialog, QMessageBox
@@ -1231,12 +1342,27 @@ class GlossaryWidget(QWidget):
 
 
     def del_row(self):
-        row = self.table.currentRow()
-        if row >= 0:
+        rows = set()
+        for item in self.table.selectedItems():
+            rows.add(item.row())
+            
+        if not rows:
+            row = self.table.currentRow()
+            if row >= 0:
+                rows.add(row)
+                
+        if not rows:
+            return
+            
+        old_state = self.table.blockSignals(True)
+        for row in sorted(list(rows), reverse=True):
             self.table.removeRow(row)
-            self._is_modified = True
-            if hasattr(self, 'save_timer'):
-                self.save_timer.start(0) # Save deletion immediately
+        self.table.blockSignals(old_state)
+        
+        self.push_history()
+        self._is_modified = True
+        if hasattr(self, 'save_timer'):
+            self.save_timer.start(0) # Save deletion immediately
 
     def save_glossary(self, show_msg=True):
         data = TStudioCore.load_profiles()
@@ -1325,6 +1451,7 @@ class GlossaryWidget(QWidget):
                 if len(new_tags) != len(rows_to_tag):
                     raise Exception(f"AI returned {len(new_tags)} tags but expected {len(rows_to_tag)}.")
                 
+                self._is_pushing_history = True
                 for idx, item in enumerate(new_tags):
                     tag = item.get("tag", "General")
                     if tag in GLOSSARY_TAGS:
@@ -1337,6 +1464,8 @@ class GlossaryWidget(QWidget):
                             tag_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                             self.table.setItem(row, 2, tag_item)
                             
+                self._is_pushing_history = False
+                self.push_history()
                 self.save_glossary(show_msg=False)
                 self.btn_gen.setText("🧠 Extract from TLM")
                 self.btn_gen.setEnabled(True)
