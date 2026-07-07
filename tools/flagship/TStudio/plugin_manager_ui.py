@@ -121,7 +121,7 @@ class PluginManagerDialog(QDialog):
                 self.installed_list.addItem(file)
                 
     def add_local_plugin(self):
-        file_path, _ = QFileDialog.getOpenFileName(self, _("plugin_select_file_title"), "", _("plugin_python_files_filter"))
+        file_path, _ext = QFileDialog.getOpenFileName(self, _("plugin_select_file_title"), "", _("plugin_python_files_filter"))
         if file_path:
             filename = os.path.basename(file_path)
             if not filename.endswith(".py"):
