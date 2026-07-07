@@ -29,6 +29,13 @@ import sys
 from packaging import version
 from i18n_helper import _
 
+# ── PyInstaller resource path helper ──────────────────────────────────────────
+def resource_path(relative_path):
+    """Get absolute path to resource — works for both dev and PyInstaller builds."""
+    base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, relative_path)
+# ──────────────────────────────────────────────────────────────────────────────
+
 # ── Bootstrap language from config BEFORE any _() calls ──────────────────────
 # Read app_lang from hub_config.json early so every _() call at module level
 # already uses the correct locale (fixes "language doesn't apply until restart" bug)
@@ -2933,8 +2940,8 @@ del "%~f0"
             {"id": "TStudio", "name": "TStudio", "desc": "สุดยอดเครื่องมือแปลภาษาด้วย AI\n(วิเคราะห์บริบท & แก้ไขแบบ Line-by-Line)\nรองรับการทำงานกับไฟล์ Localization หลายรูปแบบ", "color": "#89b4fa", "exe": "tstudio_app.py", "icon": "assets/TStudio.png"},
             {"id": "TRun", "name": "TRun", "desc": "เครื่องมือแปลภาษาแบบ Batch อัตโนมัติ\n(รองรับไฟล์ขนาดใหญ่และปริมาณมหาศาล)\nแปลทั้งโปรเจกต์ได้อย่างรวดเร็วในคลิกเดียว", "color": "#a6e3a1", "exe": "trun_app.py", "icon": "assets/TRun.png"},
             {"id": "TVox", "name": "TVox", "desc": "เครื่องมือจัดการ FMV และซับไตเติ้ล\n(วิดีโอเพลเยอร์ & ดึงคลื่นเสียง Waveform)\nออกแบบมาเพื่อการแปลวิดีโอคัทซีนโดยเฉพาะ", "color": "#f38ba8", "exe": "tvox_app.py", "icon": "assets/TVox.png"},
-            {"id": "flagship.tfont", "folder": "TFont", "name": "TFont Generator", "desc": "เครื่องมือปรับแต่งและสร้างฟอนต์ PUA", "color": "#b4befe", "exe": "run_tfont.bat", "icon": "assets/TFONT.png", "no_project": True},
-            {"id": "flagship.tpua", "folder": "TPUA", "name": "TPUA Text Converter", "desc": "เครื่องมือแปลงข้อความภาษาไทยเข้าสู่ระบบ PUA", "color": "#cba6f7", "exe": "run_tpua.bat", "icon": "assets/TPUA.png", "no_project": True},
+            {"id": "flagship.tfont", "folder": "TFont", "name": "TFont Generator", "desc": "เครื่องมือปรับแต่งและสร้างฟอนต์ PUA", "color": "#b4befe", "exe": "tfont_app.py", "icon": "assets/TFONT.png", "no_project": True},
+            {"id": "flagship.tpua", "folder": "TPUA", "name": "TPUA Text Converter", "desc": "เครื่องมือแปลงข้อความภาษาไทยเข้าสู่ระบบ PUA", "color": "#cba6f7", "exe": "tpua_app.py", "icon": "assets/TPUA.png", "no_project": True},
             {"id": "TGlyph", "name": "TGlyph", "desc": "เครื่องมือสร้าง Texture ฟอนต์\n(Generate Texture และแผนที่ตัวอักษร)\nสำหรับดัดแปลงฟอนต์ Bitmap ในเกม", "color": "#fab387", "exe": "tglyph_app.py", "icon": "assets/TGlyph.png", "no_project": True}
         ]
             
@@ -2999,7 +3006,9 @@ del "%~f0"
         orig_img = None
         if item.get("icon"):
             try:
-                full_logo = os.path.join(os.path.dirname(__file__), item["icon"])
+                full_logo = resource_path(item["icon"])
+                if not os.path.exists(full_logo):
+                    full_logo = os.path.join(os.path.dirname(os.path.abspath(__file__)), item["icon"])
                 if os.path.exists(full_logo):
                     orig_img = ctk.CTkImage(light_image=Image.open(full_logo), size=(80, 80))
                     # Use a Button instead of a Label so it's clickable!
@@ -3012,19 +3021,24 @@ del "%~f0"
         
         action_frame = ctk.CTkFrame(card, fg_color="transparent")
         action_frame.grid(row=3, column=0, pady=(0, 20))
-        
-        # Context Selector
-        projects = self.config.get("projects", [])
-        proj_names = [_("พ่วงโปรเจกต์: ไม่มี"), _("พ่วงโปรเจกต์: เลือกโฟลเดอร์...")] + [f"พ่วง: {p['name']}" for p in projects]
+        no_project = item.get("no_project", False)
+
+        # Context Selector — hidden for tools that don't need a project context
         context_var = ctk.StringVar(value=_("พ่วงโปรเจกต์: ไม่มี"))
-        
-        opt_context = ctk.CTkOptionMenu(action_frame, values=proj_names, variable=context_var, width=140, fg_color="#313244", button_color="#45475a")
-        opt_context.pack(side="top", pady=(0, 10))
-        
+        if not no_project:
+            projects = self.config.get("projects", [])
+            proj_names = [_("พ่วงโปรเจกต์: ไม่มี"), _("พ่วงโปรเจกต์: เลือกโฟลเดอร์...")] + [f"พ่วง: {p['name']}" for p in projects]
+            context_var.set(_("พ่วงโปรเจกต์: ไม่มี"))
+            opt_context = ctk.CTkOptionMenu(action_frame, values=proj_names, variable=context_var, width=140, fg_color="#313244", button_color="#45475a")
+            opt_context.pack(side="top", pady=(0, 10))
+
         btn_action = ctk.CTkButton(action_frame, text=_("🚀 เปิดโปรแกรม"), fg_color=item["color"], text_color="#1e1e2e", font=ctk.CTkFont(weight="bold"))
         btn_action.pack(side="top", padx=5)
-        
-        def do_launch(e=exe_path, b=icon_btn, i=orig_img, cvar=context_var):
+
+        def do_launch(e=exe_path, b=icon_btn, i=orig_img, cvar=context_var, noproj=no_project):
+            if noproj:
+                self.launch_script_with_loading(e, b, i)
+                return
             cval = cvar.get()
             if cval == _("พ่วงโปรเจกต์: ไม่มี"):
                 self.launch_script_with_loading(e, b, i)
@@ -3036,12 +3050,15 @@ del "%~f0"
                 pname = cval.replace(f"{_('พ่วง:')} ", "")
                 proj_path = next((proj["path"] for proj in self.config.get("projects", []) if proj["name"] == pname), None)
                 self.launch_script_with_loading(e, b, i, target_path=proj_path)
-                
+
         if icon_btn:
             icon_btn.configure(cursor="hand2", command=do_launch)
             btn_action.configure(command=do_launch)
         else:
-            def fallback_launch(e=exe_path, cvar=context_var):
+            def fallback_launch(e=exe_path, cvar=context_var, noproj=no_project):
+                if noproj:
+                    self.launch_script(e)
+                    return
                 cval = cvar.get()
                 if cval == _("พ่วงโปรเจกต์: ไม่มี"):
                     self.launch_script(e)
@@ -3054,7 +3071,7 @@ del "%~f0"
                     proj_path = next((proj["path"] for proj in self.config.get("projects", []) if proj["name"] == pname), None)
                     self.launch_script(e, target_path=proj_path)
             btn_action.configure(command=fallback_launch)
-            
+
         return card
             
     def launch_script_with_loading(self, path, icon_btn, orig_img, target_path=None):

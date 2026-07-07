@@ -1,9 +1,15 @@
 import os
 import json
 from pathlib import Path
+import sys
 
-_LOCALES = Path(os.path.abspath(__file__)).parent / 'locales'
-_TSTUDIO_LOCALES = Path(os.path.abspath(__file__)).parent.parent / 'TStudio' / 'locales'
+def get_base_path(module_name):
+    if hasattr(sys, '_MEIPASS'):
+        return Path(sys._MEIPASS) / 'tools' / 'flagship' / module_name
+    return Path(os.path.abspath(__file__)).parent
+
+_LOCALES = get_base_path('TGlyph') / 'locales'
+_TSTUDIO_LOCALES = get_base_path('TStudio') / 'locales'
 _cache = {}
 
 def _load_lang(locales_path, lang):
