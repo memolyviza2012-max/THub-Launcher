@@ -1,0 +1,4 @@
+__file__: E:\Mod_Workspace\Modder_project\modder-hub\dist\THub\_internal\tools\flagship\TPUA\test_paths.py
+sys._MEIPASS exists: False
+path1: E:\Mod_Workspace\Modder_project\modder-hub\dist\THub\_internal\tools\flagship\TPUA\assets\TPUA.png | exists: False
+path2: E:\Mod_Workspace\Modder_project\modder-hub\dist\THub\_internal\assets\TPUA.png | exists: True

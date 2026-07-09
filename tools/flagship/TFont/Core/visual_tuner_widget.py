@@ -168,10 +168,17 @@ class VisualTunerWidget(QWidget):
 
         for word in self.test_words:
             word_start_x = current_x
-            # We must group characters in a cell. 
-            # Thai logic: Base -> Lower/Upper Vowel -> Tone
+            has_long_tail = False
+            has_lower_tail = False
+            has_upper_vowel = False
             
             for char in word:
+                if char in ['ป', 'ฝ', 'ฟ']:
+                    has_long_tail = True
+                elif char in ['ฎ', 'ฏ']:
+                    has_lower_tail = True
+                elif char in ['ิ', 'ี', 'ึ', 'ื', 'ั', 'ํ', '็', 'ำ']:
+                    has_upper_vowel = True
                 path, width = self.visual_engine.get_glyph_path_and_width(char)
                 if path.isEmpty(): continue
                 
@@ -183,17 +190,18 @@ class VisualTunerWidget(QWidget):
                 
                 if cat == 'upper_vowel':
                     color = c_upper
-                    # In F700, some upper vowels are left shifted (ป, ฝ, ฟ).
-                    # Since our test word is 'ปี้', 'ป' has a long tail, so vowel shifts left.
-                    # We will visually apply x_left to all upper vowels just for the preview to see how it looks.
-                    dx = self.x_left
+                    if has_long_tail:
+                        dx = self.x_left
                 elif cat == 'tone_mark':
                     color = c_tone
-                    dx = self.x_left # Usually left shifted if there's a long tail
-                    dy = self.y_raise
+                    if has_long_tail:
+                        dx = self.x_left
+                    if has_upper_vowel:
+                        dy = self.y_raise
                 elif cat == 'lower_vowel':
                     color = c_lower
-                    dy = self.y_down
+                    if has_lower_tail:
+                        dy = self.y_down
 
                 # Position the path
                 # TTF path is at (0,0). We move it to current_x + dx, baseline_y + dy

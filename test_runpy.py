@@ -1,0 +1,1 @@
+import sys; print(hasattr(sys, '_MEIPASS'))

@@ -804,6 +804,21 @@ def reconstruct_mesg_json_file(csv_path, origin_file):
 # =========================================================
 # Main Window
 # =========================================================
+class TransEditorEventFilter(QObject):
+    def __init__(self, parent_window):
+        super().__init__(parent_window)
+        self.parent_window = parent_window
+
+    def eventFilter(self, obj, event):
+        if event.type() == event.Type.KeyPress:
+            if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+                if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                    return super().eventFilter(obj, event)
+                else:
+                    self.parent_window.select_next_row()
+                    return True
+        return super().eventFilter(obj, event)
+
 class TranslationStudio(QMainWindow):
     def __init__(self, project_path=None, profile_name=None, source_lang=None, target_lang=None):
         super().__init__()
@@ -1095,12 +1110,24 @@ class TranslationStudio(QMainWindow):
         l3.addWidget(btn_widget)
         
         self.txt_trans = QTextEdit()
+        self.trans_filter = TransEditorEventFilter(self)
+        self.txt_trans.installEventFilter(self.trans_filter)
+        
         self._trans_save_timer = QTimer(self)
         self._trans_save_timer.setSingleShot(True)
         self._trans_save_timer.timeout.connect(self.on_trans_changed)
         self.txt_trans.textChanged.connect(lambda *args: self._trans_save_timer.start(150))
         # When table data changes (via double click edit), update text box if it's the current row
         self.model.dataChanged.connect(self._on_table_data_changed)
+        
+        # Keyboard Shortcuts
+        self.shortcut_batch = QShortcut(QKeySequence("Ctrl+Shift+T"), self)
+        self.shortcut_batch.activated.connect(self.retranslate_batch)
+        self.shortcut_single = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.shortcut_single.activated.connect(lambda: self.retranslate_special("default"))
+        self.shortcut_delete = QShortcut(QKeySequence(Qt.Key.Key_Delete), self.table)
+        self.shortcut_delete.setContext(Qt.ShortcutContext.WidgetShortcut)
+        self.shortcut_delete.activated.connect(self.clear_selected_translations)
         
         # Setup CSV auto-save timer
         self._csv_auto_save_timer = QTimer(self)
@@ -3912,6 +3939,32 @@ class TranslationStudio(QMainWindow):
             if current_index.isValid():
                 self.on_row_selected(current_index, current_index)
 
+    def clear_selected_translations(self):
+        selected_indexes = self.table.selectionModel().selectedRows()
+        if not selected_indexes: return
+        for index in selected_indexes:
+            source_row = self.proxy.mapToSource(index).row()
+            self.model.update_trans(source_row, "")
+        self.is_dirty = True
+        self.statusBar().showMessage(_("cleared_translations", "Cleared selected translations."), 3000)
+        # Update UI text area if current row is cleared
+        current_index = self.table.currentIndex()
+        if current_index.isValid() and current_index in selected_indexes:
+            self.txt_trans.setPlainText("")
+        # Force table update
+        self.model.layoutChanged.emit()
+
+    def select_next_row(self):
+        current = self.table.currentIndex()
+        if current.isValid():
+            next_row = current.row() + 1
+            if next_row < self.proxy.rowCount():
+                next_index = self.proxy.index(next_row, current.column())
+                self.table.setCurrentIndex(next_index)
+                self.table.selectRow(next_row)
+                
+                # Make sure the table scrolls to the newly selected row
+                self.table.scrollTo(next_index, QAbstractItemView.ScrollHint.EnsureVisible)
 
 if __name__ == '__main__':
     import argparse
