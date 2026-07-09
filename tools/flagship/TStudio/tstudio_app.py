@@ -251,21 +251,17 @@ class MergeTranslatedDialog(QDialog):
                 headers = next(reader, None)
                 if headers:
                     for row in reader:
-                        if len(row) >= 3:
+                        if len(row) >= 2:
                             t_id = row[0]
-                            # Usually translated text is in col 2 or 3 depending on format.
-                            # TStudio outputs: ID, Source, Trans, AI_Ref. (Trans is col 2, AI_Ref is col 3)
-                            t_text = row[2] if len(row) > 2 else ""
-                            # If it's a raw bundle dump, translation might be empty, but let's take whatever has Thai characters or is not same as source
-                            # Actually, if the Translated File is a TStudio CSV, translation is in col 2.
-                            # If it's a modified bundle, translation is in Source column (col 1) because the bundle only has Source!
-                            t_src = row[1] if len(row) > 1 else ""
-                            
-                            # Heuristic: If col 2 exists and is not empty, use it. Else use col 1.
-                            if len(row) > 2 and row[2].strip():
-                                final_t = row[2]
+                            if len(row) >= 3:
+                                # TStudio outputs: ID, Source, Trans, AI_Ref. (Trans is col 2, AI_Ref is col 3)
+                                t_src = row[1]
+                                t_text = row[2]
+                                final_t = t_text if t_text.strip() else t_src
                             else:
-                                final_t = t_src
+                                # Fallback for 2-column formats (e.g. ID, Trans)
+                                final_t = row[1]
+                                
                             trans_dict[t_id] = final_t
                             
             # Build merged CSV
