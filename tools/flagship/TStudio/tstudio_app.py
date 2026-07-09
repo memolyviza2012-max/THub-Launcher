@@ -244,54 +244,65 @@ class MergeTranslatedDialog(QDialog):
             if not orig_csv or not trans_csv or not os.path.exists(orig_csv) or not os.path.exists(trans_csv):
                 raise Exception("Failed to extract one of the files to CSV.")
                 
-            # Read translated CSV
+            # --- Step 1: Read translated CSV into memory (BEFORE any file write) ---
+            # This prevents truncation if save_path == trans_csv or save_path == orig_csv
             trans_dict = {}
             with open(trans_csv, 'r', encoding='utf-8-sig', errors='ignore') as f:
                 reader = csv.reader(f)
-                headers = next(reader, None)
-                if headers:
-                    for row in reader:
-                        if len(row) >= 2:
-                            t_id = row[0]
-                            if len(row) >= 3:
-                                # TStudio outputs: ID, Source, Trans, AI_Ref. (Trans is col 2, AI_Ref is col 3)
-                                t_src = row[1]
-                                t_text = row[2]
-                                final_t = t_text if t_text.strip() else t_src
-                            else:
-                                # Fallback for 2-column formats (e.g. ID, Trans)
-                                final_t = row[1]
-                                
-                            trans_dict[t_id] = final_t
-                            
-            # Build merged CSV
-            merged_count = 0
-            with open(orig_csv, 'r', encoding='utf-8-sig', errors='ignore') as f_in, \
-                 open(save_path, 'w', encoding='utf-8-sig', newline='') as f_out:
-                reader = csv.reader(f_in)
-                writer = csv.writer(f_out)
-                headers = next(reader, None)
-                if headers:
-                    # Write standard headers: ID, Source, Trans, AI_Ref
-                    writer.writerow([_("col_id"), _("col_source"), _("col_translation"), 'AI Reference'])
-                    
+                next(reader, None)  # skip header
                 for row in reader:
                     if len(row) >= 2:
-                        o_id = row[0]
-                        o_src = row[1]
-                        trans_val = ""
-                        
-                        if o_id in trans_dict:
-                            # We found a match in translated file
-                            t_val = trans_dict[o_id]
-                            # Only use it if it actually differs from original source OR if it contains Thai
-                            import re
-                            if t_val != o_src or re.search(r'[ก-๙เแไใโ]', t_val):
-                                trans_val = t_val
-                                merged_count += 1
-                                
-                        # Write row
-                        writer.writerow([o_id, o_src, trans_val, trans_val])
+                        t_id = row[0]
+                        if len(row) >= 3:
+                            # TStudio format: ID, Source, Trans, AI_Ref → use col 2 (Trans)
+                            t_text = row[2]
+                            t_src = row[1]
+                            final_t = t_text if t_text.strip() else t_src
+                        else:
+                            # 2-column format (ID, Trans) from external tools
+                            final_t = row[1]
+                        trans_dict[t_id] = final_t
+
+            # --- Step 2: Read orig CSV rows into memory (BEFORE any file write) ---
+            orig_rows = []
+            with open(orig_csv, 'r', encoding='utf-8-sig', errors='ignore') as f_in:
+                reader = csv.reader(f_in)
+                next(reader, None)  # skip header
+                for row in reader:
+                    orig_rows.append(row)
+
+            # --- Step 3: Write to temp file, then move to save_path (Safe Save) ---
+            import tempfile
+            tmp_fd, tmp_path = tempfile.mkstemp(suffix='.csv', dir=os.path.dirname(save_path))
+            merged_count = 0
+            try:
+                with os.fdopen(tmp_fd, 'w', encoding='utf-8-sig', newline='') as f_out:
+                    writer = csv.writer(f_out)
+                    writer.writerow([_("col_id"), _("col_source"), _("col_translation"), 'AI Reference'])
+
+                    for row in orig_rows:
+                        if len(row) >= 2:
+                            o_id = row[0]
+                            o_src = row[1]
+                            trans_val = ""
+
+                            if o_id in trans_dict:
+                                t_val = trans_dict[o_id]
+                                # Accept if it differs from source OR contains Thai
+                                import re
+                                if t_val != o_src or re.search(r'[ก-๙เแไใโ]', t_val):
+                                    trans_val = t_val
+                                    merged_count += 1
+
+                            writer.writerow([o_id, o_src, trans_val, trans_val])
+
+                shutil.move(tmp_path, save_path)
+            except Exception:
+                try:
+                    os.unlink(tmp_path)
+                except OSError:
+                    pass
+                raise
                         
             self.merged_csv_path = save_path
             QApplication.restoreOverrideCursor()
