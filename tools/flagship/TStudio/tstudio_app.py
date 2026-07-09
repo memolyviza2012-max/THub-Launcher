@@ -1128,13 +1128,12 @@ class TranslationStudio(QMainWindow):
         self.model.dataChanged.connect(self._on_table_data_changed)
         
         # Keyboard Shortcuts
-        self.shortcut_batch = QShortcut(QKeySequence("Ctrl+Shift+T"), self)
-        self.shortcut_batch.activated.connect(self.retranslate_batch)
-        self.shortcut_single = QShortcut(QKeySequence("Ctrl+T"), self)
-        self.shortcut_single.activated.connect(lambda: self.retranslate_special("default"))
+        # NOTE: Delete shortcut is widget-bound to the table only (won't fire while typing in txt_trans)
         self.shortcut_delete = QShortcut(QKeySequence(Qt.Key.Key_Delete), self.table)
         self.shortcut_delete.setContext(Qt.ShortcutContext.WidgetShortcut)
         self.shortcut_delete.activated.connect(self.clear_selected_translations)
+        # Ctrl+T and Ctrl+Shift+T are handled by QAction shortcuts below (in setup_menu)
+        # to avoid double-firing conflicts with QShortcut
         
         # Setup CSV auto-save timer
         self._csv_auto_save_timer = QTimer(self)
@@ -1314,6 +1313,7 @@ class TranslationStudio(QMainWindow):
         edit_menu.addSeparator()
         
         self.act_trans_smart = QAction(_("act_trans_smart"), self)
+        # Ctrl+T = Smart translate: single if 1 row, batch if multiple rows selected
         self.act_trans_smart.setShortcuts([QKeySequence("Ctrl+T"), QKeySequence("Ctrl+Return"), QKeySequence("Ctrl+Enter")])
         self.act_trans_smart.triggered.connect(self.retranslate_smart)
         edit_menu.addAction(self.act_trans_smart)
@@ -1324,8 +1324,9 @@ class TranslationStudio(QMainWindow):
         edit_menu.addAction(self.act_trans_opt)
         
         self.act_trans_special = QAction(_("act_trans_special"), self)
+        # Ctrl+Shift+T = Batch translate all selected rows
         self.act_trans_special.setShortcut("Ctrl+Shift+T")
-        self.act_trans_special.triggered.connect(self.show_special_translation_menu_at_cursor)
+        self.act_trans_special.triggered.connect(self.retranslate_batch)
         edit_menu.addAction(self.act_trans_special)
         
         self.act_trans_batch = QAction(_("btn_batch_deepseek"), self)
