@@ -17,6 +17,7 @@ import html
 import json
 import requests
 import re
+import shutil
 import file_converter
 from tpua_engine import TPUAEngine
 from tstudio_core import TStudioCore, CoreAI
