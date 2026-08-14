@@ -356,7 +356,7 @@ class ProjectWizardWindow(ctk.CTkToplevel):
         self.destroy()
 
 # Constants
-CURRENT_VERSION = "1.1.0"
+CURRENT_VERSION = "1.1.4"
 UPDATE_FILE_PATH = os.path.join(os.path.dirname(__file__), "updates.json")
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hub_config.json")
 KNOWLEDGE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "Modding-Knowledge"))
@@ -412,7 +412,11 @@ class AIHelperDialog(ctk.CTkToplevel):
         self.tab_var = ctk.StringVar(value=_("💬 โหมดที่ปรึกษา (วางใน ChatGPT / Claude)"))
         self.seg_btn = ctk.CTkSegmentedButton(
             self,
-            values=[_("💬 โหมดที่ปรึกษา (วางใน ChatGPT / Claude)"), _("💻 โหมดปฏิบัติการ (Codex / Claude Code / Antigravity)")],
+            values=[
+                _("💬 โหมดที่ปรึกษา (วางใน ChatGPT / Claude)"),
+                _("💻 โหมดปฏิบัติการ (Codex / Claude Code / Antigravity)"),
+                _("🎙️ โหมดพากษ์ (Voice Dubbing)"),
+            ],
             variable=self.tab_var,
             command=self.on_tab_change,
             font=ctk.CTkFont(weight="bold")
@@ -448,6 +452,34 @@ class AIHelperDialog(ctk.CTkToplevel):
         _add_checkbox("deep_scan",   _("🔬 Deep Scan Mode (ละเอียดขึ้น, ช้าขึ้น)"),        False, _("→ ไม่ข้ามไฟล์ที่ไม่รู้จัก"))
         _add_checkbox("mem_hook",    _("🧩 อนุญาต Memory Hook Fallback (BepInEx ฯลฯ)"),   False, _("→ ใช้เมื่อแกะ archive โดยตรงไม่ได้"))
 
+        # --- Dubbing Options Panel ---
+        self.dub_options_frame = ctk.CTkFrame(self, fg_color="#1e1e2e", corner_radius=10)
+
+        dub_opt_label = ctk.CTkLabel(self.dub_options_frame, text=_("🎙️ ตัวเลือกสำหรับม็อดพากษ์เสียง"),
+                                     font=ctk.CTkFont(weight="bold", size=13), text_color="#fab387")
+        dub_opt_label.pack(anchor="w", padx=16, pady=(10, 6))
+
+        self._dub_vars = {}
+
+        def _add_dub_checkbox(key, label, default, description):
+            var = ctk.BooleanVar(value=default)
+            self._dub_vars[key] = var
+            drow = ctk.CTkFrame(self.dub_options_frame, fg_color="transparent")
+            drow.pack(fill="x", padx=10, pady=2)
+            ctk.CTkCheckBox(drow, text=label, variable=var, onvalue=True, offvalue=False,
+                            command=self.rebuild_dubbing_prompt,
+                            font=ctk.CTkFont(size=12, weight="bold"),
+                            fg_color="#fab387", hover_color="#f9e2af",
+                            text_color="#cdd6f4", checkmark_color="#1e1e2e").pack(side="left")
+            ctk.CTkLabel(drow, text=description, text_color="#585b70",
+                         font=ctk.CTkFont(size=11)).pack(side="left", padx=(8, 0))
+
+        _add_dub_checkbox("has_thai_sub",      _("📝 เกมมีซับไทยอยู่แล้ว"),                 False, _("→ นำซับ/Subtitle มาใช้เป็น Script พากษ์เลย"))
+        _add_dub_checkbox("gen_tracking_sheet",_("📊 สร้าง Tracking Sheet (CSV/JSON)"),     True,  _("→ จับคู่ไฟล์เสียงกับบทพูดทุกไฟล์"))
+        _add_dub_checkbox("analyze_duration",  _("⏱️ วิเคราะห์ Duration เสียงต้นฉบับ"),   True,  _("→ เก็บข้อมูลความยาวสำหรับ timing"))
+        _add_dub_checkbox("gen_replace_script",_("🔄 สร้าง Script แทนที่ไฟล์เสียง"),       True,  _("→ ใช้หลังพากษ์เสร็จและได้ไฟล์มาแล้ว"))
+        _add_dub_checkbox("keep_original",     _("💾 สำรองเสียงต้นฉบับก่อนแทนที่"),        True,  _("→ ป้องกันไฟล์สูญหาย"))
+
         # --- Textbox for Prompt (editable so user can tweak before copying) ---
         self.textbox = ctk.CTkTextbox(self, font=ctk.CTkFont(family="Consolas", size=12))
         self.textbox.pack(fill="both", expand=True, padx=20, pady=(0, 6))
@@ -470,12 +502,20 @@ class AIHelperDialog(ctk.CTkToplevel):
 
     # ── Tab / Mode switching ────────────────────────────────────────────────
     def on_tab_change(self, value):
-        # We check for "Codex" or "Antigravity" to match the new Tab 2 name
-        if "Codex" in value or "Antigravity" in value:
+        # Dubbing mode
+        if "พากษ์" in value or "Dubbing" in value or "Voice" in value:
+            self.agent_options_frame.pack_forget()
+            self.dub_options_frame.pack(fill="x", padx=20, pady=(0, 8), before=self.textbox)
+            self.rebuild_dubbing_prompt()
+        # Agent / Operation mode
+        elif "Codex" in value or "Antigravity" in value:
+            self.dub_options_frame.pack_forget()
             self.agent_options_frame.pack(fill="x", padx=20, pady=(0, 8), before=self.textbox)
             self.rebuild_agent_prompt()
+        # Chat / Advisor mode
         else:
             self.agent_options_frame.pack_forget()
+            self.dub_options_frame.pack_forget()
             self._set_textbox(self.get_chat_prompt())
 
     def rebuild_agent_prompt(self):
@@ -486,6 +526,18 @@ class AIHelperDialog(ctk.CTkToplevel):
             proj_path = self.proj.get("path", "")
             if os.path.exists(proj_path):
                 with open(os.path.join(proj_path, "ai_instructions.md"), "w", encoding="utf-8") as f:
+                    f.write(prompt)
+        except Exception:
+            pass
+
+    def rebuild_dubbing_prompt(self):
+        prompt = self.get_dubbing_prompt()
+        self._set_textbox(prompt)
+        # Silently save ai_dubbing_instructions.md
+        try:
+            proj_path = self.proj.get("path", "")
+            if os.path.exists(proj_path):
+                with open(os.path.join(proj_path, "ai_dubbing_instructions.md"), "w", encoding="utf-8") as f:
                     f.write(prompt)
         except Exception:
             pass
@@ -624,111 +676,341 @@ If you understand your role, reply briefly with: "Understood! Please provide the
         if is_en:
             parts = [f"""🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
 
-Context & Goal: 
-I want to create a professional localization Mod for the game: {name} 
+Context & Goal:
+I want to create a professional {target_lang} localization Mod for the game: {name}
 Translating from **{source_lang}** to **{target_lang}**.
-We will work together step-by-step in a systematic and safe manner. Here is the project overview:
+We will work together step-by-step. Here is the full project overview:
 
 Environment & Workspace:
-- Workspace: {path} (Using THub's 01 to 06 folder structure)
-- Game Directory: {game_dir}
-- Tool Directory: {tool_dir}
-- Modding Knowledge Base: {KNOWLEDGE_DIR}
+- Workspace:          {path}  (THub 01–06 folder structure)
+- Game Directory:     {game_dir}
+- Tool Directory:     {tool_dir}
+- Modding Knowledge:  {KNOWLEDGE_DIR}
+- Modding Knowledge (GitHub, always latest): https://github.com/memolyviza2012-max/Modding-Knowledge
 
-[IMPORTANT] Workspace Safety Rules:
-1. Never create working files outside this Workspace.
-2. The "01_Original_Backup" folder is the original backup (Read-Only). Never overwrite or modify it. Use it for reading and backup only.
+══════════════════════════════════════════════════════
+🏭 ECOSYSTEM: THub Translation Engine (READ-ONLY — DO NOT MODIFY)
+══════════════════════════════════════════════════════
+A stable, production-ready translation engine is already available at:
+  {path}/tools/flagship/
 
-Milestones & Workflow (Execute step-by-step. Only move to the next step when I say "Proceed to step..."):
+  • TStudio  (TStudio/tstudio_app.py)    — GUI workspace for review & deploy
+  • TRun     (TRun/trun_app.py)          — Automated batch translation engine
+  • Core     (Core/tstudio_core.py,
+              TStudio/file_converter.py) — API handler, format converter
 
-1. Extraction & Analysis:
-   - Study the game Engine and search the Modding-Knowledge base for guidance.
-   - Locate language files and extract text (dialogues, UI, cutscenes) into 01_Original_Backup.
-   - Analyze original file Encoding (e.g., UTF-8, UTF-8 with BOM, or ANSI) to maintain exact encoding.
-   - Analyze archive structures (.pak, .arc, .bin, etc.) to identify required Unpack/Pack tools.
+⛔ CRITICAL CONSTRAINTS — NEVER VIOLATE:
+  1. DO NOT modify core files: trun_app.py, tstudio_app.py, tstudio_core.py, file_converter.py
+  2. DO NOT write your own LLM translation loop — use TRun for all batch translation
+  3. Your scripts act as a Bridge only:
+       Unpack  : game format  →  TStudio CSV
+       Pack    : TStudio CSV  →  game format
 
-2. Font & UI Architecture ({target_lang}):
-   - Check where original fonts are stored and their format (.ttf, .otf, Font Atlas/Sprite).
-   - Plan character encoding/PUA mapping and prepare the {target_lang} font in 03_Font_and_UI.
+TStudio CSV Standard Format:
+  Columns : key | source | translation | context | file_path
+  Example : MENU_001 | "New Game" | "" | "Main Menu > Buttons" | ui/menu.json
+  Rules   : key must be unique · translation is empty when handed to TRun · never alter source column
 
-3. Pre-Translation Glossary:
-   - Scan all text files to extract specific terms (character names, locations, items, skills) into a list for me to define as a standard GLOSSARY.
-   - Translated terms must be maintained for reference throughout the project.
+══════════════════════════════════════════════════════
+[IMPORTANT] Workspace Safety Rules
+══════════════════════════════════════════════════════
+  1. Never create files outside this Workspace.
+  2. "01_Original_Backup" is Read-Only — never overwrite it. Copy out before modifying.
+  3. Always write FULL, runnable code. Never use placeholders like "# rest of code".
+  4. [CHECKPOINT RULE] Before every Pack operation that modifies Game Directory files,
+     backup the target files to 01_Original_Backup/ and log the action in session_log.md.
 
-4. Proof of Concept (Main Menu translation and test):
-   - Translate only the "Main Menu" text in 02_Translation_Workspace, keeping it concise for UI fit.
-   - Pack the menu files and fonts, then test in 04_Packed_Mod to confirm font rendering is correct.
+══════════════════════════════════════════════════════
+Milestones & Workflow
+(Step-by-step. Only move forward when I say "Proceed to step...")
+══════════════════════════════════════════════════════
 
-5. Script Customization & Safety Rules:
-   - Develop or modify scripts to extract/inject translated text, storing them in 05_Scripts_and_Tools.
-   - [Hard Rule] Scripts must never modify or delete game tags/variables (e.g. %s, {{0}}, <color=red>, \\n, \\r).
-   - After writing scripts, wait for me to provide API Keys and update the Glossary before proceeding.
-   - [Coding Rule] Always provide full, runnable code. Never use placeholders.
+────────────────────────────────────────────────────
+Step 1 — Game File Analysis & Approach Decision
+────────────────────────────────────────────────────
+  1.1  Scan {game_dir} to identify:
+         - Engine (Unity / Unreal / RE Engine / Godot / custom...)
+         - Text container format (.json, .xml, .locres, .pak, .bin, proprietary...)
+         - File encoding (UTF-8, UTF-8 BOM, ANSI, UTF-16...)
+         - Archive structure wrapping the text (if any)
 
-6. Mass Translation & Automated QA:
-   - Translate all remaining text as instructed.
-   - Before packing, write a Validator Script to cross-check {target_lang} vs {source_lang} files for missing variables (%s) or mismatched tags. Report errors and stop if found.
+  1.2  [MANDATORY — KNOWLEDGE BASE CONSULTATION]
+       Immediately after identifying the Engine/Format, before writing any code:
+         → Search BOTH sources using these keywords:
+             Local: {KNOWLEDGE_DIR}
+             GitHub (always latest): https://github.com/memolyviza2012-max/Modding-Knowledge
+             • Engine name  (e.g. "Unreal", "Unity", "RE Engine")
+             • Format name  (e.g. "LOCRES", "PAK", "STR", "WIN", "BIN")
+             • Game name    (e.g. "{name}")
+         → Report your findings clearly:
+             ✅ FOUND:     "Found [filename] — [brief summary of relevant guidance]"
+             ❌ NOT FOUND: "No guide for [Engine/Format] in Knowledge Base. Will analyze from scratch."
+         → If found: apply the guide's approach. Do not contradict it.
+         → If not found: proceed with analysis and explain your reasoning.
 
-7. Final Playtest & Release:
-   - Run the game for a real playtest, checking for crashes or font glitches.
-   - When ready for release, create a final build (.zip) in the 06_Releases folder.
+  1.3  Choose & declare your Approach:
+       [APPROACH A] Simple/parseable formats (.json, .xml, .csv, .txt, .locres...)
+         → Write a Custom Parser Plugin:
+            File: {path}/tools/flagship/TStudio/CustomParsers/[GameName]_parser.py
+            Must implement: convert_to_csv(filepath) → TStudio CSV
+            TStudio loads it automatically via its Plugin Manager.
 
-Instructions for AI: 
-If you understand the goals, folder structure, and Milestone agreements, confirm your understanding and immediately begin "Step 1 (Extraction & Analysis)" by telling me which folder you will scan and what additional information you need to identify the game Engine."""]
+       [APPROACH B] Heavy archives (.pak, .dat, .arc, .bin, encrypted bundles...)
+         → Write two Standalone CLI scripts:
+            [GameName]_unpacker.py  — extracts text → TStudio CSV
+            [GameName]_packer.py    — reads translated CSV → repacks game format
+            Store both in: {path}/05_Scripts_and_Tools/
+
+       State which Approach you chose and WHY before writing any code.
+
+────────────────────────────────────────────────────
+Step 2 — Write Bridge Script (TStudio Integration)
+────────────────────────────────────────────────────
+  • Write the extraction/injection script per your chosen Approach.
+  • Output must be valid TStudio CSV (columns: key | source | translation | context | file_path).
+  • Store all scripts in: {path}/05_Scripts_and_Tools/
+  • [HARD RULE] Scripts must NEVER modify game tags/variables: %s {{0}} <color=red> \\n \\r
+
+────────────────────────────────────────────────────
+⭐ Step 3 — Proof of Concept: Make Main Menu Show {target_lang}
+[GATE — DO NOT proceed to Step 4 until {target_lang} renders correctly in-game]
+────────────────────────────────────────────────────
+  Goal: Prove the game CAN render {target_lang} before translating everything.
+
+  3.1  Extract ONLY the Main Menu text (~5–20 lines) using your Step 2 script.
+
+  3.2  Translate those lines yourself immediately (no TStudio / TRun needed here).
+       Example translations for testing:
+         "New Game"    →  "New Game ({target_lang} test)"
+         "Continue"    →  "Continue ({target_lang} test)"
+         "Settings"    →  "Settings ({target_lang} test)"
+         "Quit"        →  "Quit ({target_lang} test)"
+       [CHECKPOINT] Backup original files → then Pack the translated lines back.
+
+  3.3  Tell the user to launch the game and check the Main Menu.
+       ✅ SUCCESS criteria (ALL must pass):
+         • No □□□ tofu/squares replacing text
+         • No garbled characters or question marks
+         • Vowels/diacritics in correct positions (critical for Thai)
+         • No crash on menu load
+
+  3.4  If {target_lang} does NOT display correctly — run this Diagnostic Tree:
+
+       [D1] Is the text even replaced in the file?
+            → Hex-dump the packed file. Confirm new bytes exist at the right offset.
+            → If NOT replaced: the pack script has a bug. Fix it first.
+
+       [D2] Text is replaced but showing squares/tofu?
+            → Font does not support {target_lang} Unicode range.
+            → Escalation Ladder:
+                Level 1: Swap game font with a {target_lang}-compatible TTF
+                          (e.g. Noto Sans Thai). Store in {path}/03_Font_and_UI/
+                Level 2: If font is a Sprite/Atlas: rebuild the atlas with {target_lang} glyphs
+                Level 3: If font is embedded in engine: patch via BepInEx/REFramework hook
+                Level 4 (Last Resort): Runtime hook — intercept render call and replace font in memory
+
+       [D3] Text shows but encoding is wrong (garbled output)?
+            → File encoding mismatch. Try: UTF-8 → UTF-8 BOM → UTF-16LE → CP874
+            → Re-pack with correct encoding and test again.
+
+       [D4] Text shows but game ignores the file (old version loaded)?
+            → Game may cache or hash-check assets.
+            → Try: clear cache folder · disable integrity check · use loose file override
+
+       Repeat 3.2–3.4 until SUCCESS. Do not move to Step 4 until GATE is cleared.
+
+────────────────────────────────────────────────────
+Step 4 — Full Extraction → Hand off to TStudio/TRun
+(Only after Step 3 GATE is cleared)
+────────────────────────────────────────────────────
+  • Use your Step 2 script to extract ALL game text → TStudio CSV.
+  • Store the CSV in: {path}/02_Translation_Workspace/
+  • Instruct the user to run TRun or TStudio to perform the batch translation.
+  • After translation: use the Packer script to inject translated CSV back.
+  • Write a Validator Script to check no game tags/variables were lost.
+
+────────────────────────────────────────────────────
+Step 5 — Final Playtest & Release
+────────────────────────────────────────────────────
+  • Full in-game playtest: check for crashes, layout overflow, missing glyphs.
+  • When approved: build release .zip → {path}/06_Releases/
+
+══════════════════════════════════════════════════════
+Begin Work
+══════════════════════════════════════════════════════
+Confirm your understanding of the ecosystem, constraints, and all milestones.
+Then immediately begin Step 1: scan {game_dir}, identify the Engine and text format,
+consult the Knowledge Base, declare your Approach, and report before writing any code."""]
         else:
             parts = [f"""🎮 Master Prompt: Game Localization Project ({target_lang} Mod) - THub Edition
 
-Context & Goal: 
-ฉันต้องการสร้าง Mod แปลภาษาระดับมืออาชีพสำหรับเกม: {name} 
+Context & Goal:
+ฉันต้องการสร้าง Mod แปลภาษา {target_lang} ระดับมืออาชีพสำหรับเกม: {name}
 โดยจะทำการแปลจากภาษา **{source_lang}** เป็นภาษา **{target_lang}**
-เราจะทำงานร่วมกันทีละขั้นตอนอย่างเป็นระบบและปลอดภัย นี่คือข้อมูลเบื้องต้นของโปรเจค:
+เราจะทำงานร่วมกันทีละขั้นตอนอย่างเป็นระบบ นี่คือข้อมูลภาพรวมของโปรเจค:
 
 Environment & Workspace:
-- Workspace: {path} (ใช้โครงสร้าง 01 ถึง 06 ของ THub)
-- Game Directory: {game_dir}
-- ตำแหน่งเครื่องมือ: {tool_dir}
-- แหล่งอ้างอิงข้อมูลม็อด: {KNOWLEDGE_DIR}
+- Workspace:          {path}  (ใช้โครงสร้าง 01–06 ของ THub)
+- Game Directory:     {game_dir}
+- Tool Directory:     {tool_dir}
+- Modding Knowledge:  {KNOWLEDGE_DIR}
+- Modding Knowledge (GitHub, always latest): https://github.com/memolyviza2012-max/Modding-Knowledge
 
-[สำคัญ] กฎความปลอดภัยของ Workspace:
-1. ห้ามสร้างไฟล์ทำงานนอกเหนือจาก Workspace นี้เด็ดขาด
-2. โฟลเดอร์ "01_Original_Backup" ถือเป็นไฟล์ต้นฉบับดั้งเดิม (Read-Only) ห้ามทำการเขียนทับหรือแก้ไขเด็ดขาด ให้ใช้สำหรับการอ่านและแบ็คอัปเท่านั้น
+══════════════════════════════════════════════════════
+🏭 ECOSYSTEM: THub Translation Engine (ห้ามแก้ไขโดยเด็ดขาด)
+══════════════════════════════════════════════════════
+โปรเจกต์นี้มี Translation Engine ที่ Stable และพร้อมใช้งานอยู่แล้วที่:
+  {path}/tools/flagship/
 
-Milestones & Workflow (ทำทีละขั้นตอน เมื่อฉันบอกว่า "ผ่านขั้นตอนที่..." จึงจะย้ายไปข้อถัดไป):
+  • TStudio  (TStudio/tstudio_app.py)    — GUI สำหรับรีวิวและ deploy งานแปล
+  • TRun     (TRun/trun_app.py)          — ระบบแปลแบบ Batch อัตโนมัติ
+  • Core     (Core/tstudio_core.py,
+              TStudio/file_converter.py) — จัดการ API, memory, แปลง format
 
-1. Extraction & Analysis (สกัดไฟล์และวิเคราะห์โครงสร้าง):
-   - ศึกษา Engine เกม และค้นหาข้อมูลจาก Modding-Knowledge เพื่อเป็นแนวทาง
-   - ค้นหาพิกัดไฟล์ภาษาและสกัดไฟล์ข้อความ (บทสนทนา, UI, คัทซีน) ออกมาเก็บไว้ใน 01_Original_Backup
-   - วิเคราะห์ Encoding ของไฟล์ดั้งเดิม (เช่น UTF-8, UTF-8 with BOM, หรือ ANSI) เพื่อรักษารหัสไฟล์ให้ตรงตามเดิมป้องกันสระภาษา{target_lang}เสีย
-   - วิเคราะห์โครงสร้างก้อนไฟล์ (.pak, .arc, .bin ฯลฯ) เพื่อระบุเครื่องมือ Unpack/Pack ที่ต้องใช้
+⛔ กฎเหล็ก — ห้ามละเมิดเด็ดขาด:
+  1. ห้ามแก้ไข Core Files: trun_app.py, tstudio_app.py, tstudio_core.py, file_converter.py
+  2. ห้ามเขียน LLM translation loop ขึ้นมาเอง — ให้ใช้ TRun สำหรับการแปลชุดใหญ่เสมอ
+  3. Script ของคุณทำหน้าที่เป็น Bridge เท่านั้น:
+       Unpack  : format เกม  →  TStudio CSV
+       Pack    : TStudio CSV  →  format เกม
 
-2. Font & UI Architecture (วิเคราะห์ระบบฟอนต์ภาษา {target_lang}):
-   - ตรวจสอบฟอนต์ดั้งเดิมของเกมว่าเก็บอยู่ที่ใดและเป็นฟอร์แมตไหน (.ttf, .otf, Font Atlas/Sprite)
-   - วางแผนกระบวนการเข้ารหัสวรรณยุกต์ไทย/สระลอย (เช่น การแปลงสระหลบหลีกเข้าช่วง PUA) และเตรียมฟอนต์ภาษา{target_lang}ให้พร้อมใช้ใน 03_Font_and_UI
+มาตรฐาน TStudio CSV Format:
+  คอลัมน์ : key | source | translation | context | file_path
+  ตัวอย่าง : MENU_001 | "New Game" | "" | "Main Menu > ปุ่มหลัก" | ui/menu.json
+  กฎ      : key ต้องไม่ซ้ำ · translation ว่างเปล่าตอนส่งให้ TRun · ห้ามแก้ไขคอลัมน์ source
 
-3. Pre-Translation Glossary (ดึงคำศัพท์เฉพาะ):
-   - ก่อนรันการแปล สแกนไฟล์ข้อความทั้งหมดเพื่อสกัด "คำเฉพาะ" (ชื่อตัวละคร, สถานที่, ไอเทม, ทักษะ) ออกมาแสดงเป็นลิสต์ให้ฉันกำหนดคำศัพท์มาตรฐาน (GLOSSARY)
-   - ลิสต์คำศัพท์ที่แปลเรียบร้อยแล้วต้องเก็บไว้ใช้อ้างอิงการแปลตลอดทั้งโปรเจค
+══════════════════════════════════════════════════════
+[สำคัญ] กฎความปลอดภัยของ Workspace
+══════════════════════════════════════════════════════
+  1. ห้ามสร้างไฟล์นอก Workspace นี้เด็ดขาด
+  2. "01_Original_Backup" คือ Read-Only — ห้ามเขียนทับ ให้ copy ออกมาก่อนเสมอ
+  3. เมื่อเขียนโค้ดต้องแสดงฉบับเต็มที่รันได้จริงเสมอ ห้ามใช้ Placeholder
+  4. [กฎ CHECKPOINT] ก่อนทุกครั้งที่จะ Pack ไฟล์กลับเข้า Game Directory:
+     ให้ backup ไฟล์เป้าหมายไปที่ 01_Original_Backup/ และบันทึกใน session_log.md ก่อน
 
-4. Proof of Concept (แปลและทดสอบหน้าเมนูหลัก):
-   - แปลข้อความเฉพาะส่วน "หน้าเมนูหลัก (Main Menu)" ใน 02_Translation_Workspace โดยเน้นความกระชับไม่ล้นกรอบ UI
-   - แพ็คไฟล์เมนูและฟอนต์ที่เตรียมไว้ไปวางทดสอบใน 04_Packed_Mod เพื่อยืนยันว่าฟอนต์ภาษา{target_lang}แสดงผลได้สระไม่เยื้อง/ไม่เป็นกล่องสี่เหลี่ยมเต้าหู้
+══════════════════════════════════════════════════════
+Milestones & Workflow
+(ทำทีละขั้นตอน เมื่อฉันบอก "ผ่านขั้นตอนที่..." จึงจะย้ายไปข้อถัดไป)
+══════════════════════════════════════════════════════
 
-5. Script Customization & Safety Rules (พัฒนาเครื่องมือช่วยแปล):
-   - พัฒนาหรือดัดแปลงสคริปต์สำหรับช่วยดึง/ใส่ข้อความแปลเก็บไว้ใน 05_Scripts_and_Tools
-   - [กฎเหล็ก] สคริปต์ต้องห้ามแก้ไข ปรับเปลี่ยน หรือลบแท็กโค้ดและตัวแปรของเกมเด็ดขาด (เช่น %s, {{0}}, <color=red>, \\n, \\r)
-   - เมื่อเขียนสคริปต์เสร็จแล้ว ให้หยุดรอฉันป้อน API Key และอัปเดตไฟล์ Glossary ก่อนเริ่มกระบวนการถัดไป
-   - [กฎการเขียนโค้ด] เมื่อเขียนสคริปต์หรือโปรแกรม ให้แสดงโค้ดฉบับเต็มเสมอ ห้ามใช้ Placeholder ย่อโค้ดเด็ดขาด
+────────────────────────────────────────────────────
+ขั้นตอนที่ 1 — วิเคราะห์ไฟล์เกมและเลือก Approach
+────────────────────────────────────────────────────
+  1.1  สแกน {game_dir} เพื่อระบุ:
+         - Engine ที่ใช้ (Unity / Unreal / RE Engine / Godot / custom...)
+         - Format ไฟล์ข้อความ (.json, .xml, .locres, .pak, .bin, proprietary...)
+         - Encoding ของไฟล์ (UTF-8, UTF-8 BOM, ANSI, UTF-16...)
+         - โครงสร้าง Archive ที่ครอบข้อความอยู่ (ถ้ามี)
 
-6. Mass Translation & Automated QA (แปลชุดใหญ่และสแกนข้อผิดพลาด):
-   - ทำการแปลข้อความที่เหลือทั้งหมดตามคำสั่ง
-   - ก่อนจะแพ็คไฟล์กลับ ให้เขียนสคริปต์สแกนตรวจสอบความถูกต้อง (Validator Script) เพื่อเช็คเทียบไฟล์ภาษา{target_lang} กับ {source_lang} ว่ามีตัวแปร (%s) หรือแท็กเปิด/ปิดใดๆ หล่นหายไปหรือไม่ หากตรวจพบ Error ให้แจ้งและหยุดทันที
+  1.2  [บังคับ — ค้น Knowledge Base ก่อนเขียนโค้ดใดๆ]
+       ทันทีที่ระบุ Engine/Format ได้แล้ว ต้องทำก่อนเสมอ:
+         → ค้นหาใน **ทั้ง  2 แหล่ง** ด้วย keyword เหล่านี้:
+             Local : {KNOWLEDGE_DIR}
+             GitHub (อัปเดตตลอด): https://github.com/memolyviza2012-max/Modding-Knowledge
+             • ชื่อ Engine  (เช่น "Unreal", "Unity", "RE Engine")
+             • ชื่อ Format  (เช่น "LOCRES", "PAK", "STR", "WIN", "BIN")
+             • ชื่อเกม      (เช่น "{name}")
+         → รายงานผลการค้นหาอย่างชัดเจน:
+             ✅ พบ:     "พบไฟล์ [ชื่อไฟล์] — [สรุปแนวทางที่เกี่ยวข้อง]"
+             ❌ ไม่พบ:  "ไม่พบข้อมูลสำหรับ [Engine/Format] ใน Knowledge Base จะวิเคราะห์เอง"
+         → ถ้าพบคัมภีร์: ต้องนำแนวทางในคัมภีร์มาใช้ ห้ามทำขัดกับคัมภีร์
+         → ถ้าไม่พบ: ค่อยวิเคราะห์เองและอธิบายเหตุผล
 
-7. Final Playtest & Release (ทดสอบการเล่นจริงและส่งมอบ):
-   - ทำการรันเกมเพื่อทดสอบเล่นจริง ตรวจเช็คการแครชและสระต่างดาว
-   - หากพร้อมแจกจ่าย ให้สร้างไฟล์บิลด์สำเร็จรูป (.zip) ไปเก็บไว้ที่โฟลเดอร์ 06_Releases เพื่อส่งมอบงาน
+  1.3  ประกาศ Approach ที่เลือก:
+       [APPROACH A] Format เรียบง่ายหรือแกะได้ (.json, .xml, .csv, .txt, .locres...)
+         → เขียน Custom Parser Plugin:
+            ไฟล์: {path}/tools/flagship/TStudio/CustomParsers/[GameName]_parser.py
+            ต้องมีฟังก์ชัน: convert_to_csv(filepath) → TStudio CSV
+            TStudio โหลดอัตโนมัติผ่าน Plugin Manager
 
-Instructions for AI: 
-หากเข้าใจเป้าหมาย โครงสร้างโฟลเดอร์ และข้อตกลงในการทำ Milestones ทั้งหมดแล้ว ให้ยืนยันความเข้าใจ และเริ่มทำงานใน "ขั้นตอนที่ 1 (Extraction & Analysis)" ได้ทันที โดยบอกฉันว่าคุณจะสแกนโฟลเดอร์ใดและต้องการข้อมูลอะไรเพิ่มเติมบ้างเพื่อระบุ Engine ของเกม"""]
+       [APPROACH B] Archive หนัก (.pak, .dat, .arc, .bin, bundle ที่เข้ารหัส...)
+         → เขียน Standalone CLI Scripts สองไฟล์:
+            [GameName]_unpacker.py  — แตกข้อความ → TStudio CSV
+            [GameName]_packer.py    — อ่าน CSV ที่แปลแล้ว → repack format เกม
+            เก็บทั้งคู่ใน: {path}/05_Scripts_and_Tools/
+
+       ระบุว่าเลือก Approach ไหนและเหตุผลก่อนเขียนโค้ด
+
+────────────────────────────────────────────────────
+ขั้นตอนที่ 2 — เขียน Bridge Script (TStudio Integration)
+────────────────────────────────────────────────────
+  • เขียน script ตาม Approach ที่เลือกในขั้นตอนที่ 1
+  • Output ต้องเป็น TStudio CSV มาตรฐาน (คอลัมน์: key | source | translation | context | file_path)
+  • เก็บ script ทั้งหมดไว้ใน: {path}/05_Scripts_and_Tools/
+  • [กฎเหล็ก] Script ต้องห้ามแก้ไขหรือลบแท็กโค้ดของเกมเด็ดขาด: %s {{0}} <color=red> \\n \\r
+
+────────────────────────────────────────────────────
+⭐ ขั้นตอนที่ 3 — Proof of Concept: ทำให้ Main Menu แสดงภาษา{target_lang}
+[GATE — ห้ามผ่านไปขั้นตอนที่ 4 จนกว่าภาษา{target_lang}จะแสดงในเกมได้จริง]
+────────────────────────────────────────────────────
+  เป้าหมาย: พิสูจน์ว่าเกมสามารถ render ภาษา{target_lang}ได้ก่อนที่จะแปลทั้งหมด
+
+  3.1  ดึงเฉพาะข้อความ Main Menu (~5–20 บรรทัด) โดยใช้ script จากขั้นตอนที่ 2
+
+  3.2  แปลข้อความเหล่านั้นเป็นภาษา{target_lang}ด้วยตัวคุณเองเลยทันที
+       (ไม่ต้องใช้ TStudio หรือ TRun สำหรับขั้นตอนนี้)
+       ตัวอย่าง:
+         "New Game"    →  "เริ่มเกมใหม่"
+         "Continue"    →  "เล่นต่อ"
+         "Settings"    →  "ตั้งค่า"
+         "Quit"        →  "ออกจากเกม"
+       [CHECKPOINT] Backup ไฟล์ต้นฉบับก่อน → จากนั้น Pack ค่าแปลกลับเข้าเกม
+
+  3.3  แจ้งให้ฉันรันเกมและตรวจสอบ Main Menu
+       ✅ เกณฑ์สำเร็จ (ต้องผ่านทุกข้อ):
+         • ไม่มีกล่องสี่เหลี่ยม □□□ แทนที่ตัวอักษร
+         • ไม่มีตัวอักษรเพี้ยนหรือเครื่องหมายคำถาม
+         • สระและวรรณยุกต์อยู่ตำแหน่งถูกต้อง (สำคัญมากสำหรับภาษาไทย)
+         • เกมไม่ crash ตอนโหลดเมนู
+
+  3.4  ถ้าภาษา{target_lang}ยังไม่แสดงถูกต้อง — ให้วินิจฉัยตาม Diagnostic Tree:
+
+       [D1] ข้อความถูกแทนที่จริงในไฟล์หรือไม่?
+            → Hex-dump ไฟล์ที่ packed แล้ว ยืนยันว่า byte ใหม่อยู่ที่ offset ถูกต้อง
+            → ถ้าไม่ถูกแทนที่: pack script มี bug → แก้ script ก่อน
+
+       [D2] ข้อความถูกแทนที่แล้วแต่แสดงเป็นกล่องสี่เหลี่ยม (tofu)?
+            → Font ของเกมไม่รองรับ Unicode ภาษา{target_lang}
+            → Escalation Ladder:
+                Level 1: สลับ font ของเกมด้วย TTF ที่รองรับ{target_lang}
+                          (เช่น Noto Sans Thai) เก็บไว้ใน {path}/03_Font_and_UI/
+                Level 2: ถ้า font เป็น Sprite/Atlas: rebuild atlas ให้มี glyph ภาษา{target_lang}
+                Level 3: ถ้า font ฝังอยู่ใน engine: patch ผ่าน BepInEx/REFramework hook
+                Level 4 (สุดท้าย): Runtime hook — สกัดกั้น render call แล้วสลับ font ใน memory
+
+       [D3] ข้อความแสดงแต่ encoding ผิด (ตัวอักษรเพี้ยน)?
+            → Encoding ไม่ตรง → ลองตามลำดับ: UTF-8 → UTF-8 BOM → UTF-16LE → CP874
+            → Repack ด้วย encoding ที่ถูกต้องแล้วทดสอบใหม่
+
+       [D4] ข้อความแสดงถูกแต่เกมโหลดไฟล์เก่าอยู่?
+            → เกมอาจ cache หรือ hash-check assets
+            → ลอง: ล้าง cache folder · ปิด integrity check · ใช้ loose file override
+
+       วนซ้ำ 3.2–3.4 จนสำเร็จ ห้ามไปขั้นตอนที่ 4 จนกว่า GATE จะผ่าน
+
+────────────────────────────────────────────────────
+ขั้นตอนที่ 4 — Full Extraction → ส่งต่อให้ TStudio/TRun
+(เริ่มได้หลัง Step 3 GATE ผ่านแล้วเท่านั้น)
+────────────────────────────────────────────────────
+  • ใช้ script จากขั้นตอนที่ 2 Extract ข้อความทั้งหมด → TStudio CSV
+  • เก็บไว้ใน: {path}/02_Translation_Workspace/
+  • แจ้งให้ฉันนำ CSV ไปใช้กับ TRun หรือ TStudio เพื่อแปลชุดใหญ่
+  • หลังแปลเสร็จ: ใช้ Packer script Pack กลับเข้าเกม
+  • เขียน Validator Script ตรวจสอบว่าแท็กโค้ดไม่หายไประหว่างแปล
+
+────────────────────────────────────────────────────
+ขั้นตอนที่ 5 — Final Playtest & Release
+────────────────────────────────────────────────────
+  • ทดสอบเล่นเกมจริงครบถ้วน: ตรวจสอบ crash, UI ล้นกรอบ, glyph หายไป
+  • เมื่อพร้อม: สร้าง .zip release สุดท้าย → {path}/06_Releases/
+
+══════════════════════════════════════════════════════
+เริ่มต้นการทำงาน
+══════════════════════════════════════════════════════
+ยืนยันความเข้าใจใน ecosystem, ข้อจำกัด และ Milestone ทั้งหมด
+จากนั้นเริ่มขั้นตอนที่ 1 ทันที: สแกน {game_dir} ระบุ Engine และ format,
+ค้น Knowledge Base แล้วรายงานผล และประกาศ Approach ก่อนเขียนโค้ดใดๆ"""]
+
 
         # ── Optional Protocol Blocks ────────────────────────────────────────
         if opt.get("auto_tool"):
@@ -929,6 +1211,256 @@ Tell me which folder you will scan first and what additional information you nee
 บอกว่าคุณจะสแกนโฟลเดอร์ใดก่อน และต้องการข้อมูลใดเพิ่มเติมจากผู้ใช้""")
 
         return "\n".join(parts)
+
+    # ── Voice Dubbing Prompt ─────────────────────────────────────────────────
+    def get_dubbing_prompt(self):
+        name        = self.proj.get("name", "Unknown")
+        path        = self.proj.get("path", "Unknown")
+        app_lang    = self.parent.config.get("app_lang", "th")
+        game_dir    = self.proj.get("game_dir",  "[รอการระบุตำแหน่งติดตั้งเกมจากผู้ใช้]" if app_lang == "th" else "[Game directory not set]")
+        tool_dir    = self.proj.get("tool_dir",  "[รอการระบุตำแหน่งโฟลเดอร์เครื่องมือ]" if app_lang == "th" else "[Tool directory not set]")
+
+        opt = {k: v.get() for k, v in self._dub_vars.items()}
+        is_en = (app_lang != "th")
+
+        has_sub     = opt.get("has_thai_sub", False)
+        gen_sheet   = opt.get("gen_tracking_sheet", True)
+        analyze_dur = opt.get("analyze_duration", True)
+        gen_replace = opt.get("gen_replace_script", True)
+        keep_orig   = opt.get("keep_original", True)
+
+        if is_en:
+            sub_note = (
+                "The game already has Thai subtitles. Use the subtitle files as the voice-over script directly."
+                if has_sub else
+                "The game does NOT have Thai subtitles. You must first map each audio file to its original source language dialogue (from scripts, subtitle assets, or STT)."
+            )
+            core = f"""🎙️ Master Prompt: Voice Dubbing Engineer — {name}
+
+Role & Mission:
+You are a Voice Dubbing Mod Engineer. Your goal is NOT to produce audio yourself.
+Your job is to: (1) discover every voice/audio file in the game, (2) map them to their dialogue lines, 
+(3) build a tracking sheet so the dubbing team can record replacements, and (4) write replacement scripts 
+to inject new audio files back into the game.
+
+Subtitle/Script Situation:
+{sub_note}
+
+Environment:
+- Game: {name}
+- Workspace: {path}
+- Game Directory: {game_dir}
+- Tool Directory: {tool_dir}
+- Knowledge Base: {KNOWLEDGE_DIR}
+
+Safety Rules:
+1. NEVER modify files in Game Directory without user confirmation.
+2. NEVER delete original audio. Always backup first.
+3. ALL output scripts and tracking files go inside Workspace.
+
+══════════════════════════════════════════════════════
+PHASE 1 — Audio Engine Detection (Auto)
+══════════════════════════════════════════════════════
+Scan {game_dir} and identify the audio middleware automatically:
+  • Wwise → look for .wem / .bnk / Init.bnk
+  • FMOD  → look for .fsb / .bank / Master.bank
+  • Raw   → look for .wav / .ogg / .mp3 directly in asset folders
+  • Report: "Detected [Engine] — found [N] audio files at [path]"
+
+Tool Discovery:
+  • Wwise  → vgmstream-cli (for .wem extraction)
+  • FMOD   → fmod_studio_bank_dump or fsb-xtract
+  • Raw    → standard Python wave/pydub library (no extra tool)
+  If a tool is missing, download the latest binary to {tool_dir} automatically.
+
+══════════════════════════════════════════════════════
+PHASE 2 — Audio File Discovery & Indexing
+══════════════════════════════════════════════════════
+Write a Python script that recursively scans {game_dir} and collects:
+  - Full path of every audio file
+  - Filename (voice ID / event name if available)
+  - File size
+  - Estimated context (directory name often reveals: "vo_", "dialog_", "ambient_", etc.)
+
+Output: {path}/05_Scripts_and_Tools/audio_index.json"""
+
+            sheet_block = ""
+            if gen_sheet:
+                dur_col = "  - duration_sec (float): original audio length" if analyze_dur else ""
+                sheet_block = f"""
+
+══════════════════════════════════════════════════════
+PHASE 3 — Tracking Sheet Generation
+══════════════════════════════════════════════════════
+Write a Python script to produce a CSV tracking sheet:
+  Output: {path}/02_Translation_Workspace/dubbing_tracking.csv
+
+  Columns:
+  - audio_id: unique identifier (filename without extension)
+  - original_path: full path inside game directory
+  - source_dialogue: original dialogue text (if discoverable)
+  - thai_script: Thai script for voice actor {'(from subtitle file)' if has_sub else '(to be filled)'}
+{dur_col}
+  - status: [PENDING / RECORDED / INJECTED]
+  - dubbed_file_path: where the new .wav/.ogg will be placed
+  - notes: any special timing or context notes"""
+
+            dur_block = ""
+            if analyze_dur:
+                dur_block = """
+
+══════════════════════════════════════════════════════
+PHASE 4 — Duration Analysis
+══════════════════════════════════════════════════════
+For each audio file found, extract duration in seconds using:
+  • vgmstream-cli -m (for .wem/.bnk)
+  • pydub/wave/scipy for raw formats
+Add a `duration_sec` column to the tracking sheet.
+Also flag any voice line shorter than 0.5 sec as [AMBIENT/SFX] (likely not dialogue).
+Sort by duration descending so long dialogue lines are prioritized."""
+
+            replace_block = ""
+            if gen_replace:
+                backup_note = "\n  - Before replacing, backup original to: {orig_path}.bak" if keep_orig else ""
+                replace_block = f"""
+
+══════════════════════════════════════════════════════
+PHASE 5 — Replacement Script Generator
+══════════════════════════════════════════════════════
+After the dubbing team delivers new audio files, write a Python script that:
+  Input: {path}/02_Translation_Workspace/dubbed_audio/ (folder with new .wav files)
+  • Reads dubbed_tracking.csv to map new files → original game paths{backup_note}
+  - For Wwise: convert .wav → .wem using wwise_encoder or vgmstream, then replace .wem in .bnk
+  - For FMOD:  rebuild .bank file with fmod_studio_bank_replace or fsb-xtract
+  - For Raw:   direct file copy with format conversion if needed
+  - Report: success/failure per file with a summary log
+  Output log: {path}/05_Scripts_and_Tools/injection_log.md"""
+
+            closing = """
+
+══════════════════════════════════════════════════════
+Begin Work
+══════════════════════════════════════════════════════
+Confirm your understanding, then immediately start Phase 1 — scan the Game Directory,
+detect the audio engine, and report your findings before asking for further instructions."""
+
+            return core + sheet_block + dur_block + replace_block + closing
+
+        else:  # Thai
+            sub_note = (
+                "เกมนี้มีซับไทยอยู่แล้ว ให้นำไฟล์ Subtitle/Script ภาษาไทยมาใช้เป็นบทพากษ์ได้เลย"
+                if has_sub else
+                "เกมนี้ยังไม่มีซับไทย ต้องทำการจับคู่ไฟล์เสียงกับบทสนทนาภาษาต้นฉบับก่อน (จาก script, subtitle asset หรือ STT)"
+            )
+            core = f"""🎙️ Master Prompt: Voice Dubbing Engineer — {name}
+
+บทบาทและภารกิจ:
+คุณคือวิศวกรม็อดพากษ์เสียงเกม เป้าหมายของคุณไม่ใช่การผลิตเสียงด้วยตัวเอง
+งานของคุณคือ: (1) ค้นหาไฟล์เสียง/พากษ์ทุกไฟล์ในเกม, (2) จับคู่ไฟล์เสียงกับบทสนทนา, 
+(3) สร้าง Tracking Sheet สำหรับทีมพากษ์ และ (4) เขียน Script สำหรับแทนที่ไฟล์เสียงหลังพากษ์เสร็จ
+
+สถานะซับไตเติ้ล:
+{sub_note}
+
+สภาพแวดล้อม:
+- เกม: {name}
+- Workspace: {path}
+- Game Directory: {game_dir}
+- Tool Directory: {tool_dir}
+- แหล่งอ้างอิงข้อมูลม็อด: {KNOWLEDGE_DIR}
+
+กฎความปลอดภัย:
+1. ห้ามแก้ไขไฟล์ใน Game Directory โดยไม่ได้รับการยืนยันจากผู้ใช้
+2. ห้ามลบเสียงต้นฉบับเด็ดขาด ต้อง Backup ก่อนเสมอ
+3. ไฟล์ Output ทุกชิ้น (Script, Sheet) ต้องเก็บใน Workspace เท่านั้น
+
+══════════════════════════════════════════════════════
+ขั้นตอนที่ 1 — ตรวจจับ Audio Engine อัตโนมัติ
+══════════════════════════════════════════════════════
+สแกน {game_dir} และระบุ Audio Middleware อัตโนมัติ:
+  • Wwise → มองหา .wem / .bnk / Init.bnk
+  • FMOD  → มองหา .fsb / .bank / Master.bank
+  • Raw   → มองหา .wav / .ogg / .mp3 โดยตรงใน asset folders
+  • รายงาน: "ตรวจพบ [Engine] — พบไฟล์เสียง [N] ไฟล์ที่ [path]"
+
+การหาเครื่องมือ:
+  • Wwise  → vgmstream-cli (สำหรับแตก .wem)
+  • FMOD   → fmod_studio_bank_dump หรือ fsb-xtract
+  • Raw    → Python wave / pydub (ไม่ต้องการเครื่องมือพิเศษ)
+  หากไม่พบเครื่องมือ ให้ดาวน์โหลด Binary ล่าสุดไปไว้ที่ {tool_dir} อัตโนมัติ
+
+══════════════════════════════════════════════════════
+ขั้นตอนที่ 2 — ค้นหาและจัดทำดัชนีไฟล์เสียง
+══════════════════════════════════════════════════════
+เขียน Python Script ที่สแกน {game_dir} แบบ Recursive แล้วเก็บข้อมูล:
+  - เส้นทางเต็มของไฟล์เสียงทุกไฟล์
+  - ชื่อไฟล์ (voice ID / event name ถ้ามี)
+  - ขนาดไฟล์
+  - Context โดยประมาณ (ชื่อโฟลเดอร์มักบอก: "vo_", "dialog_", "ambient_" ฯลฯ)
+
+Output: {path}/05_Scripts_and_Tools/audio_index.json"""
+
+            sheet_block = ""
+            if gen_sheet:
+                dur_col = "  - duration_sec (float): ความยาวเสียงต้นฉบับเป็นวินาที" if analyze_dur else ""
+                sheet_block = f"""
+
+══════════════════════════════════════════════════════
+ขั้นตอนที่ 3 — สร้าง Tracking Sheet
+══════════════════════════════════════════════════════
+เขียน Python Script สร้าง CSV Tracking Sheet:
+  Output: {path}/02_Translation_Workspace/dubbing_tracking.csv
+
+  คอลัมน์:
+  - audio_id: รหัสเฉพาะ (ชื่อไฟล์ไม่มีนามสกุล)
+  - original_path: เส้นทางเต็มใน Game Directory
+  - source_dialogue: บทสนทนาต้นฉบับ (ถ้าค้นหาได้)
+  - thai_script: บทพากษ์ภาษาไทย {'(จากไฟล์ Subtitle)' if has_sub else '(รอกรอกจากทีมพากษ์)'}
+{dur_col}
+  - status: [PENDING / RECORDED / INJECTED]
+  - dubbed_file_path: ที่ที่จะวาง .wav/.ogg ใหม่
+  - notes: หมายเหตุ timing หรือบริบทพิเศษ"""
+
+            dur_block = ""
+            if analyze_dur:
+                dur_block = """
+
+══════════════════════════════════════════════════════
+ขั้นตอนที่ 4 — วิเคราะห์ Duration เสียงต้นฉบับ
+══════════════════════════════════════════════════════
+สำหรับไฟล์เสียงทุกไฟล์ที่พบ ให้ดึงความยาวเป็นวินาทีโดยใช้:
+  • vgmstream-cli -m (สำหรับ .wem/.bnk)
+  • pydub/wave/scipy สำหรับ Format ทั่วไป
+เพิ่มคอลัมน์ `duration_sec` ใน Tracking Sheet
+และ Flag ไฟล์ที่สั้นกว่า 0.5 วินาทีเป็น [AMBIENT/SFX] (น่าจะไม่ใช่บทพูด)
+เรียงลำดับจากยาวที่สุดเพื่อให้ทีมพากษ์เริ่มจากบทสำคัญก่อน"""
+
+            replace_block = ""
+            if gen_replace:
+                backup_note = "\n  - ก่อนแทนที่ ให้ backup เสียงเดิมไว้ที่: {orig_path}.bak" if keep_orig else ""
+                replace_block = f"""
+
+══════════════════════════════════════════════════════
+ขั้นตอนที่ 5 — สร้าง Script แทนที่ไฟล์เสียง
+══════════════════════════════════════════════════════
+หลังจากทีมพากษ์ส่งไฟล์เสียงใหม่มา ให้เขียน Python Script ที่:
+  Input: {path}/02_Translation_Workspace/dubbed_audio/ (โฟลเดอร์ที่มี .wav ใหม่)
+  • อ่าน dubbing_tracking.csv เพื่อ map ไฟล์ใหม่ → เส้นทางต้นฉบับในเกม{backup_note}
+  - Wwise: แปลง .wav → .wem แล้วแทนที่ .wem ใน .bnk
+  - FMOD:  Rebuild .bank ด้วย fsb-xtract
+  - Raw:   Copy ไฟล์โดยตรง แปลง Format ถ้าจำเป็น
+  - รายงาน: success/fail ต่อไฟล์ พร้อม Summary Log
+  Output log: {path}/05_Scripts_and_Tools/injection_log.md"""
+
+            closing = """
+
+══════════════════════════════════════════════════════
+เริ่มต้นการทำงาน
+══════════════════════════════════════════════════════
+ยืนยันความเข้าใจและเริ่ม ขั้นตอนที่ 1 — สแกน Game Directory ตรวจจับ Audio Engine
+แล้วรายงานผลก่อนที่จะขอข้อมูลเพิ่มเติมจากผู้ใช้"""
+
+            return core + sheet_block + dur_block + replace_block + closing
 
 
 class AdjustCropDialog(ctk.CTkToplevel):
@@ -2888,19 +3420,21 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             bat_path = os.path.join(current_dir, "update.bat")
             
             bat_content = f"""@echo off
-timeout /t 1 /nobreak >nul
-if exist "{current_dir}\\{exe_name}.old" del /f /q "{current_dir}\\{exe_name}.old"
-ren "{current_dir}\\{exe_name}" "{exe_name}.old"
-xcopy /s /e /y "{temp_dir}\\*" "{current_dir}\\"
-rmdir /s /q "{temp_dir}"
-start "" "{current_dir}\\{exe_name}"
+chcp 65001 >nul
+cd /d "%~dp0"
+timeout /t 2 /nobreak >nul
+if exist "{exe_name}.old" del /f /q "{exe_name}.old"
+ren "{exe_name}" "{exe_name}.old"
+xcopy /s /e /y "_temp_update\\*" "."
+rmdir /s /q "_temp_update"
+start "" "{exe_name}"
 del "%~f0"
 """
             with open(bat_path, "w", encoding="utf-8") as f:
                 f.write(bat_content)
                 
             # DETACHED_PROCESS (0x00000008) so the bat file outlives this process
-            subprocess.Popen(f'"{bat_path}"', shell=True, cwd=current_dir, creationflags=0x00000008)
+            subprocess.Popen([bat_path], cwd=current_dir, creationflags=0x00000008)
             import os
             os._exit(0) # Force hard exit to release file locks immediately
             
