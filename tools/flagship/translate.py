@@ -3,7 +3,7 @@ import urllib.request
 import os
 from pathlib import Path
 
-API_KEY = 'sk-50d1975e48464ad98f0d31281b67ce5e'
+API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 URL = 'https://api.deepseek.com/chat/completions'
 
 LANGS = {

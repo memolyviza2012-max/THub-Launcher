@@ -1,0 +1,29 @@
+﻿=== S.T.A.L.K.E.R. 2: Heart of Chornobyl — IoStore UTOC Content ===
+Files: TH_P.pak (347 B stub) + TH_P.ucas (33.03 MB) + TH_P.utoc (25.6 KB)
+PAK Version: 0 (stub)
+IoStore Version: 3
+Entry Count: 3
+Compressed Blocks: 2,140 (Zlib)
+Entropy: 7.77 (heavily compressed)
+
+--- Assets (3 entries) ---
+Stalker2/Content/Localization/
+  LocalizationDB.uasset  ← Metadata/structure for localization database
+  LocalizationDB.ubulk   ← Bulk text data (all Thai translations)
+
+--- No Fonts ---
+This mod does NOT include any font files.
+STALKER 2 likely handles Thai font rendering through the game engine's built-in
+Unicode font fallback system, or via a separate font mod.
+
+--- Naming Convention ---
+TH_P = Thai_Patch
+  TH = Thai locale identifier
+  _P = Patch (override original localization)
+
+--- LocalizationDB Format ---
+STALKER 2 (by GSC Game World) uses a proprietary "LocalizationDB" format:
+  - NOT standard Unreal Engine LocRes
+  - UAsset container with .ubulk sidecar for bulk string data
+  - Likely stores key-value pairs with language/namespace metadata
+  - 33 MB compressed = potentially massive amount of text content

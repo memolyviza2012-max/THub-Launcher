@@ -93,6 +93,8 @@ class TFontApp(QMainWindow):
         if LegacyFontEngine:
             self.legacy_engine = LegacyFontEngine()
             
+        self.workers = set()
+            
         # Try to load default mapping if available
         self.default_mapping_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Core', 'Mapping.json'))
         if self.font_engine and os.path.exists(self.default_mapping_path):
@@ -245,9 +247,14 @@ class TFontApp(QMainWindow):
             return False
 
     def _set_buttons_enabled(self, enabled):
-        self.btn_encode.setEnabled(enabled)
-        self.btn_decode.setEnabled(enabled)
-        self.btn_generate_font.setEnabled(enabled)
+        if hasattr(self, 'btn_encode'):
+            self.btn_encode.setEnabled(enabled)
+        if hasattr(self, 'btn_decode'):
+            self.btn_decode.setEnabled(enabled)
+        if hasattr(self, 'btn_generate_font'):
+            self.btn_generate_font.setEnabled(enabled)
+        if hasattr(self, 'btn_gen_legacy'):
+            self.btn_gen_legacy.setEnabled(enabled)
 
     def encode_file(self):
         if not self.engine: return
@@ -265,10 +272,13 @@ class TFontApp(QMainWindow):
             self.log(f"Encoded! Original PUA: {original_pua} -> Final PUA: {final_pua} (+{final_pua - original_pua})", "#f9e2af")
             self.save_file(encoded)
             self._set_buttons_enabled(True)
+            self.workers.discard(worker)
         def on_error(err):
             self.log(_("log_error_encoding"), "#f38ba8")
             self._set_buttons_enabled(True)
+            self.workers.discard(worker)
         worker = Worker(run_encode)
+        self.workers.add(worker)
         worker.signals.finished.connect(on_success)
         worker.signals.error.connect(on_error)
         QThreadPool.globalInstance().start(worker)
@@ -289,10 +299,13 @@ class TFontApp(QMainWindow):
             self.log(f"Decoded! Original PUA: {original_pua} -> Final PUA: {final_pua} (-{original_pua - final_pua})", "#f9e2af")
             self.save_file(decoded)
             self._set_buttons_enabled(True)
+            self.workers.discard(worker)
         def on_error(err):
             self.log(_("log_error_decoding"), "#f38ba8")
             self._set_buttons_enabled(True)
+            self.workers.discard(worker)
         worker = Worker(run_decode)
+        self.workers.add(worker)
         worker.signals.finished.connect(on_success)
         worker.signals.error.connect(on_error)
         QThreadPool.globalInstance().start(worker)
@@ -348,12 +361,15 @@ class TFontApp(QMainWindow):
         def on_success(res):
             self.log(_("log_font_gen_done"), "#a6e3a1")
             self._set_buttons_enabled(True)
+            self.workers.discard(worker)
             
         def on_error(err):
             self.log(_("log_error_font_gen"), "#f38ba8")
             self._set_buttons_enabled(True)
+            self.workers.discard(worker)
             
         worker = Worker(run_generate)
+        self.workers.add(worker)
         worker.signals.progress.connect(on_progress)
         worker.signals.finished.connect(on_success)
         worker.signals.error.connect(on_error)
@@ -488,13 +504,16 @@ class TFontApp(QMainWindow):
             self.log("Legacy Font Generation Completed!", "#a6e3a1")
             self._set_buttons_enabled(True)
             self.btn_gen_legacy.setEnabled(True)
+            self.workers.discard(worker)
             
         def on_error(err):
             self.log(f"Error generating legacy font: {err}", "#f38ba8")
             self._set_buttons_enabled(True)
             self.btn_gen_legacy.setEnabled(True)
+            self.workers.discard(worker)
             
         worker = Worker(run_generate)
+        self.workers.add(worker)
         worker.signals.progress.connect(on_progress)
         worker.signals.finished.connect(on_success)
         worker.signals.error.connect(on_error)

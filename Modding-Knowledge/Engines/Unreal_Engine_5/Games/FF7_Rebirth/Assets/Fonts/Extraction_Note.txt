@@ -1,0 +1,1 @@
+﻿Font assets are bitmap font texture pages (U_Com_JP_*) stored as UAssets inside UCAS IoStore. 38 texture pages total (12 LatinFontLarge + 9 4K + various SystemFont sizes). These are NOT TTF/OTF files but pre-rendered glyph atlas textures.

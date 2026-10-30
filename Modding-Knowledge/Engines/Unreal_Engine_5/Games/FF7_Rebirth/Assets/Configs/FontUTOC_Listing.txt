@@ -1,0 +1,19 @@
+﻿=== FF7 REBIRTH Font UTOC Asset Listing ===
+IoStore Version: 2
+Mount Point: ../../../End/Content/Menu/Billboard/Common/
+
+--- Font Texture Pages (LatinFontLarge) ---
+U_Com_JP_LatinFontLarge-01.uasset through -12.uasset (12 pages)
+U_Com_JP_LatinFontLarge4K-01.uasset through -09.uasset (9 pages, 4K resolution)
+
+--- System Font Textures ---
+U_Com_JP_SystemFontLarge-02.uasset
+U_Com_JP_SystemFontLarge4K-06 through -08.uasset (3 pages)
+U_Com_JP_SystemFontNormal-01.uasset
+U_Com_JP_SystemFontNormal4K-03 through -04.uasset (2 pages)
+U_Com_JP_SystemFontSmall-01.uasset
+U_Com_JP_SystemFontSmall4K-02 through -03.uasset (2 pages)
+U_Com_JP_SystemFontXLarge-02 through -05.uasset (4 pages)
+U_Com_JP_SystemFontXLarge4K-02 through -04.uasset (3 pages)
+
+Total: 38 unique font texture assets

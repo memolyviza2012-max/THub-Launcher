@@ -1,6 +1,10 @@
 import os
 import subprocess
-import numpy as np
+try:
+    import numpy as np
+except Exception:
+    np = None
+
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtCore import Qt, pyqtSignal, QThread, QRectF
 from PyQt6.QtGui import QPainter, QColor, QPen, QPainterPath
@@ -16,8 +20,12 @@ class AudioExtractorWorker(QThread):
         self.is_cancelled = False
 
     def run(self):
+        if np is None:
+            self.error.emit("numpy is not installed; audio waveform extraction disabled.")
+            return
         temp_raw = os.path.join(os.path.dirname(self.video_path), "temp_tvox_audio.raw")
         try:
+
             # Extract mono 8kHz s16le audio
             cmd = [
                 self.ffmpeg_path,

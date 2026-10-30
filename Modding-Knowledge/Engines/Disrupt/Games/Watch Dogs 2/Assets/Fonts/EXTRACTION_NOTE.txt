@@ -1,0 +1,1 @@
+Fonts for Watch Dogs 2 are embedded inside Disrupt Engine .dat/.fat archives. Specialized unpackers are required to extract the font textures or files.

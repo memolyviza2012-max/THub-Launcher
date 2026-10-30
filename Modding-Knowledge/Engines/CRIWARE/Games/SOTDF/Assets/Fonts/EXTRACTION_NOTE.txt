@@ -1,0 +1,1 @@
+Font is stored in font_en-us.cpk using a proprietary CRIWARE format (likely CRILAYLA compressed or bitmap). No standard TTF/OTF signature found.

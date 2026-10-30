@@ -1,0 +1,9 @@
+Font Extraction Note
+
+Game: Resident Evil 0 HD Remaster
+Format: Bitmap / SDF Texture Atlas (.tex + .fnt)
+
+Extraction Failure Reason:
+The game runs on the MT Framework engine, which uses rasterized bitmap sprite sheets for fonts instead of vector TTF/OTF files. The Thai mod provides the font as pre-rendered pixels within a texture atlas inside the `.arc` files. Therefore, it is impossible to extract a fully functional vector TTF/OTF font file.
+
+Original source font: Unknown. Modder pre-rendered a Thai font into the texture.

@@ -1,0 +1,1 @@
+No font assets found in the provided loose files. The game likely uses Unity's default fonts or requires AssetBundle extraction for custom fonts.

@@ -1,0 +1,6 @@
+No TrueType (.ttf) or OpenType (.otf) fonts were found in the mod directory for Assassin's Creed Mirage.
+
+Reason for non-extraction:
+The mod architecture does not include external font files. It is highly likely that either:
+1. The game engine natively includes a font with Thai glyph support out of the box.
+2. The modified font is packed directly inside the `.forge` archive files, and standard font files are not exposed externally.

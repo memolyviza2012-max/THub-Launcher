@@ -35,7 +35,10 @@ class TPUAEngine:
         # Build reverse maps
         for thai, hex_code in self.standard.items():
             try:
-                cp = int(hex_code, 16)
+                if len(hex_code) == 1:
+                    cp = ord(hex_code)
+                else:
+                    cp = int(hex_code, 16)
                 if cp not in self.reverse or len(thai) > len(self.reverse[cp]):
                     self.reverse[cp] = thai
             except (ValueError, OverflowError):
@@ -43,8 +46,8 @@ class TPUAEngine:
 
         for thai, hex_list in self.contextual.items():
             try:
-                pua_cp = int(hex_list[0], 16)
-                vowel_cp = int(hex_list[1], 16)
+                pua_cp = ord(hex_list[0]) if len(hex_list[0]) == 1 else int(hex_list[0], 16)
+                vowel_cp = ord(hex_list[1]) if len(hex_list[1]) == 1 else int(hex_list[1], 16)
                 self.ctx_reverse[(pua_cp, vowel_cp)] = thai
             except (ValueError, OverflowError, IndexError):
                 pass
@@ -56,7 +59,13 @@ class TPUAEngine:
 
         for word in sorted(self.contextual.keys(), key=len, reverse=True):
             try:
-                out = "".join(chr(int(h, 16)) for h in self.contextual[word])
+                out_chars = []
+                for h in self.contextual[word]:
+                    if len(h) == 1:
+                        out_chars.append(h)
+                    else:
+                        out_chars.append(chr(int(h, 16)))
+                out = "".join(out_chars)
             except (ValueError, OverflowError):
                 continue
             result = result.replace(word, out)
@@ -64,7 +73,10 @@ class TPUAEngine:
         for word in sorted(self.standard.keys(), key=len, reverse=True):
             hex_code = self.standard[word]
             try:
-                pua_char = chr(int(hex_code, 16))
+                if len(hex_code) == 1:
+                    pua_char = hex_code
+                else:
+                    pua_char = chr(int(hex_code, 16))
             except (ValueError, OverflowError):
                 continue
             result = result.replace(word, pua_char)

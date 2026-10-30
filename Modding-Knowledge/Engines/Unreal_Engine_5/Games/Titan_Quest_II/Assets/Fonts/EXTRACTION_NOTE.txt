@@ -1,0 +1,13 @@
+Font extraction result: no installable font file is present in this mod package.
+
+Evidence
+- A recursive extension scan found no .ttf, .otf, .ufont, .woff, or .woff2 file.
+- The mod's two PAKs were inspected with repak: pakchunkThai-Windows_P.pak has zero entries; pakchunkThaiICU-Windows_P.pak has exactly one entry, Engine/Content/Internationalization/icudt64l/brkitr/thaidict.dict.
+- The IoStore container contains localization resources, but its supplied directory/content evidence exposes no font asset.
+
+Interpretation
+The README's claim of Thai font support is consistent with the game already shipping a font with Thai glyphs. This mod adds ICU Thai word-breaking data and overrides the Simplified-Chinese localization slot; it does not redistribute a standalone font. Without an embedded font file, no Shell.Application font-family verification is applicable.
+
+Thai word-break asset extracted separately:
+../Internationalization/Engine/Content/Internationalization/icudt64l/brkitr/thaidict.dict
+SHA-256: 04A9C7F7AB10F7F2123A3782CCB300310EA3A601DBAC09A8173D540E01C2E949

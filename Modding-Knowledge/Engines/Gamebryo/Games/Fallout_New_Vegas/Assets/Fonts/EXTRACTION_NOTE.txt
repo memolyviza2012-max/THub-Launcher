@@ -1,0 +1,8 @@
+1. What format the font IS stored in:
+The fonts in this game are stored as rasterized bitmap textures (`.tex`) combined with a mapping file (`.fnt`).
+
+2. WHY it can't be converted:
+The vector data (.ttf / .otf) has been destroyed during the baking process to create the rasterized textures. It is impossible to losslessly reconstruct a TrueType font from baked pixels.
+
+3. What the original source font MIGHT be:
+Based on the file names (e.g. `NVFontmai33`), the font might be a custom Thai font, but it's not possible to deduce the exact family name. The base English fonts are Monofonto and fixedsys.

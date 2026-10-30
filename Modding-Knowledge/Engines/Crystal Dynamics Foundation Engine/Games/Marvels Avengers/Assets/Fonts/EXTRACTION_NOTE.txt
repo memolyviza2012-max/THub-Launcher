@@ -1,0 +1,8 @@
+Extraction of the font as a standard `.ttf` or `.otf` file failed for Marvel's Avengers.
+
+Reason:
+1. The game uses the Crystal Dynamics Foundation Engine, which employs Scaleform (GFX/SWF) for its UI and fonts, or proprietary Signed Distance Field (SDF) textures.
+2. The fonts are pre-compiled into DefineFont tags within the `.gfx` files or baked into textures, meaning vector data as a standalone TTF is lost or obfuscated inside the UI chunks.
+3. No standard TTF magic headers were found as extractable files within the `.tiger` archives.
+
+Original source font: Unknown. Modders must use tools like JPEXS to view the internal font family names within the Scaleform files.

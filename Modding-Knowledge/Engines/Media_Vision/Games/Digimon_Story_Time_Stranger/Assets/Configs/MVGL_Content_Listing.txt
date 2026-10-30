@@ -1,0 +1,43 @@
+﻿=== Digimon Story Time Stranger — MVGL Content Listing ===
+
+--- app_text01.dx11.mvgl (8.84 MB) ---
+Format: MDB1 (Media.Vision Database v1)
+Magic: 4D 44 42 31 (MDB1)
+Header entries: 255
+Data offset: 42848
+File size: 9,272,774 bytes
+
+Font resources:
+  bin font\commonfont    @4240  ★ RodinNTLGPro-B (OTF, ~6.4 MB, CFF-based)
+  bin font\eventfont     @36624 ★ Event text font
+
+Image resources:
+  img images\ui_btl_cc00 @4368
+
+--- patch_text01.dx11.mvgl (1.84 MB) ---
+Format: MDB1
+Header entries: 223
+Data offset: 37472
+File size: 1,931,530 bytes
+
+Text resources (MBE format):
+  mbe text\battle_info_message       — Battle text
+  mbe message\field_text             — Field dialogue
+  mbe text\char_name                 — Character names
+  mbe text\ed_lyrics                 — Ending lyrics
+  mbe text\generation_name           — Generation names
+  mbe text\worldmap_group_explanation — World map groups
+  mbe text\worldmap_place_explanation — Place descriptions
+  mbe text\worldmap_group_name       — Group names
+  mbe text\worldmap_place_name       — Place names
+  mbe text\graphictext               — UI graphics text
+  mbe text\key_help_text             — Key help
+  mbe text\shop_text                 — Shop text
+  mbe text\skill_auto_explanation    — Skill auto description
+  mbe text\skill_name                — Skill names
+  mbe text\skill_explanation         — Skill descriptions
+  mbe text\skill_menu_combi_type_name — Combo type names
+  mbe text\skill_ruby                — Skill furigana
+  mbe text\skill_name_dlc17          — DLC17 skill names
+  mbe text\status_name               — Status names
+  mbe text\steam_input               — Steam input labels

@@ -1,0 +1,12 @@
+SHA-256 (16 ตัวแรก) ของไฟล์ในแพ็กนี้
+
+22beb851975341ea  install.bat                                    3609 bytes
+60a9d8dd7e4e0a8d  text_assets/en/text_assets_global.toc          2048 bytes
+60a9d8dd7e4e0a8d  text_assets/text_assets_global.toc             2048 bytes
+ab491cedbce94232  uninstall.bat                                  2459 bytes
+b1f3dff0902faa84  ติดตั้งเอง-อ่านก่อน.txt                        9087 bytes
+b5d07a8c063b47f8  install.sh                                     1990 bytes
+bb566562b82963de  uninstall.sh                                   1386 bytes
+f85ccb7ae4f8feac  text_assets/en/text_assets_global.str        524288 bytes
+f85ccb7ae4f8feac  text_assets/text_assets_global.str           524288 bytes
+f88a6602a8531f41  text_assets/text/D8CBB618.str                131072 bytes

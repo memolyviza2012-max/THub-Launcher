@@ -1,0 +1,16 @@
+﻿FONT EXTRACTION STATUS: ❌ NO FONT FILE FOUND
+=======================================
+Game: Jump Space
+Engine: Unity (Addressables)
+
+File Analyzed: localization-string-tables-english(en)_assets_all.bundle (495 KB)
+
+Why it cannot be extracted:
+After a deep scan of the provided mod directory, it contains ONLY the Localization String Tables bundle. 
+There is no font asset (.ttf, .otf, or TextMeshPro SDF) embedded in this mod. 
+The 495 KB bundle consists entirely of plaintext Unity Localization translation strings.
+
+Conclusion: 
+The game natively supports Thai rendering using an internal fallback font (like Noto Sans) 
+or relies on OS-level font fallback. The modder only needed to translate the strings without 
+creating a font mod.

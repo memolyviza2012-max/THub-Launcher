@@ -1,0 +1,4 @@
+The mod for Resident Evil 8 does not contain any font files (.oft, .ttf, .otf, etc.).
+It appears the mod relies on pre-existing fonts in the user's OS, or the mod is distributed as an Fluffy Manager add-on where fonts are handled separately or injected dynamically.
+Additionally, .tex.30 files are included, which might be pre-rendered text for specific UI elements or environmental textures.
+Thus, no Thai fonts could be extracted from this specific mod archive.

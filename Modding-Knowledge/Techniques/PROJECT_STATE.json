@@ -1,0 +1,155 @@
+{
+  "project_name": "Autonomous ComfyUI & Smart Home AI Studio",
+  "architecture_model": "Hub-and-Spoke (Master & Worker Chats)",
+  "master_conversation_id": "ec35ca32-12a6-4378-8ce3-ce0a8d7dc7ad",
+  "last_updated": "2026-09-17T22:56:00+07:00",
+  "environment": {
+    "nas_server": "http://192.168.1.102:5050",
+    "comfyui_server": "http://192.168.1.11:8188",
+    "main_pc_ip": "192.168.1.100",
+    "multi_gpu_farm": {
+      "orchestrator": "http://192.168.1.102:5050",
+      "architecture": "Option 1: NAS Central Orchestrator & Smart Dispatcher",
+      "nodes": {
+        "main_pc": {
+          "ip": "192.168.1.100:8188",
+          "gpu": "RTX 4080 SUPER (16GB)",
+          "priority": 1,
+          "role": "Speed Priority (Online on demand)"
+        },
+        "aipc1": {
+          "ip": "192.168.1.11:8188",
+          "gpu": "RTX 4070 (12GB)",
+          "priority": 2,
+          "role": "24/7 Standby & Failover"
+        }
+      },
+      "dispatch_modes": ["auto", "parallel", "main_pc", "aipc1"]
+    },
+    "power_rate_per_kwh_thb": 4.18,
+    "drive_mapping_standard": {
+      "tool": "RaiDrive",
+      "mount_letter": "Z:\\",
+      "target": "NAS Root Volume (HSH2)",
+      "synchronized_nodes": [
+        "Main PC (192.168.1.100)",
+        "AiPC1 (192.168.1.11)"
+      ]
+    },
+    "model_storage": "//192.168.1.102/06_Ai_Model/",
+    "footage_storage": {
+      "local_path": "Z:\\05_VideoFootage\\01_ComfyUi_Footage",
+      "smb_path": "//192.168.1.102/05_VideoFootage/01_ComfyUi_Footage",
+      "container_mount": "/footage",
+      "structure": [
+        "01_Videos/Raw_Generations",
+        "01_Videos/Shots_Cache",
+        "02_Images/Generations",
+        "02_Images/Characters",
+        "03_Audio/Voiceovers",
+        "04_Finished_Productions/Drama_Episodes"
+      ]
+    },
+    "workspace_dir": "Z:\\01_Work\\01_ComfyUi_Project",
+    "aipc1_autostart": {
+      "status": "configured_and_active",
+      "method": "Dual (Windows Task Scheduler AtLogOn + Startup Folder VBS)",
+      "task_name": "ComfyUI",
+      "silent_launcher": "C:\\ComfyUI_windows_portable\\start_comfyui_silent.vbs",
+      "powershell_engine": "C:\\ComfyUI_windows_portable\\autostart_comfyui.ps1",
+      "management_tools": [
+        "C:\\ComfyUI_windows_portable\\Check-ComfyUI-Status.bat",
+        "C:\\ComfyUI_windows_portable\\Restart-ComfyUI.bat",
+        "C:\\ComfyUI_windows_portable\\Stop-ComfyUI.bat"
+      ]
+    },
+    "main_pc_comfyui": {
+      "status": "installed_and_active",
+      "install_dir": "C:\\ComfyUI_windows_portable",
+      "gpu": "NVIDIA GeForce RTX 4080 SUPER (16GB VRAM)",
+      "url": "http://127.0.0.1:8188",
+      "model_sharing": "Zero-redundancy NAS SMB (//192.168.1.102/06_Ai_Model/)"
+    }
+  },
+  "modules": {
+    "short_drama_studio": {
+      "status": "active_production",
+      "version": "2.8",
+      "name": "Higgsfield-Style AI Director Studio",
+      "core_engine": "01_AI_Short_Drama_Engine/short_drama_engine.py",
+      "nas_engine": "02_NAS_Server_And_Deployment/short_drama_engine.py",
+      "ui_workflow": "01_AI_Short_Drama_Engine/MiniMax_H3_Short_Drama_Studio_UI.json",
+      "features": [
+        "Dual Studio Modes: Quick Presets (1-Click) & Higgsfield Director Studio",
+        "Character Vault: Consistent Identity & Outfit via ComfyUI Node 114 first_frame conditioning",
+        "9 Cinematic Visual Camera Motions (Zoom, Pan, Crane, Tilt, Orbit, Handheld, Static)",
+        "Non-Linear Shot-by-Shot Timeline with Per-Shot Independent Re-roll",
+        "Frame Continuity Chaining via Previous Shot Last-Frame PNG",
+        "Master Movie Video & Audio FFmpeg Stitcher with Garuda ASS Thai Subtitles",
+        "Multi-scene 3 scenes",
+        "Edge-TTS Thai (Premwadee / Niwat)",
+        "Smart Node Routing (Auto / Parallel Dual-GPU / Main PC / AiPC1)",
+        "Direct NAS Footage Disk Persistence"
+      ],
+      "endpoints": [
+        "/api/drama/characters",
+        "/api/drama/characters/upload",
+        "/api/drama/camera_motions",
+        "/api/drama/shot/generate",
+        "/api/drama/shot/status/{shot_key}",
+        "/api/drama/shot/media/{filename}",
+        "/api/drama/stitch"
+      ]
+    },
+    "affiliate_product_studio": {
+      "status": "active_production",
+      "version": "1.0",
+      "worker_chat": "Worker-Chat-Affiliate",
+      "core_engine": "01_AI_Short_Drama_Engine/affiliate_engine.py",
+      "launcher": "01_AI_Short_Drama_Engine/run_affiliate_studio.bat",
+      "features": [
+        "Image to 3D video rotation (MiniMax H3)",
+        "Blinking Yellow Basket Badge",
+        "Animated Bouncing CTA Arrow",
+        "Flash Sale Ribbon & Price Tag",
+        "Thai Neural Urgency Voiceovers (Edge-TTS)",
+        "High-contrast ASS Subtitles"
+      ],
+      "verified_sample": "01_AI_Short_Drama_Engine/affiliate_outputs/Affiliate_1789635352_FINAL.mp4"
+    },
+    "voice_cloning_and_storytelling": {
+      "status": "planned",
+      "worker_chat": "Worker-Chat-VoiceClone",
+      "target_file": "01_AI_Short_Drama_Engine/storyteller_engine.py",
+      "features": ["User voice 15s reference clone", "F5-TTS Thai inference", "Atmospheric horror/history scripts", "Ambient soundscapes"]
+    },
+    "home_dashboard_smart_control": {
+      "status": "active_production",
+      "worker_chat": "Worker-Chat-HomeDashboard",
+      "server_file": "02_NAS_Server_And_Deployment/nas_server.py",
+      "frontend_dir": "02_NAS_Server_And_Deployment/frontend"
+    },
+    "thai_commercial_tts_studio": {
+      "status": "active_production",
+      "version": "1.0",
+      "custom_node": "C:\\ComfyUI_windows_portable\\ComfyUI\\custom_nodes\\ComfyUI_Thai_Commercial_TTS",
+      "canvas_workflow": "01_AI_Short_Drama_Engine/Thai_Commercial_TTS_Studio.json",
+      "api_workflow": "01_AI_Short_Drama_Engine/thai_commercial_tts_api_prompt.json",
+      "cli_tool": "01_AI_Short_Drama_Engine/run_thai_commercial_tts.py",
+      "features": [
+        "10 Pre-tuned Thai Commercial Sales Voice Presets (Live Sales, Beauty, Urgency, Luxury, Tech)",
+        "Zero-VRAM Microsoft Neural HD Thai Model",
+        "Thai Sales Script Generator Node (6 High-converting Templates)",
+        "Direct ComfyUI AUDIO and SaveAudioMP3 Pipeline",
+        "Direct NAS Footage Disk Persistence (03_Audio/Voiceovers/)"
+      ]
+    }
+  },
+  "documentation": {
+    "master_bible": "PROJECT_MASTER_CONTROL_BIBLE.md",
+    "comfy_bible": "COMFYUI_AI_SHORT_DRAMA_MASTER_BIBLE.md",
+    "home_bible": "HOME_DASHBOARD_HANDOVER_BIBLE.md",
+    "tts_guide": "THAI_COMMERCIAL_TTS_MASTER_GUIDE.md",
+    "ui_visual_guide": "comfyui_workflow_visual_guide.md"
+  }
+}

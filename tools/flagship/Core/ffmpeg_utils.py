@@ -9,17 +9,23 @@ from PyQt6.QtCore import Qt
 
 def get_ffmpeg_path():
     """Returns the path to ffmpeg.exe if available, else None."""
-    # 1. Check tools/bin
+    # 1. Check tools/bin across potential dev and packaged locations
+    candidates = []
     if getattr(sys, 'frozen', False):
-        base_dir = os.path.dirname(sys.executable)
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.extend([
+            os.path.join(exe_dir, "tools", "bin", "ffmpeg.exe"),
+            os.path.join(exe_dir, "_internal", "tools", "bin", "ffmpeg.exe"),
+        ])
+        if hasattr(sys, '_MEIPASS'):
+            candidates.append(os.path.join(sys._MEIPASS, "tools", "bin", "ffmpeg.exe"))
     else:
-        # We are in tools/flagship/Core or TVox, so base project is 3 levels up from Core?
-        # Core is in modder-hub/tools/flagship/Core
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-    
-    local_ffmpeg = os.path.join(base_dir, "tools", "bin", "ffmpeg.exe")
-    if os.path.exists(local_ffmpeg):
-        return local_ffmpeg
+        candidates.append(os.path.join(base_dir, "tools", "bin", "ffmpeg.exe"))
+
+    for p in candidates:
+        if p and os.path.exists(p):
+            return p
 
     # 2. Check system PATH
     try:
@@ -51,10 +57,11 @@ def ensure_ffmpeg(parent_widget):
     try:
         if getattr(sys, 'frozen', False):
             base_dir = os.path.dirname(sys.executable)
+            internal_bin = os.path.join(base_dir, "_internal", "tools", "bin")
+            bin_dir = internal_bin if os.path.exists(os.path.join(base_dir, "_internal")) else os.path.join(base_dir, "tools", "bin")
         else:
             base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-            
-        bin_dir = os.path.join(base_dir, "tools", "bin")
+            bin_dir = os.path.join(base_dir, "tools", "bin")
         os.makedirs(bin_dir, exist_ok=True)
         
         zip_path = os.path.join(bin_dir, "ffmpeg.zip")

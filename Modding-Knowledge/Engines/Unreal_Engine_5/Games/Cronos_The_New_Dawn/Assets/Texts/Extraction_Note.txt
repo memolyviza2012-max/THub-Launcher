@@ -1,0 +1,5 @@
+﻿2 LocRes files inside PAK v4 (Zlib compressed):
+- Game.locres (Cronos/Content/Localization/Game/en/) = Game UI, items, menus
+- Dialog.locres (Cronos/Content/Localization/Dialog/en/) = Character dialogues
+Both use English slot override (en/).
+Requires UnrealPak to extract .locres files.

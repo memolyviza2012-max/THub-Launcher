@@ -1,0 +1,3 @@
+Failed to extract TTF directly from bundle. The Unity AssetBundle is encrypted and requires a decryption key. 
+UnityPy Error: "The BundleFile is encrypted, but no key was provided!"
+You can set the key via UnityPy.set_assetbundle_decrypt_key(key). To try brute-forcing the key, you need global-metadata.dat or a memory dump.

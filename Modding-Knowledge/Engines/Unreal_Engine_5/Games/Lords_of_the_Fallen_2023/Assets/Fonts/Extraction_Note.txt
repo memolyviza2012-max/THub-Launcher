@@ -1,0 +1,3 @@
+﻿31 .ufont files packed inside PAK (PAK v11, Zlib compressed).
+Key Thai font: NotoSansThai-VariableFont_wdth_wght.ufont
+Requires UnrealPak to extract individual .ufont files.

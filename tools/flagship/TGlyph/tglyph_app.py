@@ -57,12 +57,46 @@ except ImportError:
     sys.exit(1)
 
 # ---------------------------------------------------------------------------
+# Dependency pre-flight check (Pillow, numpy)
+# ---------------------------------------------------------------------------
+_missing_deps = []
+try:
+    import PIL
+except ImportError:
+    _missing_deps.append("Pillow")
+
+try:
+    import numpy
+except ImportError:
+    _missing_deps.append("numpy")
+
+if _missing_deps:
+    _missing_str = ", ".join(_missing_deps)
+    _install_cmd = f"pip install {' '.join(_missing_deps)}"
+    print("=" * 60, file=sys.stderr)
+    print(f"  [ERROR] TGlyph missing required dependencies: {_missing_str}", file=sys.stderr)
+    print(f"  Please install with: {_install_cmd}", file=sys.stderr)
+    print("=" * 60, file=sys.stderr)
+
+    _app = QApplication.instance() or QApplication(sys.argv)
+    QMessageBox.critical(
+        None,
+        "TGlyph — Missing Dependencies",
+        f"TGlyph ไม่สามารถเริ่มต้นทำงานได้เนื่องจากขาดโมดูลที่จำเป็น:\n\n"
+        f"  • ขาดไลบรารี: {_missing_str}\n\n"
+        f"กรุณาเปิด Terminal / Command Prompt แล้วพิมพ์คำสั่ง:\n"
+        f"  {_install_cmd}\n\n"
+        f"จากนั้นลองเปิดโปรแกรมใหม่อีกครั้ง"
+    )
+    sys.exit(1)
+
+# ---------------------------------------------------------------------------
 # Local module imports
 # ---------------------------------------------------------------------------
 _SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(_SCRIPT_DIR))
 
-from i18n import I18n, PRESET_TEXTS, _
+from i18n import I18n, PRESET_TEXTS, _, _
 import pua_engine
 import font_renderer
 import atlas_packer
@@ -912,7 +946,9 @@ class TGlyphApp(QMainWindow):
         h = int(self._config.get("window_height", 900))
         self.resize(w, h)
         
-        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TGlyph.png"))
+        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TGlyph.ico"))
+        if not os.path.exists(logo_path):
+            logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TGlyph.png"))
         if os.path.exists(logo_path):
             self.setWindowIcon(QIcon(logo_path))
 
@@ -2991,8 +3027,11 @@ def main() -> None:
     app.setFont(app_font)
 
     # Set application window icon
-    logo_path = _SCRIPT_DIR.parent.parent.parent / "assets" / "TGlyph.png"
-    app.setWindowIcon(QIcon(str(logo_path.resolve())))
+    logo_path = _SCRIPT_DIR.parent.parent.parent / "assets" / "TGlyph.ico"
+    if not logo_path.exists():
+        logo_path = _SCRIPT_DIR.parent.parent.parent / "assets" / "TGlyph.png"
+    if logo_path.exists():
+        app.setWindowIcon(QIcon(str(logo_path.resolve())))
 
     # Show startup dialog
     startup = StartupDialog()

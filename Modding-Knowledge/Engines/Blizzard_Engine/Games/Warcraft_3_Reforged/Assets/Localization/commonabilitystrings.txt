@@ -1,0 +1,178 @@
+﻿//allied building
+[Aall]
+Name="แบ่งปนรานค้า, อาคารพันธมิตร"
+
+//burrow detection, fliers
+[Abdt]
+Name=ตรวจจับใต้ดิน
+EditorSuffix=" (Fliers, Obsolete)"
+
+//purchase (shop)
+[Apit]
+Name=ซือไอเทมรานค้า
+
+[Amou]
+Name=ขีพาหนะ
+Tip=แปลงราง
+Untip=ยกเลิกแปลงราง
+Ubertip="แปลงรางฮีโรเปนรูปแบบ อืน"
+Unubertip="คืนฮีโรสู่รูปแบบปกติ"
+Hotkey=R
+Unhotkey=R
+
+[Ahar]
+Name=เก็บเกียว
+Tip=เก็บ
+Ubertip="ขุดทองจากเหมืองทองและ เก็บเกียวไม้จากต้นไม้"
+Untip=ส่งทรพยากรกลับ
+Unubertip="นำทรพยากรทีถือกลับไปยัง ศูนย์กลางเมืองทีใกล้ ทีสุด"
+Hotkey=G
+Unhotkey=E
+EditorSuffix= (ทองและไม้)
+
+[Ahrl]
+Name=เก็บเกียว
+Tip=เก็บ
+Ubertip="เก็บเกียวไม้จากต้นไม้"
+Untip=ส่งทรพยากรกลับ
+Unubertip="นำทรพยากรทีถือกลับไปยัง เนโครโพลิสหรอสุสานทีใกล้ ทีสุด"
+Hotkey=G
+Unhotkey=E
+EditorSuffix= (ไม้กูล)
+
+[Arev]
+Name=ชุบชีวิตฮีโร
+
+[Aawa]
+Name=ชุบชีวิตฮีโรทันที
+
+// passive 'detector' ability
+[Adet]
+Name=เครองตรวจจับ
+
+[Adt1]
+Name=เครองตรวจจับ
+
+[Adta]
+Name=เปดเผย
+Tip=เปดเผย
+Hotkey=R
+
+[Bdet]
+Bufftip=ถูกตรวจจับ
+Buffubertip="หน่วยนีถูกตรวจจับ ผู้เล่นฝายศัตรูมองเห็นได้"
+
+[Bvul]
+Bufftip=อมตะ
+Buffubertip="หน่วยนีอมตะ จะไม่ได้รบความเสียหายจาก การโจมตีและไม่สามารถถู กรายเวทใส่ได้"
+
+[Bspe]
+Bufftip=โบนัสความเรว
+Buffubertip="หน่วยนีมีโบนัสความเรว เคลือนทีเรวกว่าปกติ"
+
+[Bfro]
+Bufftip=ถูกชะลอ
+Buffubertip="หน่วยนีถูกชะลอ เคลือนทีช้ากว่าปกติ"
+
+// peon/peasant repair ability
+[Arep]
+Name=ซ่อมแซม
+Tip=ซ่อมแซม
+Ubertip="ซ่อมแซมหน่วยและ สิงก่อสรางเครองจักรโดย ใช้ทรพยากร"
+Untip="|cffc3dbffคลิกขวาเพือเปดใช้การราย อัตโนมัติ|r"
+Unubertip="|cffc3dbffคลิกขวาเพือปดการราย อัตโนมัติ|r"
+Hotkey=R
+Unhotkey=R
+
+// Abilities that need names in the editor
+[AEpa]
+Name=ลูกธนูพิษ
+Tip=ลูกศรพิษ - [|cffffcc00ระดับ 1|r],ลูกศรพิษ - [|cffffcc00ระดับ 2|r],ลูกศรพิษ - [|cffffcc00ระดับ 3|r]
+Ubertip="เพิมความเสียหายไฟโบนัส <AHfa,DataA1> ให้การโจมตีศัตรู แต่ดูดมานาทุกครงทียิง","เพิมความเสียหายไฟโบนัส <AHfa,DataA2> ให้การโจมตี แต่ดูดมานาทุกครงทียิง","เพิมความเสียหายไฟโบนัส <AHfa,DataA3> ให้การโจมตี แต่ดูดมานาทุกครงทียิง"
+Untip="|cffc3dbffคลิกขวาเพือเปดใช้การราย อัตโนมัติ|r"
+Unubertip="|cffc3dbffคลิกขวาเพือปดการราย อัตโนมัติ|r"
+Hotkey=R
+Unhotkey=R
+Researchtip="เรยนรู้ลูกศรพิษ - [|cffffcc00ระดับ %d|r]"
+Researchubertip="เพิมความเสียหายการโจมตี ของพรสเทสด้วยไฟ |n|n|cffffcc00ระดับ 1|r - โบนัสความเสียหาย <AHfa,DataA1> |n|cffffcc00ระดับ 2|r - โบนัสความเสียหาย <AHfa,DataA2> |n|cffffcc00ระดับ 3|r - โบนัสความเสียหาย <AHfa,DataA3>"
+Researchhotkey=R
+
+[AEbu]
+Name=สราง (ไนท์เอลฟ)
+
+[AGbu]
+Name=สราง (นาคา)
+
+[AHbu]
+Name=สราง (มนุษย์)
+
+[AHer]
+Name=ฮีโร
+
+[ANbu]
+Name=สราง (กลาง)
+
+[AObu]
+Name=สราง (ออรค)
+
+[ARal]
+Name=จุดรวมพล
+
+[AUbu]
+Name=สราง (อันเดด)
+
+[Aalr]
+Name=สัญญาณเตือน
+
+[Aatk]
+Name=โจมตี
+
+[Afih]
+Name=ติดไฟ (มนุษย์)
+
+[Afin]
+Name=ติดไฟ (ไนท์เอลฟ)
+
+[Afio]
+Name=ติดไฟ (ออรค)
+
+[Afir]
+Name=ติดไฟ
+
+[Afiu]
+Name=ติดไฟ (อันเดด)
+
+[Aloc]
+Name=ตักแตน
+
+[Amov]
+Name=เคลือนที
+
+[Atdp]
+Name=ปล่อยนักบิน
+
+[Atlp]
+Name=รบนักบิน
+
+[Attu]
+Name=ปอมปน
+
+// Stun buff
+[BSTN]
+Bufftip=มึนงง
+Buffubertip="หน่วยนีมึนงง เคลือนที โจมตี หรอรายเวทไม่ได้"
+
+// Pause buff
+[BPSE]
+Bufftip=มึนงง
+Buffubertip="หน่วยนีจะไม่เคลือนที"
+EditorSuffix= (หยุดชัวคราว)
+
+[Xbdt]
+EditorName=เปดเผย (เอฟเฟกต์)
+
+[Xbli]
+EditorName=แผ่นดินเสือม (เอฟเฟกต์)
+
+[Xdis]
+EditorName=ฮีโรจางหาย (เอฟเฟกต์)

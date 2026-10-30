@@ -1,0 +1,8 @@
+1. What format the font IS stored in:
+The font vector data is encapsulated within a Scaleform SWF file (`fonts_CHN.swf`) using Flash `DefineFont` tags.
+
+2. WHY it can't be converted:
+The command-line tools available do not have the capability to parse the SWF binary structure to reconstruct a raw TTF/OTF file. 
+
+3. What the original source font MIGHT be:
+Unknown. You can extract it manually using JPEXS Free Flash Decompiler (FFDec) by opening the SWF file and exporting the font symbols.

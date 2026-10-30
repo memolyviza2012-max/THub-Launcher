@@ -1,0 +1,31 @@
+﻿=== The Alters — PAK Content Listing ===
+Files: 2 PAK variants (Steam + Game Pass), identical content
+  Steam:     TheAlters-Windows_P_999.pak (2.11 MB)
+  Game Pass: TheAlters-WinGDK_P_999.pak  (2.11 MB)
+PAK Version: 3
+Mount Point: ../../../TheAlters/Content/
+Entry Count: 9
+Compression: Zlib (97 blocks)
+Internal Codename: P9Playable
+
+--- Fonts (8 .ufont entries) ---
+P9Playable/UI/Fonts/Inter/
+  Inter-Regular.ufont         ★ UI font
+  Inter-Medium.ufont          ★ UI font
+  Inter-SemiBold.ufont        ★ UI font
+  Inter-Bold.ufont            ★ UI font
+  Inter-ExtraBold.ufont       ★ UI font
+
+P9Playable/UI/Fonts/Inter_ExplorationMAp/
+  Inter-Medium-Exp.ufont      ★ Exploration map variant
+
+P9Playable/UI/Fonts/NotoSans/
+  NotoSans-Black.ufont        ★ Thai fallback (Black weight)
+  NotoSans-SemiBold.ufont     ★ Thai fallback (SemiBold weight)
+
+--- Localization (1 file) ---
+Localization/P9Playable/en/P9Playable.locres  ★ Thai translations (English slot override)
+
+--- Extracted TTF Fonts ---
+  Noto Sans Thai Looped Regular (99 KB) — extracted from NotoSans .ufont wrappers
+  (Inter fonts embedded as Noto Sans Thai Looped — font swapping technique)

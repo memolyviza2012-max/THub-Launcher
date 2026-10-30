@@ -1,0 +1,15 @@
+FONT EXTRACTION STATUS: FAILED — raw OTF carve is not portable
+============================================================
+Game: Digimon Story: Time Stranger
+Source: app_text01.dx11.mvgl (MDB1)
+
+Evidence
+- The archive indexes `bin font\commonfont` and contains `OTTO` markers at 0xA762 and 0x544D48.
+- The previous 6,601,936-byte carve starts with `OTTO` but does not have valid contiguous OpenType table bounds.
+- fontTools reports malformed name-table offsets; Windows Shell.Application returns no font family.
+
+Conclusion
+The font's tables are record-interleaved or relocated by MDB1 metadata. The raw carve is forensic evidence only, not an installable OTF. Its family, maker, licence, and Thai glyph coverage cannot be identified from this carve.
+
+Required next step
+Use an MVGL/MDB1-aware extractor that reconstructs the full `bin font\commonfont` record, then validate the resulting TTF/OTF with fontTools and Shell.Application before redistribution.

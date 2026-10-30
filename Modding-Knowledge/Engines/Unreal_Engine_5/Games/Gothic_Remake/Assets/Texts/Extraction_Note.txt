@@ -1,0 +1,1 @@
+Text extraction failed: AlkimiaLocalization_00000000.lcache is encrypted (entropy 7.8). Requires Alkimia engine decryptor tool to extract.

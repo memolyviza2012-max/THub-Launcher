@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>THub.Unity.NativeAssetPacker</RootNamespace>
+    <AssemblyName>NativeAssetPacker</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="E:\Mod_Workspace\Tool\UABE\uabea-windows\classdata.tpk" Link="classdata.tpk" CopyToOutputDirectory="PreserveNewest" />
+    <Reference Include="AssetsTools.NET">
+      <HintPath>E:\Mod_Workspace\Tool\UABE\uabea-windows\AssetsTools.NET.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="AssetsTools.NET.MonoCecil">
+      <HintPath>E:\Mod_Workspace\Tool\UABE\uabea-windows\AssetsTools.NET.MonoCecil.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>E:\Mod_Workspace\Tool\UABE\uabea-windows\Mono.Cecil.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>E:\Mod_Workspace\Tool\UABE\uabea-windows\Mono.Cecil.Rocks.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,6 @@
+1. What format the font IS stored in
+- No font files are present in this mod package.
+2. WHY it can't be converted
+- The mod only replaces the encrypted text file `locales_EN.txt`. The font is not included. It might be using a fallback font or the base game already supports Thai glyphs.
+3. What the original source font MIGHT be
+- Unknown.

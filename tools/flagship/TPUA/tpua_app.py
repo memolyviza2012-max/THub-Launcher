@@ -1,4 +1,4 @@
-from tpua_i18n import _, get_resource_path
+from i18n_helper import _, get_resource_path
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'Core')))
@@ -261,7 +261,7 @@ class TPUAApp(QMainWindow):
         try:
             with open(path, 'w', encoding='utf-8-sig') as f:
                 f.write(content)
-            self.log(_("log_saved_to"), "#a6e3a1")
+            self.log(_("log_saved_to").format(path=path), "#a6e3a1")
             return True
         except Exception as e:
             self.log(f"Error saving: {e}", "#f38ba8")
@@ -320,7 +320,22 @@ class TPUAApp(QMainWindow):
         QThreadPool.globalInstance().start(worker)
 
 if __name__ == "__main__":
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('flagship.tpua.font.1.0')
+        except Exception:
+            pass
+
     app = QApplication(sys.argv)
+    logo_path = str(get_resource_path(os.path.join("assets", "TPUA.ico")))
+    if not os.path.exists(logo_path):
+        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TPUA.ico"))
+    if not os.path.exists(logo_path):
+        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TPUA.png"))
+    if os.path.exists(logo_path):
+        app.setWindowIcon(QIcon(logo_path))
+
     window = TPUAApp()
     window.show()
     sys.exit(app.exec())

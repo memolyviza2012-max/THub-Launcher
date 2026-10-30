@@ -1,0 +1,49 @@
+﻿=== Lords of the Fallen (2023) — PAK Content Listing ===
+File: pakchunk99-Windows.pak (64.03 MB)
+PAK Version: 11
+Mount Point: ../../../
+Entry Count: 32
+Compression: Zlib
+
+--- Engine Fonts (7 files) ---
+Engine/Content/EngineFonts/Faces/
+  DroidSansFallback.ufont
+  DroidSansMono.ufont
+  RobotoBold.ufont
+  RobotoBoldItalic.ufont
+  RobotoItalic.ufont
+  RobotoLight.ufont
+  RobotoRegular.ufont
+
+--- Game Fonts: CaslonPro (5 files) ---
+LOTF2/Content/Art/UI/Fonts/FontFaces/CaslonPro/
+  ACaslonPro-Bold.ufont
+  ACaslonPro-BoldItalic.ufont
+  ACaslonPro-Italic.ufont
+  ACaslonPro-Regular.ufont
+  ACaslonPro-Semibold.ufont
+
+--- Game Fonts: NotoSerif family (19 files) ---
+LOTF2/Content/Art/UI/Fonts/FontFaces/NotoSerif/
+  NotoSansBengali-VariableFont_wdth_wght.ufont
+  NotoSansDevanagari-VariableFont_wdth_wght.ufont
+  NotoSansDisplay-VariableFont_wdth_wght.ufont
+  NotoSansJP-Regular.ufont
+  NotoSansThai-VariableFont_wdth_wght.ufont   ★ THAI FONT
+  NotoSerif-Bold.ufont
+  NotoSerif-BoldItalic.ufont
+  NotoSerif-Italic.ufont
+  NotoSerif-Regular.ufont
+  NotoSerifJP-Bold.ufont
+  NotoSerifJP-Light.ufont
+  NotoSerifJP-Regular.ufont
+  NotoSerifKR-Bold.ufont
+  NotoSerifKR-Light.ufont
+  NotoSerifKR-Regular.ufont
+  NotoSerifSC-Bold.ufont
+  NotoSerifSC-Light.ufont
+  NotoSerifSC-Medium.ufont
+  NotoSerifSC-Regular.ufont
+
+--- Localization (1 file) ---
+LOTF2/Content/Localization/Game/en/Game.locres   ★ LOCRES (Thai text inside, "en" folder = override slot)

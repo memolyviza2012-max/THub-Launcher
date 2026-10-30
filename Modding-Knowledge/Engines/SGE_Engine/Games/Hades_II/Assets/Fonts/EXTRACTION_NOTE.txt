@@ -1,0 +1,9 @@
+No TTF/OTF font files are included in this mod package.
+
+The mod uses **Chakra Petch** font (by Cadson Demak) for Thai text rendering.
+This font is available for free download from Google Fonts under the SIL Open Font License 1.1.
+
+Download: https://fonts.google.com/specimen/Chakra+Petch
+License: SIL Open Font License 1.1 (see ChakraPetch-OFL.txt in the mod's licenses/ folder)
+
+The font was likely installed separately or embedded in the game's engine assets outside the mod folder.

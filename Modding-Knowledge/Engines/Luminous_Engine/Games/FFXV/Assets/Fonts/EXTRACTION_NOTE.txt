@@ -1,0 +1,17 @@
+﻿FONT EXTRACTION STATUS: ❌ NOT POSSIBLE (Proprietary Asset)
+=======================================
+Game: Final Fantasy XV (FF15)
+Engine: Luminous Engine
+
+File Analyzed: datas\common\fontandmessage.earc (168 MB)
+
+Why it cannot be extracted as TTF/OTF:
+1. Luminous Engine uses the proprietary .earc (Enix Archive) format with block-level Zlib compression.
+2. Inside the archive, fonts are not stored as standard vector fonts (TrueType/OpenType). 
+   Instead, they are pre-processed and baked into Luminous Engine's proprietary texture atlases (.tex) 
+   and glyph mapping files (.font).
+3. Because the original TTF/OTF was rasterized and converted during the modding/packing process 
+   (using tools like Flagrum), the raw vector data is destroyed. 
+
+Conclusion: 
+Extracting this file will only yield proprietary textures and binary maps, not an installable Windows font.

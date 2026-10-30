@@ -1,0 +1,58 @@
+﻿=== Cronos The New Dawn — PAK Content Listing ===
+File: Cronos_TH-Artdekdok_P.pak (2.17 MB)
+PAK Version: 4
+Mount Point: ../../../
+Entry Count: 39
+Compression: Zlib (163 compressed blocks)
+Subfolder: ตัวอักษรมีหัว (Headed/Serif Thai glyphs variant)
+
+--- Game Fonts (6 files) ---
+Cronos/Content/Game/UI/Fonts/
+  Atkinson-Hyperlegible-Bold-102.ufont      (accessibility font)
+  Atkinson-Hyperlegible-BoldItalic-102.ufont
+  Atkinson-Hyperlegible-Regular-102.ufont
+  JetBrainsMono-ExtraBold.ufont             (monospace code font)
+  JetBrainsMonoNL-SemiBold.ufont
+  JetBrainsMono-Regular.ufont
+
+--- Engine Fonts (.ufont) (6 files) ---
+Engine/Content/EngineFonts/Faces/
+  DroidSansFallback.ufont
+  DroidSansMono.ufont
+  RobotoBold.ufont
+  RobotoBoldItalic.ufont
+  RobotoLight.ufont
+  RobotoRegular.ufont
+
+--- Engine Slate Fonts (.ttf) (12 files) ---
+Engine/Content/Slate/Fonts/
+  DroidSansFallback.ttf
+  DroidSansMono.ttf
+  NotoSansThai-Regular.ttf  ★ THAI FONT (Slate UI)
+  Roboto-Black.ttf
+  Roboto-BlackItalic.ttf
+  Roboto-Bold.ttf
+  Roboto-BoldCondensed.ttf
+  Roboto-BoldCondensedItalic.ttf
+  Roboto-BoldItalic.ttf
+  Roboto-Italic.ttf
+  Roboto-Light.ttf
+  Roboto-Medium.ttf
+  Roboto-Regular.ttf
+
+--- Localization (2 files) ---
+Cronos/Content/Localization/Game/en/Game.locres    ★ Game text (Thai)
+Cronos/Content/Localization/Dialog/en/Dialog.locres ★ Dialog text (Thai)
+
+--- Thai Fonts embedded in .ufont (extracted from Zlib) ---
+  109PANIChalam Regular      (53.4 KB) - Thai serif font (มีหัว)
+  109PANIChalam Bold         (53.1 KB) - Thai serif font bold
+  Chakra Petch Bold          (64 KB)   - Thai display font
+  Chakra Petch Medium        (64 KB)   - Thai display font
+  Chakra Petch SemiBold      (64 KB)   - Thai display font
+  MiSans Thai Regular        (45.6 KB) - Xiaomi Sans Thai
+  MiSans Thai Bold           (45 KB)   - Xiaomi Sans Thai bold
+  MiSans Thai Semibold       (45 KB)   - Xiaomi Sans Thai semibold
+  Noto Sans Thai Regular     (38.2 KB) - Google Noto Thai
+  Playpen Sans Thai Bold     (64 KB)   - Handwriting-style Thai
+  Playpen Sans Thai Regular  (64 KB)   - Handwriting-style Thai

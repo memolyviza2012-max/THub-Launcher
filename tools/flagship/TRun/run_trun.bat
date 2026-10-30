@@ -1,3 +1,3 @@
 @echo off
 cd /d "%~dp0"
-python trun_app.py
+python ..\TStudio\tstudio_app.py --mode=trun %*

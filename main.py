@@ -1,5 +1,5 @@
 # Thub - Cloud Launcher and Modding Tools
-# Copyright (C) 2026 Danaiwit Kanthawong (NodNuatTranslator)
+# Copyright (C) 2026 NodNuat Translator (THub Project)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -356,7 +356,7 @@ class ProjectWizardWindow(ctk.CTkToplevel):
         self.destroy()
 
 # Constants
-CURRENT_VERSION = "1.1.4"
+CURRENT_VERSION = "2.2.0"
 UPDATE_FILE_PATH = os.path.join(os.path.dirname(__file__), "updates.json")
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "hub_config.json")
 KNOWLEDGE_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "Modding-Knowledge"))
@@ -820,14 +820,35 @@ Step 2 — Write Bridge Script (TStudio Integration)
        Repeat 3.2–3.4 until SUCCESS. Do not move to Step 4 until GATE is cleared.
 
 ────────────────────────────────────────────────────
-Step 4 — Full Extraction → Hand off to TStudio/TRun
+Step 4 — Full Extraction → Hand off to TStudio/TRun (Deep Scan & 2-File Workspace)
 (Only after Step 3 GATE is cleared)
 ────────────────────────────────────────────────────
-  • Use your Step 2 script to extract ALL game text → TStudio CSV.
-  • Store the CSV in: {path}/02_Translation_Workspace/
-  • Instruct the user to run TRun or TStudio to perform the batch translation.
-  • After translation: use the Packer script to inject translated CSV back.
-  • Write a Validator Script to check no game tags/variables were lost.
+  4.1 Deep Extraction Protocol (Zero-Omission Scan):
+      • Aggressively extract ALL game text. In complex engines like Unity, text is often nested deeply:
+        - Unity Deep Scan: Recursively scan all AssetBundles & Addressables in StreamingAssets/ and all subdirectories.
+        - Inspect resources.assets, sharedassets*.assets, globalgamemanagers.
+        - Scan serialized MonoBehaviour assets (ScriptableObjects, Dialogue System nodes, Quest trees, UI Text/TMP) that standard TextAsset dumpers miss.
+        - Check Unity Localization Package (StringTable/AssetTable) and I2 Localization (I2Languages.asset).
+        - Inspect IL2CPP metadata (global-metadata.dat / string literals) for hardcoded UI text.
+        - Scan nested formats: JSON, XML, Yarn Spinner, Ink bytecode, Naninovel, SQLite databases.
+      • Audit total strings to guarantee zero missing dialogue or UI strings.
+
+  4.2 Consolidated 2-File Workspace Architecture:
+      • Merge and organize all extracted text into: {path}/02_Translation_Workspace/
+      • The workspace root must strictly contain ONLY 2 primary files for translation:
+        1. en_original.csv  → 100% untouched English master baseline (Single Source of Truth) for QA diffing and validation.
+        2. translate_TH.csv → Prepared Thai translation target in TStudio CSV format (columns: key | source | translation | context | file_path), ready for immediate batch translation via TStudio or TRun.
+
+  4.3 Archive POC & Test Slices (Safety Quarantine — DO NOT DELETE):
+      • Intermediate slices and POC test files from Step 3 contain critical offset, header, and binary structure context: NEVER delete them!
+      • Automatically quarantine/move all test files into:
+        {path}/02_Translation_Workspace/_archive_test/ (or {path}/01_Original_Backup/test_slices/)
+      • Keep the main workspace clean so TStudio and TRun never ingest outdated test fragments.
+
+  4.4 Handoff & Validation:
+      • Instruct the user to run TRun or open TStudio on translate_TH.csv to perform the batch translation.
+      • Prepare the Packer script to inject translated strings from translate_TH.csv back into game assets based on file_path.
+      • Write a Validator Script to cross-check translate_TH.csv against en_original.csv to guarantee no tags (%s, {{0}}, <color=...>) or lines were lost.
 
 ────────────────────────────────────────────────────
 Step 5 — Final Playtest & Release
@@ -989,14 +1010,35 @@ Milestones & Workflow
        วนซ้ำ 3.2–3.4 จนสำเร็จ ห้ามไปขั้นตอนที่ 4 จนกว่า GATE จะผ่าน
 
 ────────────────────────────────────────────────────
-ขั้นตอนที่ 4 — Full Extraction → ส่งต่อให้ TStudio/TRun
+ขั้นตอนที่ 4 — Full Extraction → ส่งต่อให้ TStudio/TRun (Deep Scan & โครงสร้าง 2 ไฟล์หลัก)
 (เริ่มได้หลัง Step 3 GATE ผ่านแล้วเท่านั้น)
 ────────────────────────────────────────────────────
-  • ใช้ script จากขั้นตอนที่ 2 Extract ข้อความทั้งหมด → TStudio CSV
-  • เก็บไว้ใน: {path}/02_Translation_Workspace/
-  • แจ้งให้ฉันนำ CSV ไปใช้กับ TRun หรือ TStudio เพื่อแปลชุดใหญ่
-  • หลังแปลเสร็จ: ใช้ Packer script Pack กลับเข้าเกม
-  • เขียน Validator Script ตรวจสอบว่าแท็กโค้ดไม่หายไประหว่างแปล
+  4.1 การสกัดข้อความทั้งหมดแบบเจาะลึก (Deep Extraction Protocol):
+      • สแกนค้นหาข้อความทั้งเกมอย่างละเอียดที่สุด โดยเฉพาะเกม Unity หรือ Engine ซับซ้อนที่ข้อความมักซ่อนลึกกว่าปกติ:
+        - Unity Deep Scan: สแกนลึกทุก AssetBundles และ Addressables ใน StreamingAssets/ และโฟลเดอร์ย่อยทั้งหมด
+        - สแกน resources.assets, sharedassets*.assets, globalgamemanagers
+        - สแกน MonoBehaviour serialized objects (ScriptableObjects, ระบบบทสนทนา Dialogue Trees, เควสต์, UI Text/TextMeshPro) ที่ TextAsset ทั่วไปมองไม่เห็น
+        - สแกนระบบ Localization ของ Unity (Unity Localization StringTable/AssetTable, I2 Localization I2Languages.asset)
+        - ตรวจสอบ IL2CPP metadata (global-metadata.dat / String Literals) หากมีข้อความถูกคอมไพล์ฝังในโค้ด C#
+        - ตรวจสอบ Nested script/data: JSON, XML, Yarn Spinner, Ink bytecode, Naninovel, SQLite
+      • ตรวจนับจำนวนบรรทัดและ String ทั้งหมด ให้มั่นใจว่าไม่มีข้อความหลุดรอดแม้แต่ประโยคเดียว
+
+  4.2 รวมไฟล์ให้อยู่ในโครงสร้าง 2 ไฟล์หลักใน Workspace (Consolidated 2-File Structure):
+      • รวมข้อความทั้งหมดที่สกัดได้ไว้ที่: {path}/02_Translation_Workspace/
+      • ที่รูทของโฟลเดอร์ Workspace จะต้องมีเพียง 2 ไฟล์หลักนี้เท่านั้น:
+        1. en_original.csv  → ไฟล์ต้นฉบับภาษาอังกฤษสมบูรณ์ 100% (Single Source of Truth / Read-only Reference) ห้ามแก้ไข ใช้สำหรับเทียบ Diff และทำ Automated QA
+        2. translate_TH.csv → ไฟล์เป้าหมายสำหรับนำไปแปลภาษาไทย ตามฟอร์แมตมาตรฐาน TStudio (คอลัมน์: key | source | translation | context | file_path) พร้อมส่งต่อให้ TStudio หรือ TRun แปลชุดใหญ่ทันที
+
+  4.3 จัดเก็บไฟล์ทดสอบเดิมเข้าคลังปลอดภัย (Quarantine & Archive Test Slices — ห้ามลบทิ้ง):
+      • ไฟล์ข้อความชิ้นส่วนที่เคยสกัดมาเทสในขั้นตอนที่ 3 (POC / slice test files) มีข้อมูล offset, header, และ binary layout ที่สำคัญมาก "ห้ามลบทิ้งเด็ดขาด"
+      • ให้เขียนสคริปต์ย้ายไฟล์ทดสอบทั้งหมดไปเก็บไว้ที่:
+        {path}/02_Translation_Workspace/_archive_test/ (หรือ {path}/01_Original_Backup/test_slices/)
+      • เพื่อให้โฟลเดอร์ทำงานสะอาดเรียบร้อย และป้องกันไม่ให้ TStudio/TRun ดึงไฟล์เทสไปแปลปนกับงานจริง
+
+  4.4 การส่งต่องานและการตรวจสอบ (Handoff & Validation):
+      • แจ้งให้ฉันนำไฟล์ translate_TH.csv ไปใช้กับ TRun หรือ TStudio เพื่อแปลชุดใหญ่
+      • เตรียม Packer script สำหรับนำ translate_TH.csv ที่แปลเสร็จแล้ว Pack กลับเข้าเกมตาม file_path ดั้งเดิม
+      • เขียน Validator Script เพื่อตรวจสอบเทียบ translate_TH.csv กับ en_original.csv ว่าไม่มีแท็กโค้ด (%s, {{0}}, <color=...>) หรือบรรทัดใดตกหล่น
 
 ────────────────────────────────────────────────────
 ขั้นตอนที่ 5 — Final Playtest & Release
@@ -2282,14 +2324,12 @@ class ModderHubApp(ctk.CTk):
                     
                     s2_name = proj.get("shortcut_2_name", "TRun")
                     if "TRun" in s2_name and "▶" not in s2_name: s2_name = f"▶️ {s2_name}"
-                    if "TVox" in s2_name and "🎙" not in s2_name: s2_name = f"🎙️ {s2_name}"
                     btn_s2 = ctk.CTkButton(content_frame, text=s2_name, width=100, fg_color="transparent", border_width=1, border_color="#fab387", text_color="#fab387", hover_color="#313244", command=lambda p=proj, s=2: self.launch_card_shortcut(p, s))
                     btn_s2.pack(side="right", padx=5)
                     btn_s2.bind("<Button-3>", lambda e, idx=i, s=2: self.configure_shortcut(idx, s))
                     
                     s1_name = proj.get("shortcut_1_name", "TStudio")
                     if "TStudio" in s1_name and "✏" not in s1_name and "🖊" not in s1_name: s1_name = f"✏️ {s1_name}"
-                    if "TVox" in s1_name and "🎙" not in s1_name: s1_name = f"🎙️ {s1_name}"
                     btn_s1 = ctk.CTkButton(content_frame, text=s1_name, width=100, fg_color="transparent", border_width=1, border_color="#a6e3a1", text_color="#a6e3a1", hover_color="#313244", command=lambda p=proj, s=1: self.launch_card_shortcut(p, s))
                     btn_s1.pack(side="right", padx=5)
                     btn_s1.bind("<Button-3>", lambda e, idx=i, s=1: self.configure_shortcut(idx, s))
@@ -2333,8 +2373,6 @@ class ModderHubApp(ctk.CTk):
 
                 if "TStudio" in s1_name and "✏" not in s1_name and "🖊" not in s1_name: s1_name = f"✏️ {s1_name}"
                 if "TRun" in s2_name and "▶" not in s2_name: s2_name = f"▶️ {s2_name}"
-                if "TVox" in s1_name and "🎙" not in s1_name: s1_name = f"🎙️ {s1_name}"
-                if "TVox" in s2_name and "🎙" not in s2_name: s2_name = f"🎙️ {s2_name}"
 
                 if not show_btn_text:
                     s1_name = s1_name.split()[0]
@@ -2547,8 +2585,7 @@ class ModderHubApp(ctk.CTk):
 
         options = {
             "✏️ TStudio (โปรแกรมแปล)": ("TStudio", r"tools\\flagship\\TStudio\\tstudio_app.py"),
-            _("▶️ TRun (โปรแกรมรันทดสอบ)"): ("TRun", r"tools\\flagship\\TRun\\trun_app.py"),
-            _("🎙️ TVox (โปรแกรมเสียง)"): ("TVox", r"tools\\flagship\\TVox\\tvox_app.py")
+            _("▶️ TRun (โปรแกรมรันทดสอบ)"): ("TRun", r"tools\\flagship\\TRun\\trun_app.py")
         }
         
         current_name = proj.get(f"shortcut_{shortcut_num}_name", "")
@@ -2764,6 +2801,22 @@ class ModderHubApp(ctk.CTk):
             os.makedirs(os.path.join(project_path, "04_Packed_Mod"), exist_ok=True)
             os.makedirs(os.path.join(project_path, "05_Scripts_and_Tools"), exist_ok=True)
             os.makedirs(os.path.join(project_path, "06_Releases"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "07_Image_Resources", "Official_Art"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "07_Image_Resources", "Generated_Logo"), exist_ok=True)
+            os.makedirs(os.path.join(project_path, "07_Image_Resources", "Final_Exports"), exist_ok=True)
+            
+            template_dir = r"E:\Mod_Workspace\1_Template\07_Image_Resources"
+            if os.path.exists(template_dir):
+                import shutil
+                img_res_dir = os.path.join(project_path, "07_Image_Resources")
+                for item in os.listdir(template_dir):
+                    s = os.path.join(template_dir, item)
+                    d = os.path.join(img_res_dir, item)
+                    if os.path.isfile(s) and not os.path.exists(d):
+                        try:
+                            shutil.copy2(s, d)
+                        except Exception:
+                            pass
             
             # Create Project-Bound Profile folder
             os.makedirs(os.path.join(project_path, ".thub", "profile"), exist_ok=True)
@@ -2804,6 +2857,7 @@ _("- **บันทึกย่อ**:") {res["notes"] if res["notes"] else "-"}
 - **`04_Packed_Mod`**: _("โฟลเดอร์ทดสอบที่จัดวางโครงสร้างตัวม็อดไว้พร้อมสำหรับการนำไปยัดหรือติดตั้งทับลงเกมจริง")
 - **`05_Scripts_and_Tools`**: _("โฟลเดอร์สำหรับเก็บสคริปต์เฉพาะกิจ (เช่น สคริปต์แยกคำแปล, สคริปต์แพ็กกลับ) หรือโปรแกรมแกะไฟล์เฉพาะเกม")
 - **`06_Releases`**: _("โฟลเดอร์สำหรับเก็บไฟล์บิลด์สำเร็จรูปสุดท้าย (.zip, .rar) สำหรับนำไปแจกจ่ายให้ผู้ใช้หรือผู้ทดสอบ")
+- **`07_Image_Resources`**: _("โฟลเดอร์สำหรับสื่อประชาสัมพันธ์ หน้าปก Facebook/Web, เทมเพลต PSD, ภาพทางการจาก Steam, และคำสั่ง AI เจนโลโก้ชื่อเกมภาษาไทย")
 
 ---
 _("*จัดระบบการจัดการโดย THub Launcher*")
@@ -2912,6 +2966,7 @@ _("- **บันทึกย่อ**:") {res["notes"] if res["notes"] else "-"}
 - **`04_Packed_Mod`**: _("โฟลเดอร์ทดสอบที่จัดวางโครงสร้างตัวม็อดไว้พร้อมสำหรับการนำไปยัดหรือติดตั้งทับลงเกมจริง")
 - **`05_Scripts_and_Tools`**: _("โฟลเดอร์สำหรับเก็บสคริปต์เฉพาะกิจ (เช่น สคริปต์แยกคำแปล, สคริปต์แพ็กกลับ) หรือโปรแกรมแกะไฟล์เฉพาะเกม")
 - **`06_Releases`**: _("โฟลเดอร์สำหรับเก็บไฟล์บิลด์สำเร็จรูปสุดท้าย (.zip, .rar) สำหรับนำไปแจกจ่ายให้ผู้ใช้หรือผู้ทดสอบ")
+- **`07_Image_Resources`**: _("โฟลเดอร์สำหรับสื่อประชาสัมพันธ์ หน้าปก Facebook/Web, เทมเพลต PSD, ภาพทางการจาก Steam, และคำสั่ง AI เจนโลโก้ชื่อเกมภาษาไทย")
 
 ---
 _("*จัดระบบการจัดการโดย THub Launcher*")
@@ -2929,6 +2984,22 @@ _("*จัดระบบการจัดการโดย THub Launcher*")
             os.makedirs(os.path.join(folder_path, "04_Packed_Mod"), exist_ok=True)
             os.makedirs(os.path.join(folder_path, "05_Scripts_and_Tools"), exist_ok=True)
             os.makedirs(os.path.join(folder_path, "06_Releases"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "07_Image_Resources", "Official_Art"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "07_Image_Resources", "Generated_Logo"), exist_ok=True)
+            os.makedirs(os.path.join(folder_path, "07_Image_Resources", "Final_Exports"), exist_ok=True)
+            
+            template_dir = r"E:\Mod_Workspace\1_Template\07_Image_Resources"
+            if os.path.exists(template_dir):
+                import shutil
+                img_res_dir = os.path.join(folder_path, "07_Image_Resources")
+                for item in os.listdir(template_dir):
+                    s = os.path.join(template_dir, item)
+                    d = os.path.join(img_res_dir, item)
+                    if os.path.isfile(s) and not os.path.exists(d):
+                        try:
+                            shutil.copy2(s, d)
+                        except Exception:
+                            pass
             
             self.config.setdefault("projects", []).insert(0, {
                 "name": project_name,
@@ -3473,7 +3544,6 @@ del "%~f0"
         registry_data = [
             {"id": "TStudio", "name": "TStudio", "desc": "สุดยอดเครื่องมือแปลภาษาด้วย AI\n(วิเคราะห์บริบท & แก้ไขแบบ Line-by-Line)\nรองรับการทำงานกับไฟล์ Localization หลายรูปแบบ", "color": "#89b4fa", "exe": "tstudio_app.py", "icon": "assets/TStudio.png"},
             {"id": "TRun", "name": "TRun", "desc": "เครื่องมือแปลภาษาแบบ Batch อัตโนมัติ\n(รองรับไฟล์ขนาดใหญ่และปริมาณมหาศาล)\nแปลทั้งโปรเจกต์ได้อย่างรวดเร็วในคลิกเดียว", "color": "#a6e3a1", "exe": "trun_app.py", "icon": "assets/TRun.png"},
-            {"id": "TVox", "name": "TVox", "desc": "เครื่องมือจัดการ FMV และซับไตเติ้ล\n(วิดีโอเพลเยอร์ & ดึงคลื่นเสียง Waveform)\nออกแบบมาเพื่อการแปลวิดีโอคัทซีนโดยเฉพาะ", "color": "#f38ba8", "exe": "tvox_app.py", "icon": "assets/TVox.png"},
             {"id": "flagship.tfont", "folder": "TFont", "name": "TFont Generator", "desc": "เครื่องมือปรับแต่งและสร้างฟอนต์ PUA", "color": "#b4befe", "exe": "tfont_app.py", "icon": "assets/TFONT.png", "no_project": True},
             {"id": "flagship.tpua", "folder": "TPUA", "name": "TPUA Text Converter", "desc": "เครื่องมือแปลงข้อความภาษาไทยเข้าสู่ระบบ PUA", "color": "#cba6f7", "exe": "tpua_app.py", "icon": "assets/TPUA.png", "no_project": True},
             {"id": "TGlyph", "name": "TGlyph", "desc": "เครื่องมือสร้าง Texture ฟอนต์\n(Generate Texture และแผนที่ตัวอักษร)\nสำหรับดัดแปลงฟอนต์ Bitmap ในเกม", "color": "#fab387", "exe": "tglyph_app.py", "icon": "assets/TGlyph.png", "no_project": True}

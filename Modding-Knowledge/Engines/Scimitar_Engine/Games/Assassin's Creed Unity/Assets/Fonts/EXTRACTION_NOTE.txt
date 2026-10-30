@@ -1,0 +1,4 @@
+Font extraction to TTF/OTF failed.
+The font is stored in a proprietary format, likely a bitmap texture atlas or custom vector format inside the .forge archive. Even though the engine is AnvilNext 2.0, standard installable TTF files are not directly accessible.
+Automated carving based on TTF magic bytes yielded false positives without valid name tables.
+To modify the font, manual extraction using AnvilToolkit and bitmap editing tools is required.

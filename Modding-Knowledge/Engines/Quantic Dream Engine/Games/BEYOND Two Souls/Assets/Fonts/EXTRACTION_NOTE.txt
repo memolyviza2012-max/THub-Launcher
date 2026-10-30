@@ -1,0 +1,8 @@
+Extraction of the font as a standard `.ttf` or `.otf` file failed for BEYOND: Two Souls.
+
+Reason:
+1. The font is embedded within the massive `BigFile_PC_9900.dat` archive.
+2. The engine uses a proprietary Quantic Dream font format or heavily strips standard TTF headers. Although potential magic sequences (`\x00\x01\x00\x00`) exist, they do not form a valid TTF table structure that standard tools (like Windows Shell or FontForge) can parse.
+3. It is likely that the font is either stored as a rasterized texture atlas (bitmap font) with custom kerning/mapping data or a proprietary vector format.
+
+Original source font: Unknown. Modders must inject replacement font data manually at the specific binary offset.

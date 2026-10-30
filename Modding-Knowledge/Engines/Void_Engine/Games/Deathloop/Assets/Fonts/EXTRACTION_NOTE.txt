@@ -1,0 +1,17 @@
+﻿FONT EXTRACTION STATUS: ❌ NOT POSSIBLE
+=======================================
+Deathloop uses SDF (Signed Distance Field) bitmap fonts stored as:
+  - TGA atlas images (rsc_images_0_2.resources — 518 MB, Oodle compressed)
+  - DAT glyph metrics (rsc_gen_0_0.resources — 381 MB, Oodle compressed)
+
+These are NOT TTF/OTF vector fonts — they are pre-rendered glyph atlases.
+Even if extracted, they would be bitmap images, not installable font files.
+
+Font families in the mod:
+  - Futura PT Extra Bold (main UI font)
+  - Futura PT Medium (secondary UI font)
+  - Courier (monospace)
+  - Handelson Two (handwriting/display, with CJK/Arabic variants)
+
+Oodle decompression requires: oo2core_6_win64.dll (proprietary)
+Tool needed: QuickBMS + Void Engine extraction scripts

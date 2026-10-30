@@ -1,0 +1,25 @@
+Font extraction status: BLOCKED BY OPERATING-SYSTEM SECURITY
+===========================================================
+
+Analysis date: 2026-08-30
+Source installer: ZombieArmyTrilogy_ThaiMod_Setup.exe
+Source path: D:\Mods games\Thai Mods\0_Rivet Engineer\ZombieArmyTrilogy ThaiMod 3 1 2026-08-30T03-08Z RnH6R7fBu
+
+Windows Defender denied every byte-read operation on the installer with:
+"Operation did not complete successfully because the file contains a virus or
+potentially unwanted software."
+
+Consequences:
+- The PE magic/header, archive contents, embedded font bytes, and SHA-256 could not be read.
+- No executable was launched.
+- No security exclusion, quarantine restore, bypass, or modification of Defender policy was attempted.
+- Therefore no TTF/OTF can be honestly extracted or verified from this source.
+
+README-only evidence says the mod supplies "Sarabun SemiBold" with adjusted Thai
+vowels and tone marks, and also says Greek/Cyrillic/Japanese/Chinese glyph slots
+are repurposed for Thai. This is a publisher claim, not a verified extracted font.
+
+To resume safely, obtain the same installer from a trusted source that passes the
+host malware policy, or provide the already-extracted game-file payload. Then scan
+each recovered archive for TTF (00 01 00 00) and OTF (4F 54 54 4F) magic, carve only
+after parsing a valid font table directory, and verify the installed font name.

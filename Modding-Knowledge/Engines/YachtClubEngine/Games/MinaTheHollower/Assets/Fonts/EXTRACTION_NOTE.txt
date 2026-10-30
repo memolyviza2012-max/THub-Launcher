@@ -1,0 +1,1 @@
+Font is embedded within custom .pak.yc archive. A dedicated Yacht Club engine unpacker is required.

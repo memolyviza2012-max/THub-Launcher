@@ -1,0 +1,5 @@
+EXTRACTION FAILED
+
+1. Format: UE5 IoStore (.ucas / .utoc). The fonts are stored inside the compiled IoStore chunks, likely as cooked `.ufont` assets utilizing Oodle compression.
+2. Reason: Standard `repak_cli` cannot unpack `.utoc` files directly without appropriate AES keys and UE5 Oodle decompression libraries.
+3. Original Source: Unknown, but likely standard UE5 Slate fonts or game-specific `.ufont` assets.

@@ -23,6 +23,10 @@
     "chk_auto_mask": "Auto-Mask Tags (e.g., %s -> [TAG_0])",
     "chk_enforce_glossary": "Enforce Glossary Replacement",
     "chk_auto_pua": "Auto-Apply PUA Encode (Requires TPUA Plugin)",
+    "chk_cjk_filter": "🇨🇳 Filter & Clean Chinese (CJK) Leaks",
+    "chk_eng_filter": "🇬🇧 Filter & Clean English Leaks",
+    "chk_dedup": "⚡ Deduplication & Auto-Propagate (Translate Unique Lines)",
+    "chk_engine_filter": "🛡️ Auto-Filter Engine Junk & Pure Tags",
     "lbl_batch_progress_default": "Batch: 0 / 0 (0%)",
     "lbl_eta_default": "ETA: --:--:--",
     "lbl_lines_default": "Lines: 0 / 0 (0%)",
@@ -94,5 +98,8 @@
     "btn_remove_sel": "🗑️ Remove Selected",
     "btn_clear_all": "🧹 Clear All",
     "lbl_file_path": "📂 File Path",
-    "lbl_profile": "⚙️ Profile"
+    "lbl_profile": "⚙️ Profile",
+    "lbl_threads": "Concurrent Workers (Threads):",
+    "chk_token_burner": "⚡ Token Burner Mode (Fast, 1 API call per row)",
+    "lbl_token_burner_active": "⚡ Token Burner Mode ACTIVE. Batching disabled. Each row will be sent as an individual API call in parallel. Fast but costs more tokens."
 }

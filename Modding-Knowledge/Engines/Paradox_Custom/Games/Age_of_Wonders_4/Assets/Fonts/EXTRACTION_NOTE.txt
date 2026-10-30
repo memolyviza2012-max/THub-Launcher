@@ -1,0 +1,16 @@
+﻿# Font Extraction Note — Age of Wonders 4
+
+## Status: NO FONT FILES PROVIDED IN MOD
+
+The Thai localization mod for Age of Wonders 4 does NOT include any font files.
+It consists of a single GNU gettext MO file (EN.MO) containing 48,625 translated strings.
+
+## Analysis:
+- The game likely uses its own built-in font that already supports Thai Unicode ranges.
+- Age of Wonders 4 (Triumph Studios) may use a system font fallback or a bundled
+  multilingual font (e.g., Noto Sans) that renders Thai natively.
+- The modder only needed to replace the text strings, not the fonts.
+
+## Implication:
+- No TTF/OTF extraction is possible because no custom font was shipped with the mod.
+- The game's internal font system handles Thai rendering without modification.

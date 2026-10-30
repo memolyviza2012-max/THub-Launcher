@@ -220,7 +220,43 @@ __marimo__/
 
 # Sensitive Configs
 hub_config.json
+hub_config.local.json
 tools/flagship/Core/config.json
+tools/flagship/config_dump.json
+tools/Standalone/TSub/tsub_config.json
+tools/flagship/TStudio/translation.glossary.json
+tools/flagship/TStudio/.thub/
+tools/flagship/TStudio/backups/
+tools/flagship/TStudio/GUI_CRASH_LOG.txt
+tools/flagship/TRun/*_debug.txt
+tools/flagship/Core/_legacy_archive/
+
+# User Workspace & Archive Folders
+workspace/
+_archive/
+scratch/
+tests/
+assets/cover_cache/
+scan_results.json
+
+# .NET / C# Build Outputs
+[bB]in/
+[oO]bj/
+*.user
+*.suo
+
+# Local Test Outputs & Temporary Assets
+out.txt
+*.log
+*.psd
+check_*.png
+compare_*.png
+layer_*.png
+test_*.png
+test_scroll_viewport.png
+test_wide_scroll.png
+test_transparent_container.png
+
 
 
 # Untracked development files

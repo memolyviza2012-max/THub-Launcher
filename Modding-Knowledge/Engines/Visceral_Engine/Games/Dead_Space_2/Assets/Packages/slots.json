@@ -1,0 +1,52 @@
+{
+ "slots": [
+  {
+   "dat": "DS2DAT2.DAT",
+   "offset": 104448,
+   "size": 655360,
+   "blob": "DS2DAT2.DAT.00019800.bin",
+   "sha_original": "c016752d0dc0c5487f6c45dc0711f98c2fe3626061d96ca9cfb52c8e1df4ea22",
+   "sha_patched": "73ba299174edbc43fce54b2ed41648ab778a057e2c8ec186206c2fe655ab2270"
+  },
+  {
+   "dat": "DS2DAT2.DAT",
+   "offset": 1286144,
+   "size": 262144,
+   "blob": "DS2DAT2.DAT.0013a000.bin",
+   "sha_original": "beb0fbd2ad51148ef74dc93e21ca6239a90f16e0cd81a0a8f66bc4d390a8eee2",
+   "sha_patched": "0ee1f3e4df5dfb0fcd149b757a757e2b1a55c4257e4fd1158a956beca3421a2a"
+  },
+  {
+   "dat": "DS2DAT3.DAT",
+   "offset": 106496,
+   "size": 655360,
+   "blob": "DS2DAT3.DAT.0001a000.bin",
+   "sha_original": "c016752d0dc0c5487f6c45dc0711f98c2fe3626061d96ca9cfb52c8e1df4ea22",
+   "sha_patched": "73ba299174edbc43fce54b2ed41648ab778a057e2c8ec186206c2fe655ab2270"
+  },
+  {
+   "dat": "DS2DAT3.DAT",
+   "offset": 1288192,
+   "size": 262144,
+   "blob": "DS2DAT3.DAT.0013a800.bin",
+   "sha_original": "beb0fbd2ad51148ef74dc93e21ca6239a90f16e0cd81a0a8f66bc4d390a8eee2",
+   "sha_patched": "0ee1f3e4df5dfb0fcd149b757a757e2b1a55c4257e4fd1158a956beca3421a2a"
+  },
+  {
+   "dat": "DS2DAT4.DAT",
+   "offset": 106496,
+   "size": 655360,
+   "blob": "DS2DAT4.DAT.0001a000.bin",
+   "sha_original": "c016752d0dc0c5487f6c45dc0711f98c2fe3626061d96ca9cfb52c8e1df4ea22",
+   "sha_patched": "73ba299174edbc43fce54b2ed41648ab778a057e2c8ec186206c2fe655ab2270"
+  },
+  {
+   "dat": "DS2DAT4.DAT",
+   "offset": 1288192,
+   "size": 262144,
+   "blob": "DS2DAT4.DAT.0013a800.bin",
+   "sha_original": "beb0fbd2ad51148ef74dc93e21ca6239a90f16e0cd81a0a8f66bc4d390a8eee2",
+   "sha_patched": "0ee1f3e4df5dfb0fcd149b757a757e2b1a55c4257e4fd1158a956beca3421a2a"
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+The font files for Resident Evil 9 (.oft.1) are NOT standard TrueType or OpenType fonts.
+When parsed, they throw a 'bad sfntVersion' error.
+Hex analysis reveals the magic bytes `46 42 46 4F` (`FBFO`) at offset 0.
+This indicates a proprietary or encrypted font container format used by modern RE Engine games (e.g., RE4 Remake). 
+Because it is not a standard OTF/TTF, it cannot be directly extracted or converted into an installable OS font using standard tools without a specialized decrypter/unpacker.

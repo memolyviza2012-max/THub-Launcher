@@ -1,0 +1,7 @@
+# DOOM Eternal Thai font extraction note
+
+The two supplied `64_df.tga$alpha$streamed$nomips$mtlkind=font` files are not literal TGA files and do not contain an installable TTF/OTF. Both begin with the proprietary `DIVINITY` header (`44 49 56 49 4E 49 54 59`) and are distance-field font atlas resources.
+
+Their paired `gameresources_patch2` files are binary metrics/mapping resources. `00 01 00 00` byte sequences found at offsets `0x78F4` (30,964) do not form a valid SFNT header: the following big-endian `numTables` value is `257`, outside the valid TTF range. They must not be carved or renamed as a font.
+
+Assets are retained intact under `Atlas/` and `Metrics/`. Rebuilding requires a compatible id Tech 7 font-atlas and mapping pipeline.

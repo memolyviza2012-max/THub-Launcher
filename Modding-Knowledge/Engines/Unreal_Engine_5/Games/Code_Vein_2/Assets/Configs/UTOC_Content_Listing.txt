@@ -1,0 +1,24 @@
+# Code Vein II — verified IoStore UTOC inventory
+
+Source: `pakchunk0-Windows_P.utoc` (8,022 B), magic `-==--==--==--==-`, IoStore version 6 at offset `0x10`.
+
+The asset-name block names these 16 UE packages inside the companion UCAS:
+
+1. `ChronosFontSet.uasset`
+2. `BankGothicLtBT.uasset`
+3. `CHRONOS_SHAPE.uasset`
+4. `Cavalero-BT.uasset`
+5. `CHRONOSSHAPEGAMEPAD.uasset`
+6. `BIOPLASMCOM.uasset`
+7. `Font_ChronosBlood.uasset`
+8. `KALIBERPRO-BOLD.uasset`
+9. `FOT-NEWRODINPRO-M.uasset`
+10. `FOT-UDKAKUGOC80PRO-R.uasset`
+11. `LINOTYPEGOTEKKBLACK.uasset`
+12. `FOT-NEWRODINPRO-B.uasset`
+13. `FOT-NewCinemaAStd-D.uasset`
+14. `FOT-TsukuAVintageMinSPro-R.uasset`
+15. `OptimaNovaLTPro-Demi.uasset`
+16. `FOT-UDKAKUGOC80PRO-B.uasset`
+
+The names prove the UE package/composite layer. Raw font programs are recorded separately in `Assets/Fonts/` only after TTF/OTF magic and metadata verification; do not assume a one-to-one filename mapping without parsing UE package exports.

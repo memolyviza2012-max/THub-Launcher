@@ -1,0 +1,15 @@
+﻿# Font Extraction Note — To the Moon (Serenity Forge Unity Remaster)
+
+## Status: NO FONT MODIFICATION REQUIRED
+
+Deep binary analysis of the esources.assets file revealed that the modder **did not modify or inject any Thai fonts**. 
+
+### Evidence:
+1. We extracted all 9 TTF fonts from the esources.assets archive (including ARIAL.ttf, TIMES.ttf, LiberationSans.ttf, and WenQuanYi Zen Hei Sharp Regular.ttf).
+2. None of these fonts contain the Thai Unicode block (U+0E00 - U+0E7F).
+3. The Thai text inside the TextAsset files (Maps_Loc.txt, Terms_Loc.txt) is standard UTF-8.
+
+### Conclusion:
+The game relies on Unity's built-in **OS Font Fallback** system for text rendering. When the engine encounters Thai characters that are not supported by the game's primary English/CJK fonts, it automatically falls back to system fonts (like Tahoma or Leelawadee on Windows) to render the Thai text perfectly. 
+
+Therefore, for this game, localization only requires translating the TextAsset files inside esources.assets.

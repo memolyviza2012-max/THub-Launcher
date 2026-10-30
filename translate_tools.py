@@ -2,7 +2,7 @@ import os
 import json
 import requests
 
-API_KEY = "sk-50d1975e48464ad98f0d31281b67ce5e"
+API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 URL = "https://api.deepseek.com/v1/chat/completions"
 
 def translate_file(path_en, path_th):

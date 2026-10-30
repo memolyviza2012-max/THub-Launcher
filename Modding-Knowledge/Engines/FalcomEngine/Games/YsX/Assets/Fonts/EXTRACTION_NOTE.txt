@@ -1,0 +1,1 @@
+Font is stored within proprietary .p3a archives. Extraction requires a dedicated Falcom unpacker.

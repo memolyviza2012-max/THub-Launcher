@@ -1,0 +1,44 @@
+﻿=== Deathloop — Font Atlas Declarations ===
+Source: rsc_decl_0.resources (28.7 MB, plaintext, SER v4)
+Format: SDF (Signed Distance Field) bitmap fonts
+Each font = TGA atlas + DAT metrics + DECL material definition
+
+--- Font Atlas Paths (from transmap declarations) ---
+  fonts/futura_pt_extra_bold/64_df.tga    ★ Main game font (Bold)
+  fonts/futura_pt_medium/64_df.tga        ★ Secondary game font (Medium)
+  fonts/courier/64_df.tga                     Monospace font
+  fonts/handelson_two/64_df.tga               Handwriting/cursive (English)
+  fonts/arabic/handelson_two/64_df.tga        Arabic variant
+  fonts/japanese/handelson_two/64_df.tga      Japanese variant
+  fonts/korean/handelson_two/64_df.tga        Korean variant
+  fonts/russian/handelson_two/64_df.tga       Russian variant
+  fonts/schinese/handelson_two/64_df.tga      Simplified Chinese variant
+  fonts/tchinese/handelson_two/64_df.tga      Traditional Chinese variant
+
+--- Font Effect System ---
+  fontfxglowparms       — Glow effect parameters
+  fontfxglowcolor       — Glow color
+  fontfxoutlinecolor    — Outline color
+  fontfxparms           — General font effect parameters
+  fontoutlineglowshadow — Shadow + outline shader
+  worldtextfont         — 3D world text font
+
+--- Font Structure (per font) ---
+  fonts/{name}/
+    64_df.tga       — SDF font atlas image (Distance Field)
+    64_df.dat       — Glyph metrics (character positions, kerning, sizes)
+    64_df.tga.decl  — Material declaration (tells engine how to load)
+
+--- Storage ---
+  Font atlas images (TGA): rsc_images_0_2.resources (518 MB, Oodle compressed)
+  Font metrics (DAT):      rsc_gen_0_0.resources (381 MB, Oodle compressed)
+  Declarations (DECL):     rsc_decl_0.resources (28.7 MB, plaintext)
+
+--- UI Framework ---
+  Iggy (Scaleform alternative)
+  Key file: ui/lib_loc_english_font.iggy — font binding for English locale
+  
+--- IMPORTANT ---
+  All font data (TGA/DAT) is inside Oodle-compressed .resources files.
+  Cannot extract without Oodle decompression DLL (oo2core_6_win64.dll).
+  Recommend using: QuickBMS + Void Engine scripts for extraction.

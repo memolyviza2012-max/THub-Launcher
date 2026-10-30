@@ -9,10 +9,15 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from tvox_i18n import _
 
+import csv
+import shutil
+import time
+from tvox_recorder import TVoxRecorder
+
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QSplitter, QFileDialog, QMessageBox,
-    QSlider, QLabel, QComboBox, QGroupBox
+    QSlider, QLabel, QComboBox, QGroupBox, QTableWidget, QTableWidgetItem, QHeaderView, QProgressBar
 )
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 
@@ -48,6 +53,14 @@ if HAS_TSTUDIO:
             self.setWindowTitle(_("window_title"))
             self.setGeometry(100, 100, 1400, 900)
 
+            # Window & Taskbar Icon
+            from PyQt6.QtGui import QIcon
+            tvox_ico = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TVox.ico"))
+            if not os.path.exists(tvox_ico):
+                tvox_ico = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TVox.png"))
+            if os.path.exists(tvox_ico):
+                self.setWindowIcon(QIcon(tvox_ico))
+
             # --- Internal State ---
             self.is_user_seeking = False
             self.mark_a = None
@@ -62,6 +75,60 @@ if HAS_TSTUDIO:
             self.video_dock.setAllowedAreas(Qt.DockWidgetArea.TopDockWidgetArea | Qt.DockWidgetArea.BottomDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
             self.video_dock.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetMovable)
             self.setDockOptions(self.dockOptions() | QMainWindow.DockOption.AllowNestedDocks)
+
+            # --- DUBBING STUDIO DOCK ---
+            self.dubbing_dock = QDockWidget("🎙️ Dubbing Studio", self)
+            self.dubbing_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+            self.dubbing_container = QWidget()
+            self.dubbing_layout = QVBoxLayout(self.dubbing_container)
+            
+            # Progress bar
+            self.lbl_dub_progress = QLabel("Project Progress: 0%")
+            self.dubbing_layout.addWidget(self.lbl_dub_progress)
+            self.dub_progress = QProgressBar()
+            self.dubbing_layout.addWidget(self.dub_progress)
+            
+            # Action Buttons
+            self.dub_btn_layout = QHBoxLayout()
+            self.btn_play_original = QPushButton("▶️ Play Original")
+            self.btn_record = QPushButton("🎙️ Record")
+            self.btn_stop = QPushButton("⏹️ Stop")
+            self.btn_inject = QPushButton("📦 Inject to Game")
+            self.btn_stop.setEnabled(False)
+            
+            self.dub_btn_layout.addWidget(self.btn_play_original)
+            self.dub_btn_layout.addWidget(self.btn_record)
+            self.dub_btn_layout.addWidget(self.btn_stop)
+            self.dub_btn_layout.addWidget(self.btn_inject)
+            self.dubbing_layout.addLayout(self.dub_btn_layout)
+            
+            # Dubbing Table
+            self.dub_table = QTableWidget()
+            self.dub_table.setColumnCount(5)
+            self.dub_table.setHorizontalHeaderLabels(["ID", "Status", "Duration", "Original", "Dubbed"])
+            self.dub_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+            self.dub_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+            self.dub_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+            self.dub_table.setAcceptDrops(True)
+            self.dub_table.viewport().installEventFilter(self)
+            self.dubbing_layout.addWidget(self.dub_table)
+            
+            self.dubbing_dock.setWidget(self.dubbing_container)
+            self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dubbing_dock)
+            
+            # Initialize Recorder
+            self.recorder = TVoxRecorder()
+            self.current_dub_id = None
+            
+            # Connect signals
+            self.btn_play_original.clicked.connect(self.play_original_audio)
+            self.btn_record.clicked.connect(self.start_dub_recording)
+            self.btn_stop.clicked.connect(self.stop_dub_recording)
+            self.btn_inject.clicked.connect(self.inject_dubbed_audio)
+            self.dub_table.itemSelectionChanged.connect(self.on_dub_table_selection)
+            
+            # Load Dubbing Data
+            QTimer.singleShot(500, self.load_dubbing_tracking)
             
             # 4. Build Video Player
             self.video_container = QWidget()
@@ -264,6 +331,27 @@ if HAS_TSTUDIO:
                 self.lbl_subtitle.setGeometry(20, h - lbl_h - 20, lbl_w, lbl_h)
 
         def eventFilter(self, obj, event):
+            # Handle Drag & Drop on dub_table
+            if hasattr(self, 'dub_table') and obj == self.dub_table.viewport():
+                if event.type() == event.Type.DragEnter:
+                    if event.mimeData().hasUrls():
+                        event.acceptProposedAction()
+                        return True
+                elif event.type() == event.Type.Drop:
+                    urls = event.mimeData().urls()
+                    if urls and urls[0].isLocalFile():
+                        filepath = urls[0].toLocalFile()
+                        if filepath.lower().endswith('.wav'):
+                            # Find which row was dropped on
+                            pos = event.position().toPoint()
+                            item = self.dub_table.itemAt(pos)
+                            if item:
+                                row = item.row()
+                                audio_id = self.dub_table.item(row, 0).text()
+                                self.handle_dropped_wav(audio_id, filepath)
+                        event.acceptProposedAction()
+                        return True
+                        
             if event.type() == event.Type.KeyPress:
                 is_target = (obj == self.video_widget) or (hasattr(self, 'waveform') and obj == self.waveform)
                 if is_target and event.key() == Qt.Key.Key_Space:
@@ -512,6 +600,159 @@ if HAS_TSTUDIO:
             # Future feature: jump to start time of dialogue
             pass
 
+
+        def load_dubbing_tracking(self):
+            if not self.project_path: return
+            base_dir = os.path.dirname(self.project_path)
+            dub_csv = os.path.join(base_dir, "dubbing_tracking.csv")
+            if not os.path.exists(dub_csv):
+                return
+            
+            self.dub_table.setRowCount(0)
+            self.dub_data = []
+            recorded_count = 0
+            total_count = 0
+            
+            with open(dub_csv, 'r', encoding='utf-8-sig') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    self.dub_data.append(row)
+                    total_count += 1
+                    if row.get('status') in ['RECORDED', 'APPROVED']:
+                        recorded_count += 1
+                        
+            self.dub_table.setRowCount(total_count)
+            for i, row in enumerate(self.dub_data):
+                self.dub_table.setItem(i, 0, QTableWidgetItem(row.get('audio_id', '')))
+                self.dub_table.setItem(i, 1, QTableWidgetItem(row.get('status', '')))
+                self.dub_table.setItem(i, 2, QTableWidgetItem(row.get('duration_sec', '')))
+                self.dub_table.setItem(i, 3, QTableWidgetItem(row.get('original_path', '')))
+                self.dub_table.setItem(i, 4, QTableWidgetItem(row.get('dubbed_file_path', '')))
+                
+            if total_count > 0:
+                pct = int((recorded_count / total_count) * 100)
+                self.dub_progress.setValue(pct)
+                self.lbl_dub_progress.setText(f"Project Progress: {pct}% ({recorded_count}/{total_count})")
+                
+        def on_dub_table_selection(self):
+            selected = self.dub_table.selectedItems()
+            if not selected:
+                self.current_dub_id = None
+                return
+            row = selected[0].row()
+            self.current_dub_id = self.dub_table.item(row, 0).text()
+            
+            # Sync with main table if possible
+            # We can find the row in self.model._data with this ID and select it
+            for i, item in enumerate(self.model._data):
+                if item.get('id') == self.current_dub_id:
+                    idx = self.proxy.mapFromSource(self.model.index(i, 0))
+                    self.table.selectRow(idx.row())
+                    break
+
+        def play_original_audio(self):
+            if not self.current_dub_id: return
+            base_dir = os.path.dirname(self.project_path) if self.project_path else os.getcwd()
+            original_path = os.path.join(base_dir, "original_audio", f"{self.current_dub_id}.wav")
+            if os.path.exists(original_path):
+                self.player.loadfile(original_path)
+            else:
+                QMessageBox.warning(self, "Not Found", f"Original audio not found:\n{original_path}")
+                
+        def handle_dropped_wav(self, audio_id, filepath):
+            base_dir = os.path.dirname(self.project_path) if self.project_path else os.getcwd()
+            output_dir = os.path.join(base_dir, "dubbed_audio")
+            os.makedirs(output_dir, exist_ok=True)
+            out_file = os.path.join(output_dir, f"{audio_id}.wav")
+            shutil.copy2(filepath, out_file)
+            
+            # Duration Validation
+            duration = self.recorder.get_wav_duration(out_file)
+            orig_duration = 0.0
+            for row in self.dub_data:
+                if row.get('audio_id') == audio_id:
+                    try:
+                        orig_duration = float(row.get('duration_sec', 0))
+                    except: pass
+                    break
+                    
+            if orig_duration > 0 and duration > orig_duration + 1.5:
+                QMessageBox.warning(self, "Duration Warning", f"Dropped audio ({duration:.2f}s) is significantly longer than original ({orig_duration:.2f}s).")
+            else:
+                QMessageBox.information(self, "Success", f"Audio imported successfully! ({duration:.2f}s)")
+                
+            self.update_dubbing_status(audio_id, "RECORDED", out_file)
+            
+        def start_dub_recording(self):
+            if not self.current_dub_id:
+                QMessageBox.warning(self, "Error", "Please select an audio row to dub.")
+                return
+            self.btn_record.setEnabled(False)
+            self.btn_stop.setEnabled(True)
+            self.recorder.start_recording()
+            
+        def stop_dub_recording(self):
+            self.btn_record.setEnabled(True)
+            self.btn_stop.setEnabled(False)
+            base_dir = os.path.dirname(self.project_path) if self.project_path else os.getcwd()
+            output_dir = os.path.join(base_dir, "dubbed_audio")
+            os.makedirs(output_dir, exist_ok=True)
+            out_file = os.path.join(output_dir, f"{self.current_dub_id}.wav")
+            
+            duration = self.recorder.stop_recording(out_file)
+            
+            # Validation
+            orig_duration = 0.0
+            for row in self.dub_data:
+                if row.get('audio_id') == self.current_dub_id:
+                    try:
+                        orig_duration = float(row.get('duration_sec', 0))
+                    except: pass
+                    break
+                    
+            if orig_duration > 0 and duration > orig_duration + 1.5:
+                QMessageBox.warning(self, "Duration Warning", f"Your recording ({duration:.2f}s) is significantly longer than the original ({orig_duration:.2f}s). This might cause cut-offs in game.")
+            else:
+                QMessageBox.information(self, "Success", f"Recorded successfully! ({duration:.2f}s)")
+                
+            # Update status in CSV and table
+            self.update_dubbing_status(self.current_dub_id, "RECORDED", out_file)
+            
+        def update_dubbing_status(self, audio_id, new_status, file_path):
+            if not self.project_path: return
+            base_dir = os.path.dirname(self.project_path)
+            dub_csv = os.path.join(base_dir, "dubbing_tracking.csv")
+            if not os.path.exists(dub_csv): return
+            
+            # Update memory
+            for i, row in enumerate(self.dub_data):
+                if row.get('audio_id') == audio_id:
+                    row['status'] = new_status
+                    row['dubbed_file_path'] = file_path
+                    self.dub_table.setItem(i, 1, QTableWidgetItem(new_status))
+                    self.dub_table.setItem(i, 4, QTableWidgetItem(file_path))
+                    break
+                    
+            # Write to CSV
+            keys = self.dub_data[0].keys() if self.dub_data else []
+            with open(dub_csv, 'w', encoding='utf-8-sig', newline='') as f:
+                writer = csv.DictWriter(f, fieldnames=keys)
+                writer.writeheader()
+                writer.writerows(self.dub_data)
+                
+            self.load_dubbing_tracking() # Refresh progress
+            
+        def inject_dubbed_audio(self):
+            base_dir = os.path.dirname(self.project_path) if self.project_path else os.getcwd()
+            script = os.path.join(base_dir, "inject_dubbed_audio.py")
+            if not os.path.exists(script):
+                QMessageBox.warning(self, "Not Found", f"Injection script not found at:\n{script}")
+                return
+            
+            QMessageBox.information(self, "Inject", "Injection process started in background. Check terminal for logs.")
+            import subprocess
+            subprocess.Popen(["python", script], cwd=os.path.dirname(script))
+
         def closeEvent(self, event):
             """TV-C1: Clean shutdown — stop timers and terminate MPV player."""
             # Stop UI update timer
@@ -541,18 +782,34 @@ def main():
     from tstudio_core import TStudioCore
     parser = argparse.ArgumentParser()
     parser.add_argument("project", nargs="?", type=str, help="Path to the THub project workspace", default=None)
+    parser.add_argument("--standalone", action="store_true", help="Run standalone legacy TVox window")
     args, unknown = parser.parse_known_args()
     
     TStudioCore.set_project_path(args.project)
 
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('flagship.tvox.dubbing.1.0')
+        except Exception:
+            pass
+
     app = QApplication(sys.argv)
-    from PyQt6.QtGui import QFont
+    from PyQt6.QtGui import QFont, QIcon
+    tvox_ico = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TVox.ico"))
+    if not os.path.exists(tvox_ico):
+        tvox_ico = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TVox.png"))
+    if os.path.exists(tvox_ico):
+        app.setWindowIcon(QIcon(tvox_ico))
+
     f = app.font()
     f.setFamily("Segoe UI")
     app.setFont(f)
+    
     window = TVoxApp(project_path=args.project)
+            
     window.show()
     sys.exit(app.exec())
 
 if __name__ == "__main__":
-    main()
+    main()

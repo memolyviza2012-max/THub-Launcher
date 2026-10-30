@@ -1,0 +1,29 @@
+Prey (2017) Thai Mod — Font Extraction Note
+============================================
+
+Analysis date: 2026-09-13
+
+No installable TTF, OTF, or TTC exists in the three source PAK files. Both raw
+files and zlib-inflated Scaleform bodies were scanned for valid SFNT table
+directories; candidate/valid installable fonts: 0/0.
+
+Actual format: Scaleform SWF DefineFont3 (tag 75) vector outlines.
+
+- fonts_EN.gfx: GFX v8, 337,744 bytes, uncompressed body
+- fonts_EN.swf: CWS v8, 220,035 bytes, declared 338,076 bytes
+- BaseGame_gfxfontlib.gfx: CFX v8, 209,736 bytes, declared 354,397 bytes
+- BaseGame_HUD_Font_LocFont.gfx: byte-identical to BaseGame_gfxfontlib.gfx
+- BaseGame_HUD_Font_LocFont_glyphs.gfx: CFX v8, 47,931 bytes, declared 76,174 bytes
+
+Runtime names are Harmonia Sans W1G, Pontiac, Design System C 700R, and Agency
+FB. Every embedded font contains 87 Thai codepoints (U+0E01–U+0E3A and
+U+0E3F–U+0E5B).
+
+Scaleform retains outlines, mappings, advances and selected layout data, not a
+complete original OpenType/SFNT with cmap/GSUB/GPOS/head/name/hinting/licensing.
+A generated TTF would be a reconstruction, not extraction. The previous Bible's
+Noto Sans Thai UI claim was not supported by any payload string or raw font; the
+source typeface of the Thai outlines remains unknown.
+
+Preserve all files beside this note as one set because fontconfig routing,
+exports, DefineFont3 code tables and HUD libraries are interdependent.

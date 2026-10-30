@@ -1,0 +1,4 @@
+Fonts for Darksiders II could not be extracted directly from the mod files.
+1. The mod is packaged as a standalone executable patcher rather than loose files.
+2. The patcher dynamically modifies `media.upak` on the user's system.
+3. The README notes that the injected font is "Sarabun" by Cadson Demak, which is freely available elsewhere, so extraction from the patcher is not strictly necessary.

@@ -1,0 +1,1 @@
+Fonts are stored inside originsfont.erf as likely bitmap/texture files. Real TTF cannot be directly extracted without ERF unpacking tools. The original source font is unknown.

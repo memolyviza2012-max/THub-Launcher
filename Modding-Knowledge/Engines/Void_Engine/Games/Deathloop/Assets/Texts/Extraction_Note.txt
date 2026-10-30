@@ -1,0 +1,3 @@
+﻿Text strings are inside rsc_gen_0_0.resources (381 MB, Oodle compressed).
+The mod overrides English locale with Thai translations.
+Cannot extract text without Oodle decompression.

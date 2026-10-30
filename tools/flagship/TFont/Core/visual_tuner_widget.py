@@ -1,10 +1,30 @@
 import os
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QGraphicsView, 
                              QGraphicsScene, QGraphicsPathItem, QSlider, QLabel, 
-                             QPushButton, QLineEdit, QFileDialog, QMessageBox, QGroupBox)
-from PyQt6.QtCore import Qt
+                             QPushButton, QLineEdit, QFileDialog, QMessageBox, QGroupBox, QSpinBox,
+                             QScrollArea, QGridLayout, QCheckBox)
+from PyQt6.QtCore import Qt, QThreadPool, QRunnable, QObject, pyqtSignal, pyqtSlot
 from PyQt6.QtGui import QPen, QBrush, QColor, QTransform, QPainter
 import sys
+
+class _WorkerSignals(QObject):
+    finished = pyqtSignal()
+    error = pyqtSignal(str)
+    progress = pyqtSignal(str)
+
+class _Worker(QRunnable):
+    def __init__(self, fn):
+        super().__init__()
+        self.fn = fn
+        self.signals = _WorkerSignals()
+    @pyqtSlot()
+    def run(self):
+        try:
+            self.fn()
+            self.signals.finished.emit()
+        except Exception as e:
+            import traceback
+            self.signals.error.emit(traceback.format_exc())
 
 # Ensure parent path is in sys.path for tfont_i18n
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -25,17 +45,64 @@ class VisualTunerWidget(QWidget):
         self.logger = logger_callback
         self.visual_engine = None
         
-        self.y_raise = 350
-        self.x_left = -150
-        self.y_down = -150
+        # Base Offsets (modify original glyphs directly)
+        self.base_tone_y = 160 # Lift tone marks up by 160 units to prevent overlapping ั or ี
+        self.base_upper_vowel_y = 0
+        self.base_lower_vowel_y = 0
+        
+        # PUA Offsets
+        self.upper_vowel_left_x = -150
+        self.upper_vowel_left_y = 0
+        
+        self.tone_raised_x = 0
+        self.tone_raised_y = 286 # New default based on typical worst-case
+        
+        self.tone_left_x = -150
+        self.tone_left_y = 0
+        
+        self.tone_left_raised_x = -150
+        self.tone_left_raised_y = 286
+        
+        self.lower_vowel_down_x = 0
+        self.lower_vowel_down_y = -150
 
-        # Sample test strings
-        self.test_words = ["ปี้", "ฟุ้ง", "ที่", "น้ำ", "ฎู", "ฐิ"]
+        # Sample test strings (showing normal words and complex combinations)
+        self.test_words = ["ปี้", "ฟุ้ง", "ที่", "น้ำ", "ฎู", "ฐิ", "กั้", "ย้ำ"]
+        
+        self.preview_f700 = False # Default to normal preview to show base shift effect
         
         self.init_ui()
 
+    def create_slider_row(self, label_text, var_name, min_val=-2048, max_val=2048):
+        h = QHBoxLayout()
+        lbl = QLabel(label_text)
+        lbl.setMinimumWidth(180)
+        
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setRange(min_val, max_val)
+        current_val = getattr(self, var_name)
+        slider.setValue(current_val)
+        
+        spin = QSpinBox()
+        spin.setRange(min_val, max_val)
+        spin.setValue(current_val)
+        
+        slider.valueChanged.connect(spin.setValue)
+        spin.valueChanged.connect(slider.setValue)
+        
+        def on_change(val, name=var_name):
+            setattr(self, name, val)
+            self.draw_preview()
+            
+        spin.valueChanged.connect(on_change)
+        
+        h.addWidget(lbl)
+        h.addWidget(slider)
+        h.addWidget(spin)
+        return h
+
     def init_ui(self):
-        layout = QVBoxLayout(self)
+        main_layout = QVBoxLayout(self)
 
         # File Selection
         h_file = QHBoxLayout()
@@ -53,57 +120,69 @@ class VisualTunerWidget(QWidget):
         h_file.addWidget(self.txt_out)
         h_file.addWidget(btn_browse_out)
         
-        layout.addLayout(h_file)
+        main_layout.addLayout(h_file)
 
         # Canvas
         self.scene = QGraphicsScene()
         self.view = QGraphicsView(self.scene)
         self.view.setRenderHint(QPainter.RenderHint.Antialiasing)
         self.view.setBackgroundBrush(QBrush(QColor("#1e1e2e")))
-        self.view.setMinimumHeight(300)
+        self.view.setMinimumHeight(200)
+        main_layout.addWidget(self.view)
         
-        # Scale view so TTF units (usually 2048) fit in the view
-        # We'll apply a scaling transform to the view later when drawing
-        layout.addWidget(self.view)
+        # Preview Controls
+        h_prev = QHBoxLayout()
+        self.chk_f700 = QCheckBox("Preview as F700 (simulate game text replacement)")
+        self.chk_f700.setChecked(self.preview_f700)
+        self.chk_f700.toggled.connect(self.on_preview_mode_changed)
+        h_prev.addWidget(self.chk_f700)
+        main_layout.addLayout(h_prev)
 
-        # Sliders group
-        grp_sliders = QGroupBox(_("visual_tuner_realtime") if hasattr(self, '_') else "Real-time Tuning")
-        l_sliders = QVBoxLayout(grp_sliders)
+        # Scroll Area for sliders
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout(scroll_content)
+
+        # Base Unicode Shift Group
+        grp_base = QGroupBox("Base Unicode Shift (Permanent Shift)")
+        l_base = QVBoxLayout(grp_base)
+        l_base.addLayout(self.create_slider_row("Tone Marks Y (่ ้ ๊ ๋ ์):", "base_tone_y"))
+        l_base.addLayout(self.create_slider_row("Upper Vowels Y (ิ ี ึ ื ั ํ ็):", "base_upper_vowel_y"))
+        l_base.addLayout(self.create_slider_row("Lower Vowels Y (ุ ู ฺ):", "base_lower_vowel_y"))
+        scroll_layout.addWidget(grp_base)
+
+        # PUA F700 Group
+        grp_pua = QGroupBox("PUA F700 Shift (Requires game replacement)")
+        l_pua = QGridLayout(grp_pua)
         
-        # Y Raise
-        self.lbl_y_raise = QLabel((_("visual_tuner_y_raise") if hasattr(self, '_') else "Y Raise (Tone Marks):") + f" {self.y_raise}")
-        self.slider_y = QSlider(Qt.Orientation.Horizontal)
-        self.slider_y.setRange(0, 800)
-        self.slider_y.setValue(self.y_raise)
-        self.slider_y.valueChanged.connect(self.on_y_raise_changed)
-        l_sliders.addWidget(self.lbl_y_raise)
-        l_sliders.addWidget(self.slider_y)
-
-        # X Left
-        self.lbl_x_left = QLabel((_("visual_tuner_x_left") if hasattr(self, '_') else "X Left (Dodge Tails):") + f" {self.x_left}")
-        self.slider_x = QSlider(Qt.Orientation.Horizontal)
-        self.slider_x.setRange(-400, 0)
-        self.slider_x.setValue(self.x_left)
-        self.slider_x.valueChanged.connect(self.on_x_left_changed)
-        l_sliders.addWidget(self.lbl_x_left)
-        l_sliders.addWidget(self.slider_x)
+        # Left side
+        l_l = QVBoxLayout()
+        l_l.addLayout(self.create_slider_row("Upper Vowel Left (X):", "upper_vowel_left_x"))
+        l_l.addLayout(self.create_slider_row("Tone Raised (Y):", "tone_raised_y"))
+        l_l.addLayout(self.create_slider_row("Tone Left (X):", "tone_left_x"))
+        l_l.addLayout(self.create_slider_row("Tone L+R (X):", "tone_left_raised_x"))
+        l_l.addLayout(self.create_slider_row("Lower Down (Y):", "lower_vowel_down_y"))
+        l_pua.addLayout(l_l, 0, 0)
         
-        # Y Down
-        self.lbl_y_down = QLabel((_("visual_tuner_y_down") if hasattr(self, '_') else "Y Down (Lower Vowels):") + f" {self.y_down}")
-        self.slider_d = QSlider(Qt.Orientation.Horizontal)
-        self.slider_d.setRange(-400, 0)
-        self.slider_d.setValue(self.y_down)
-        self.slider_d.valueChanged.connect(self.on_y_down_changed)
-        l_sliders.addWidget(self.lbl_y_down)
-        l_sliders.addWidget(self.slider_d)
-
-        layout.addWidget(grp_sliders)
+        # Right side
+        l_r = QVBoxLayout()
+        l_r.addLayout(self.create_slider_row("Upper Vowel Left (Y):", "upper_vowel_left_y"))
+        l_r.addLayout(self.create_slider_row("Tone Raised (X):", "tone_raised_x"))
+        l_r.addLayout(self.create_slider_row("Tone Left (Y):", "tone_left_y"))
+        l_r.addLayout(self.create_slider_row("Tone L+R (Y):", "tone_left_raised_y"))
+        l_r.addLayout(self.create_slider_row("Lower Down (X):", "lower_vowel_down_x"))
+        l_pua.addLayout(l_r, 0, 1)
+        
+        scroll_layout.addWidget(grp_pua)
+        scroll.setWidget(scroll_content)
+        main_layout.addWidget(scroll)
 
         # Export Button
-        self.btn_export = QPushButton("💾 " + (_("visual_tuner_export") if hasattr(self, '_') else "Export Tuned F700 Font"))
+        self.btn_export = QPushButton("💾 " + (_("visual_tuner_export") if hasattr(self, '_') else "Export Tuned Font"))
         self.btn_export.setStyleSheet("background: #a6e3a1; color: #11111b; font-size: 16px; padding: 12px;")
         self.btn_export.clicked.connect(self.export_font)
-        layout.addWidget(self.btn_export)
+        main_layout.addWidget(self.btn_export)
 
     def browse_in(self):
         path, _ = QFileDialog.getOpenFileName(self, "Select Font", "", "Font Files (*.ttf *.otf);;All Files (*.*)")
@@ -132,35 +211,37 @@ class VisualTunerWidget(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Could not load font: {e}")
 
-    def on_y_raise_changed(self, val):
-        self.y_raise = val
-        self.lbl_y_raise.setText((_("visual_tuner_y_raise") if hasattr(self, '_') else "Y Raise (Tone Marks):") + f" {self.y_raise}")
+    def on_preview_mode_changed(self, checked):
+        self.preview_f700 = checked
         self.draw_preview()
 
-    def on_x_left_changed(self, val):
-        self.x_left = val
-        self.lbl_x_left.setText((_("visual_tuner_x_left") if hasattr(self, '_') else "X Left (Dodge Tails):") + f" {self.x_left}")
-        self.draw_preview()
-
-    def on_y_down_changed(self, val):
-        self.y_down = val
-        self.lbl_y_down.setText((_("visual_tuner_y_down") if hasattr(self, '_') else "Y Down (Lower Vowels):") + f" {self.y_down}")
-        self.draw_preview()
+    def get_offsets(self):
+        return {
+            'base_tone_y': self.base_tone_y,
+            'base_upper_vowel_y': self.base_upper_vowel_y,
+            'base_lower_vowel_y': self.base_lower_vowel_y,
+            'upper_vowel_left_x': self.upper_vowel_left_x,
+            'upper_vowel_left_y': self.upper_vowel_left_y,
+            'tone_raised_x': self.tone_raised_x,
+            'tone_raised_y': self.tone_raised_y,
+            'tone_left_x': self.tone_left_x,
+            'tone_left_y': self.tone_left_y,
+            'tone_left_raised_x': self.tone_left_raised_x,
+            'tone_left_raised_y': self.tone_left_raised_y,
+            'lower_vowel_down_x': self.lower_vowel_down_x,
+            'lower_vowel_down_y': self.lower_vowel_down_y
+        }
 
     def draw_preview(self):
         if not self.visual_engine: return
         self.scene.clear()
 
-        # Qt's coordinate system is Y-down. TTF is Y-up.
-        # We need a base transform to flip Y and scale down (e.g. by 0.1 for a 2048 UPM font)
         scale_factor = 0.08
         base_transform = QTransform().scale(scale_factor, -scale_factor)
 
-        # Start drawing cursors
         current_x = 0
         baseline_y = 0
 
-        # Colors for different parts
         c_base = QColor("#cdd6f4")
         c_upper = QColor("#89b4fa")
         c_tone = QColor("#f38ba8")
@@ -173,57 +254,59 @@ class VisualTunerWidget(QWidget):
             has_upper_vowel = False
             
             for char in word:
-                if char in ['ป', 'ฝ', 'ฟ']:
-                    has_long_tail = True
-                elif char in ['ฎ', 'ฏ']:
-                    has_lower_tail = True
-                elif char in ['ิ', 'ี', 'ึ', 'ื', 'ั', 'ํ', '็', 'ำ']:
-                    has_upper_vowel = True
+                if char in ['ป', 'ฝ', 'ฟ']: has_long_tail = True
+                elif char in ['ฎ', 'ฏ']: has_lower_tail = True
+                elif char in ['ิ', 'ี', 'ึ', 'ื', 'ั', 'ํ', '็', 'ำ']: has_upper_vowel = True
+                
                 path, width = self.visual_engine.get_glyph_path_and_width(char)
                 if path.isEmpty(): continue
                 
                 cat = self.visual_engine.get_f700_type(char)
                 
-                # Setup offset
                 dx, dy = 0, 0
                 color = c_base
                 
+                # Apply shifts based on preview mode
                 if cat == 'upper_vowel':
                     color = c_upper
-                    if has_long_tail:
-                        dx = self.x_left
+                    if self.preview_f700 and has_long_tail:
+                        dx, dy = self.upper_vowel_left_x, self.upper_vowel_left_y
+                    else:
+                        dy = self.base_upper_vowel_y
+                        
                 elif cat == 'tone_mark':
                     color = c_tone
-                    if has_long_tail:
-                        dx = self.x_left
-                    if has_upper_vowel:
-                        dy = self.y_raise
+                    if self.preview_f700:
+                        if has_long_tail and has_upper_vowel:
+                            dx, dy = self.tone_left_raised_x, self.tone_left_raised_y
+                        elif has_long_tail:
+                            dx, dy = self.tone_left_x, self.tone_left_y
+                        elif has_upper_vowel:
+                            dx, dy = self.tone_raised_x, self.tone_raised_y
+                        else:
+                            dy = self.base_tone_y # If no F700 trigger, falls back to base shift
+                    else:
+                        dy = self.base_tone_y
+                        
                 elif cat == 'lower_vowel':
                     color = c_lower
-                    if has_lower_tail:
-                        dy = self.y_down
+                    if self.preview_f700 and has_lower_tail:
+                        dx, dy = self.lower_vowel_down_x, self.lower_vowel_down_y
+                    else:
+                        dy = self.base_lower_vowel_y
 
-                # Position the path
-                # TTF path is at (0,0). We move it to current_x + dx, baseline_y + dy
                 char_transform = QTransform().translate(current_x + dx, baseline_y + dy)
                 transformed_path = char_transform.map(path)
-                
-                # Apply global view scale and Y-flip
                 final_path = base_transform.map(transformed_path)
                 
-                # Draw
                 item = self.scene.addPath(final_path, QPen(Qt.PenStyle.NoPen), QBrush(color))
                 
-                # Only advance X if it's a base character (vowels/tones have 0 width in F700)
                 if cat == 'base':
                     current_x += width
 
-            # Add spacing between test words
             current_x += self.visual_engine.upm * 0.5
             
-        # Adjust scene rect so it fits nicely
         self.scene.setSceneRect(self.scene.itemsBoundingRect())
-        # Center view vertically, align left horizontally
         self.view.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
     def export_font(self):
@@ -232,19 +315,38 @@ class VisualTunerWidget(QWidget):
         if not os.path.exists(in_path):
             QMessageBox.warning(self, "Error", "Source font not found.")
             return
+        if not out_path:
+            QMessageBox.warning(self, "Error", "No output path specified.")
+            return
 
         self.btn_export.setEnabled(False)
-        self.logger("Exporting F700 Tuned Font via Legacy Engine...", "#f38ba8")
+        self.logger("Exporting Advanced Font via Legacy Engine...", "#f38ba8")
         
-        # We can run this in a thread or directly. For simplicity, directly if it's fast.
-        try:
-            self.legacy_engine.process_font(in_path, out_path, self.y_raise, self.x_left, self.y_down, callback=self.logger_callback)
+        offsets = self.get_offsets()
+        
+        def run_export():
+            # Emit progress signal safely instead of directly updating GUI
+            self.legacy_engine.process_font(in_path, out_path, offsets=offsets, callback=worker.signals.progress.emit)
+        
+        def on_done():
             self.logger("Export Complete!", "#a6e3a1")
-        except Exception as e:
-            self.logger(f"Error exporting: {e}", "#f38ba8")
-            QMessageBox.critical(self, "Error", str(e))
-        finally:
             self.btn_export.setEnabled(True)
+            self._export_worker = None
+        
+        def on_error(err):
+            self.logger(f"Error exporting: {err}", "#f38ba8")
+            self.btn_export.setEnabled(True)
+            self._export_worker = None
+            
+        def on_progress(msg):
+            self.logger_callback(msg)
+        
+        worker = _Worker(run_export)
+        self._export_worker = worker  # Keep reference to prevent GC
+        worker.signals.progress.connect(on_progress)
+        worker.signals.finished.connect(on_done)
+        worker.signals.error.connect(on_error)
+        QThreadPool.globalInstance().start(worker)
 
     def logger_callback(self, msg):
         self.logger(msg, "#89b4fa")

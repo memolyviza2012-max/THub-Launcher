@@ -1,8 +1,16 @@
 {
-    "active_theme": "Monokai",
+    "active_theme": "Obsidian",
+    "app_lang": "th",
+    "card_view_mode": "Vertical",
+    "auto_update": false,
+    "default_author": "",
+    "default_tools_dir": "",
+    "default_workspace_dir": "",
+    "game_library_paths": [],
     "projects": [],
-    "app_lang": "en",
     "tools": {},
-    "card_view_mode": "Large",
-    "auto_update": false
+    "steam_auto_capsule": true,
+    "ai_cli_preset": "claude",
+    "ai_cli_custom_cmd": "claude",
+    "ai_cli_auto_copy": true
 }

@@ -1,0 +1,97 @@
+{
+ "game": "XCOM: Chimera Squad",
+ "slot": "KOR",
+ "files": [
+  {
+   "path": "XComGame/PCConsoleTOC.txt",
+   "size": 3423312,
+   "sha256": "f5a399bbb0fd48a20a47a6ee6cf7fd0ab41f47db542f8be62662bd440f9f56f8",
+   "orig_size": 3423313,
+   "orig_sha256": "7866a85901b22121b7aaf977a06aa27e450bdb3252dcf11c600e0b15e7b369b3"
+  },
+  {
+   "path": "XComGame/CookedPCConsole/Startup_LOC_KOR.upk",
+   "size": 105577,
+   "sha256": "4efbf92d8f44bc66a762ca7f0b544bb60413a8868207abab4c16e635c5f74cca",
+   "orig_size": 162153,
+   "orig_sha256": "4ceb50292bf31a74bf4f94ac8598774e6c49f61b360ffb7ca9e9a73d86ac235f"
+  },
+  {
+   "path": "XComGame/CookedPCConsole/Startup_LOC_KOR.upk.uncompressed_size",
+   "size": 9,
+   "sha256": "57ac7130e3155cb1852f6848b24b16264f6f416192f5cdb97550ee17d12607c1",
+   "orig_size": 9,
+   "orig_sha256": "6075078440b5703e82f4a16b0c7ee7c74f6139252df1959b45ef8ac875186060"
+  },
+  {
+   "path": "XComGame/CookedPCConsole/gfxfonts_kor_SF.upk",
+   "size": 248338,
+   "sha256": "76b3ca1c8b251a54b70d474569dffa2ee6f6fb3f045fa58ad76a21fd2c8aa001",
+   "orig_size": 5994009,
+   "orig_sha256": "95e5d5b5255c1bc899d8e8da2406be9294bb7fb9caa3072431a653687649ad5d"
+  },
+  {
+   "path": "XComGame/Localization/KOR/Editor.kor",
+   "size": 3448,
+   "sha256": "13afeda3606ee89b2ce1f4cbfb9bfade58dfd14a46caf8a6217500791166216c",
+   "orig_size": 4508,
+   "orig_sha256": "b4e627bdf22061aa73e70b04994287f1c23336663a4c1c53b270b340235fcae9"
+  },
+  {
+   "path": "XComGame/Localization/KOR/Engine.kor",
+   "size": 856,
+   "sha256": "dd02081c3cc1bc678bd1359f390de205ff1ebbb79fb7bbc738536982196174e8",
+   "orig_size": 786,
+   "orig_sha256": "7695f1befb8ea0b769b3351885b7de0734ef845ef3a79ff3a26029434041c218"
+  },
+  {
+   "path": "XComGame/Localization/KOR/GFxUI.kor",
+   "size": 730,
+   "sha256": "d6bd572cb6a06a7a0f33bc15062f8e416260c875ba2b479ca41a63a791fef20c",
+   "orig_size": 758,
+   "orig_sha256": "8c9017529d6d4ab58478398ffd00a54b78ec1a16d487c5aa5030a0af97cd67d9"
+  },
+  {
+   "path": "XComGame/Localization/KOR/Launch.kor",
+   "size": 212,
+   "sha256": "b655f29ccad8364c566b164f693f45b0897b32f1e09e550ac4c87f7590272335",
+   "orig_size": 198,
+   "orig_sha256": "36011c3d5e6d44232beef130310e64e3e88de5c92d605075e4081c553912e570"
+  },
+  {
+   "path": "XComGame/Localization/KOR/Subtitles.kor",
+   "size": 33056,
+   "sha256": "81a761ca89db2f1432feb3669b71460e1fa12e1eadb90c69f83ea25fa22d1366",
+   "orig_size": 29462,
+   "orig_sha256": "9396ad335f5b38c8861122044fdfdface02598c6caf57f004e4846990bdc27cc"
+  },
+  {
+   "path": "XComGame/Localization/KOR/TemplateOverrides.kor",
+   "size": 1888,
+   "sha256": "b6423d86aa091b9fc5d72a65694cde231da8acfe1d15cf74b5de08db7569dc8e",
+   "orig_size": 1776,
+   "orig_sha256": "40dadaca34e069a31c6594a7799d59420f2dcd6f54c5d007d0434a9e53892e73"
+  },
+  {
+   "path": "XComGame/Localization/KOR/VO.kor",
+   "size": 1237524,
+   "sha256": "b018a4567e0a2ba58cc814906cd9bfffe8d558059f5d46e5803552c669b58110",
+   "orig_size": 1134130,
+   "orig_sha256": "252ade17ca084e21504df219616181e7e1aadd3fae9dd43af41658559507cbae"
+  },
+  {
+   "path": "XComGame/Localization/KOR/XComGame.kor",
+   "size": 1559816,
+   "sha256": "2a0a6da653c5f12b7ebdc1b32a813f9f1cd481e6cc7872fba405d559c4e121c1",
+   "orig_size": 1423354,
+   "orig_sha256": "5c4ae119281bb8378e6df998407fd64559e46f005fe2228eecdfa9151f26a969"
+  },
+  {
+   "path": "XComGame/Localization/KOR/XComLauncher.kor",
+   "size": 176,
+   "sha256": "eb86f363cb578c2e3fcfe7f6726cce4a31b38712280627ec9b88c4fd13fcb708",
+   "orig_size": 166,
+   "orig_sha256": "ccc3d04702f28aa0f679f4a4f2c72bc975f69333fc79c41605a206528386526d"
+  }
+ ]
+}

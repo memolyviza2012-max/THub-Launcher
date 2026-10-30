@@ -1,2 +1,0 @@
-MEIPASS: NOT SET
-__file__: E:\Mod_Workspace\Modder_project\modder-hub\dist\THub\_internal\tools\flagship\TPUA\test_meipass2.py

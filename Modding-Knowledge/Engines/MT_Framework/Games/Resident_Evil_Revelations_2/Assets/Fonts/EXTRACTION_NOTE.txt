@@ -1,0 +1,18 @@
+Resident Evil Revelations 2 — font extraction note (2026-09-13)
+
+Source mod has 11 loose font assets: 7 TEX image atlases and 4 GFD metric/
+glyph descriptor files. All are preserved in this directory. Each TEX was
+converted on a copy with ARCtool 0.9.713 (-tex -texRE6) to a DDS in
+../Textures/. DDS headers validate as 1024x512 or 1024x1024 DXT5/DXT1.
+
+No installable TTF/OTF was found. The full mod, including all 4,519 inflated
+ARC entries, was scanned for SFNT signatures and table directories; valid
+SFNT candidates = 0. Bitmap pixels cannot recover original vector outlines,
+OpenType shaping tables, designer metadata or licence. The README names
+Sarabun and cites SIL OFL; the exact source font file/version is not present.
+
+GFD magic: 47 46 44 00 (GFD\0), followed by 06 0C 01 00.
+TEX magic: 54 45 58 00 (TEX\0), followed by 9D 20 00 20.
+The GFD glyph record/UV/kerning layout has not been validated. Do not inject
+coordinates at guessed byte offsets or treat a DDS as a drop-in replacement
+for the game TEX. Preserve corresponding TEX and GFD as a set.

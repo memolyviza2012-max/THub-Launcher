@@ -1,0 +1,7 @@
+EXTRACTION FAILED
+
+Reason: Call of Duty: Ghosts uses the IW6 engine with encrypted/compressed FastFiles (IWffu100 format) utilizing LZX compression and proprietary cross-referencing. Offline extraction via typical BMS scripts or older CoD-FF-Tools is not supported. 
+
+The industry standard extraction tool for this game is "Greyhound", which requires a live memory hook. During automated testing via pywinauto, the tool failed to attach to the game process because the game was not running. 
+
+Without memory extraction, strings and fonts cannot be acquired offline.

@@ -23,6 +23,10 @@
     "chk_auto_mask": "ซ่อนแท็กอัตโนมัติ (เช่น %s -> [TAG_0])",
     "chk_enforce_glossary": "บังคับแทนที่อภิธานศัพท์",
     "chk_auto_pua": "ใช้การเข้ารหัส PUA อัตโนมัติ (ต้องใช้ปลั๊กอิน TPUA)",
+    "chk_cjk_filter": "🇨🇳 กรอง/ล้างภาษาจีนที่หลุดมา (CJK Leak Filter)",
+    "chk_eng_filter": "🇬🇧 กรอง/แปลซ้ำภาษาอังกฤษตกค้าง (English Leak Filter)",
+    "chk_dedup": "⚡ แปลเฉพาะข้อความไม่ซ้ำ (Deduplication & Auto-Propagate)",
+    "chk_engine_filter": "🛡️ กรองคำสั่งเอนจิน/แท็กล้วน (Engine Junk Filter)",
     "lbl_batch_progress_default": "แบตช์: 0 / 0 (0%)",
     "lbl_eta_default": "เวลาโดยประมาณ: --:--:--",
     "lbl_lines_default": "บรรทัด: 0 / 0 (0%)",
@@ -94,5 +98,8 @@
     "btn_remove_sel": "🗑️ ลบที่เลือก",
     "btn_clear_all": "🧹 ล้างทั้งหมด",
     "lbl_file_path": "📂 เส้นทางไฟล์",
-    "lbl_profile": "⚙️ โปรไฟล์"
+    "lbl_profile": "⚙️ โปรไฟล์",
+    "lbl_threads": "จำนวนการประมวลผลพร้อมกัน (Threads):",
+    "chk_token_burner": "⚡ โหมดผลาญโทเค็น (ไวจัด, 1 บรรทัดต่อ 1 API)",
+    "lbl_token_burner_active": "⚡ เปิดใช้งานโหมดผลาญโทเค็นแล้ว! ระบบจำลอง TStudio: ปิดระบบ Batch ส่งคำแปล 1 บรรทัดต่อ 1 API ทันที (เร็วกว่าแต่ใช้ Token เปลืองกว่า)"
 }

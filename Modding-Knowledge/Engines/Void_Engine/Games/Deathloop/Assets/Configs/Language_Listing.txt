@@ -1,0 +1,20 @@
+﻿=== Deathloop — Supported Languages ===
+arabic, brazilian, english, french, german, italian,
+japanese, korean, mexican, polish, russian,
+simplified_chinese, spanish, traditional_chinese
+
+--- Localization Structure ---
+generated/decls/localized/{language}/speechscene/speech/scene/...
+generated/decls/localized/{language}/speechbarks/speech/speech_barks/...
+
+--- Thai Modding Strategy ---
+Thai is NOT natively supported.
+Mod overrides English locale with Thai text + Thai SDF font atlas.
+
+--- File Sizes ---
+master_resources.index:    60.7 MB  (resource directory)
+rsc_decl_0.resources:      28.7 MB  (declarations, plaintext)
+rsc_gen_0_0.resources:    381.3 MB  (game data, Oodle)
+rsc_gen_0_1.resources:     17.6 MB  (supplementary, Oodle)
+rsc_images_0_2.resources: 518.9 MB  (images/textures, Oodle)
+Total:                   ~1007.2 MB (~1 GB)

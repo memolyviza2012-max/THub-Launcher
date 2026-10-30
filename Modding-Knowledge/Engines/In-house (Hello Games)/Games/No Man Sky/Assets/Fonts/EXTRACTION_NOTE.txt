@@ -1,0 +1,1 @@
+Failed to extract TTF directly from PSAR archive. The NO MAN SKY .pak file uses a proprietary PSAR format with zlib compression. Unpacking requires the MBINCompiler or PSARExtract tools, which are not currently available in the environment.

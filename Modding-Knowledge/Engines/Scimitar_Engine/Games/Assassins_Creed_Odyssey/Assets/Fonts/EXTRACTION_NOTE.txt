@@ -1,0 +1,4 @@
+No TrueType (.ttf) or OpenType (.otf) fonts were found in the mod directory for Assassin's Creed Odyssey.
+
+Reason for non-extraction:
+The mod architecture uses the Forger utility to apply text modifications via `.acod` payloads. These payloads only contain text strings (UTF-16 LE) and no font data. It is likely that the font modifications are either natively supported by the game or injected via a different system not present in these specific files.

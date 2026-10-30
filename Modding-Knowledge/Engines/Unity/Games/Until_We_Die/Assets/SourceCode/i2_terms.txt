@@ -1,0 +1,494 @@
+Story/story_01	The Spring’s First Falling Stars \nIn the coming days, people in Moscow will be able to watch this spring’s first falling stars. The meteor shower will be visible in the night sky April 16th through the 25th according to the Moscow Planetarium.
+Story/story_02	The Lyrids Meteor Shower\n... The scientists pointed out that the Lyrid meteors are quite large and glowing an unsettling shade of purple, which they are attributing to exotic chemical makeup of a possibly organic nature... (text truncated)
+Story/story_03	“Fireballs in the Sky”\nA meteor shower has fallen upon the capital and the nearby towns. The number of victims is unknown so far. Authorities are assessing damage to the towns... (text truncated)
+Story/story_04	Toxic Fog in Moscow \n... A purple haze has spread all over the capital. Research is being conducted to find out if that fog contains any toxic substances.
+Story/story_05	An Unknown Infection Breaks Out\nMedical personnel are looking for the origin of the new virus and analyzing its projected spread. It has not been proven yet whether any connection exists between the disease and the purple fog. People are advised to use respiratory protection.
+Story/story_06	Measures to Contain the Incident\n... during the government session on July 15... (text truncated) ... Military personnel are urgently evacuating civilians to nearby civil defense facilities... (text truncated)
+Story/story_misc_01	Fried Rats\nToday was the first time my sister and I caught a rat and fried it. Previously, I’d puke at the very thought of tasting it. Things are different today, though. Never ending hunger has changed our tastes drastically.
+Story/story_misc_02	The Family\nI keep thinking about my family. They’re still with me, exhausted by hunger and disease. I can’t bear to look at them any longer. I feel powerless. I’m beginning to think that I have to be the first one to perish. I don’t want to watch them die.
+Story/story_misc_03	A Feast\nI’m having a feast today. I was able to steal some canned food from my old folks. They’re as good as dead anyway, while I need a bite. I don’t care about anyone! I WILL SURVIVE.
+Story/story_misc_04	Disease\nMy father’s been sick for a week already. My sister promised to get some medications, but we haven’t heard from her in three days. I’m scared to think about what may have happened to her. If she doesn’t return today, I’ll have to go get the medications myself.
+Story/story_misc_05	A New Job\nI decided to become a stalker today. I hope the Commander will pick me for that job. I want to see the surface again! I might even be able to see my home from a distance.
+Story/story_misc_06	My Birthday\nI’ve turned 84 today... I’ve lived a good life, but now I’m all alone. As I look at the ceiling of my tiny hovel, I understand I have nothing left to hold me to this place. I hope the Grim Reaper will come get me before I go insane.
+Story/story_misc_07	The First Raid\nThis was my first raid, and I killed it. Killed it! My hands were shaking like I was spastic, but I managed to fire a shot. My friends were patting me on the back and saying their congratulations. They should have known that I was plain lucky. I got scared shitless when I fired. Miraculously, I hit my target. My hands are still shaking, but I’m alive. Alive...
+Story/story_misc_08	A Gift for Mary\nI like Mary. Her fiery red hair is what I live to see in these tunnels. I want to give her a gift. I already made a deal with the logistics guy. He’ll trade a can of stewed rat meat for a handful of ammo. I hope she’ll like it.
+Story/story_misc_09	Casualties\nAnton’s team didn’t return from their raid today. The commander wants to send our team on a search mission in the morning. However, we already know what happens to those who don’t get back by dark. At best we’ll find their corpses, and we’ll be lucky if each of them is in one piece...
+Story/story_misc_10	Food Supplies\nShit... Rats ate up all the dried rat meat in the depot on my shift! Those were our supplies for a week. Goddamn cannibals! The commander will surely eat me whole, shit included.
+Story/story_misc_11	In the Tunnel\nToday, we found a family that starved to death in the tunnel. I should have felt sadness, anger, something... but I felt nothing. I've become an insensitive bastard just like those mutants. I found them, put them in bags, and burned them up. That’s it. I can’t even hate myself for that. 
+Story/story_misc_12	The Survivors\nFor a long time, we’ve been unaware of what’s going on in the rest of the world. Do they eat nothing but rat meat in America and China too? I’d like to believe that they’re better at survival than we are. I keep telling my little brother that we’re going to get help, that all we need is just wait for a while...
+Story/story_misc_13	Lack of Food Variety\nMushroom soup, mashed mushrooms, mushroom puree, mushroom tincture... I’m starting to think my wife wants to poison me. I can’t stand those mushrooms anymore. Not in any form. Except maybe in the form of an enema, but I won’t last long in that case. Today, I’m going to pretend her brew has killed me.
+Story/story_misc_14	A Delicacy\nRoasted slugs were not so bad as I thought. They didn’t taste like chicken, of course, but they’re edible. Compared to rat meat, they’re a delicacy! Though frankly, I don’t remember the taste of chicken at all...
+Story/story_misc_15	Farewell\nI’m the only survivor from Anton’s team. Alas, that’s not for long. Monsters are everywhere. My dark corner and the two bullets in my hand are all I have left. What we managed to get a hold of, I’ll leave next to me. Farewell.\n
+Story/story_misc_16	Settlers\nAnother group of survivors approached our settlement. They reeked of death. All of them were dirty and emaciated, and they had festering wounds. One of them was a very young child. I hope that kid’s suffering won’t be long.
+Story/story_misc_17	Rat Traps\nI’ve been taking rats out of rat traps today. Those critters are so numerous that we’ll never starve to death here. But what do they eat... Aww shit, I don’t even want to think about that.
+Story/story_misc_18	A Terrible Monster\nThis was the first time I saw the Giant through my scope, a terrible monster in every sense. Our defenses will hardly be able to hold it back. I hope I’ll be able to take out the bastard before it gets close.
+Story/story_misc_19	May They Go up in Flames!\nToday, the boys and I were making Molotov cocktails. It’s simple: a bottle, some fuel, and a rag, but you should have seen the boys’ eyes gleam as they were working. Everyone was imagining those mutants crying out in fear as fire consumes them. May they go up in flames!
+Story/story_misc_20	The Raid\nMy Mary will be on duty in the infirmary tomorrow, and I’ll be out conducting a raid. I’ll try to get her something interesting, like I did last time. She was ecstatic over that small mirror.
+Story/story_misc_21	Exhaustion\nThis is the third day of almost no sleep. The constant attacks mean we've had to spend more time repairing our defenses than we did building them in the first place. Gennady, a guy from my repair crew, died of exhaustion today. I don’t want to end up like he did. 
+Story/story_misc_23	My Salvation\nBooks are my salvation. They’re the only things that help me stay sane in this waking nightmare. I’ve got a whole library in my tiny hovel. I hope I’ll manage to read them all.
+Story/story_misc_24	Frigging Coward\nThat rat, Hunchback, has been killing me with his whining and making excuses. I’d kill that bastard if our fight hadn’t been broken up. He tried to leave his friends and flee... Frigging coward.
+Story/story_misc_25	A Bad Feeling\nPurple outgrowths with dense roots have appeared along the base’s perimeter. Each time we cleared the area of them, some horrible howling could be heard from the tunnels. I’ve got a bad feeling about this...
+Story/story_misc_26	Goddamn “Weed”\nBeware, brother. There’s a “weed” in the air shaft, and it looks hungry. It's immune to bullets. If you’re brave enough and can gather some men to follow you into its lair, that freak needs digging out.
+Story/scenario_1	Our scouts confirmed the integrity of the ventilation shaft at the Electrozavodskaya station. The decision was taken to gain a foothold in that area and use the shaft to deliver supplies from the surface. Your task is to restore the power supply to the station and survive for <#fff94c>{[survive_days]}</color> days before the arrival of our main forces. Good luck, Commander.
+Story/hero_description_1	After lengthy service, he left the army and devoted his subsequent life to gamekeeping on a hunting estate. As a professional hunter, he had no fear of predators or poachers. He proved himself a tough and reliable worker with clear leadership skills. Proficient with firearms.
+Story/hero_description_2	Before the invasion, she worked as a personal trainer and enjoyed target shooting in her free time. She also won numerous different competitions. She is strong willed, goal-oriented and responsible. She carries a shotgun that belonged to her father and which she will never part with, showing no interest in other weapons.
+Story/hero_description_appendex_1	Ivan Ivanovich Tolstoy\n58 years old\nMoscow
+Story/hero_description_appendex_2	Anna Arkadievna Karenina\n26 years old\nMoscow
+Story/hero_description_ui_1	Characteristics
+Story/hero_description_1_perk_name	Perk: Powerful Shot
+Story/hero_description_2_perk_name	Perk: Good Appetite
+Story/hero_description_1_perk	Every fifth round in Ivan's clip is explosive. These rounds deal greater damage.
+Story/hero_description_2_perk	Restores stamina when she picks up food.
+intro_voice	UWD Intro_Eng_F_
+Dialog/dialog_autosave	The game uses an auto save feature. Do not switch off your system while a auto save icon is seen on the screen.
+Dialog/dialog_bonus_01	Cement factory\n \nIncreases <#6de38c>wall</color> durability. Decreased damage to walls from explosions. Requires <#6de38c>engineers</color> to operate.
+Dialog/dialog_bonus_02	Ammunition factory\n \nEnhances damage done by <#6de38c>firearms</color>. Red cartridges do not ricochet. Requires <#6de38c>engineers</color> to operate.
+Dialog/dialog_bonus_03	Good gear\n \nIncreases vitality and combat potential of <#6de38c>stalkers</color>.
+Dialog/dialog_bonus_04	Radical healing\n \nThe first <#6de38c>{[modificator_radical_healing_count]} severely wounded</color> units can be healed.\nEvery <#6de38c>{[modificator_radical_healing_frequency]} seconds</color> one of the wounded units will restore health.
+Dialog/dialog_elevator_01	Now we can send <#6de38c>expeditions</color> to the surface.
+Dialog/dialog_elevator_02	An expedition requires <#6de38c>3 stalker volunteers</color> and some supplies.
+Dialog/dialog_elevator_03	Team to base. We’re coming back from the surface.
+Dialog/dialog_elevator_04	We were attacked! {arg1} and {arg2} got killed. Commander, we warned you to delay the raid!
+Dialog/dialog_elevator_05	The surface is a dangerous place with all kinds of terrible creatures wandering around the thick fog.
+Dialog/dialog_elevator_07	We saw an intact gas station. Next time, we’ll try to gather some <#6de38c>fuel</color>.
+Dialog/dialog_elevator_08	That’ll be a risky venture, though. Before we make our move, we should stay put for a <#6de38c>day</color> until the mutants leave.
+Dialog/dialog_elevator_09	The <#6de38c>fuel</color> we have will last for a long time. Great raid!
+Dialog/dialog_elevator_10	The <#6de38c>fuel</color> is ours... But at what price? Our friends got killed...
+Dialog/dialog_generator_01	<#6de38c>Generator</color> upgraded.
+Dialog/dialog_generator_02	<#6de38c>Generator</color> upgraded. Electric power will last for a long time, but it’s not enough for us to expand our settlement. We need to find a source of <#6de38c>fuel</color>.
+Dialog/dialog_hero_01	Mmm... the smell of fried rat meat is spreading fast. Our field kitchen will attract <#6de38c>tramps</color> from all over the place.
+Dialog/dialog_hero_02	Hmm... the wooden planks are held in place by spit and bailing wire. Mutants won't have any trouble getting through that hole. We need bring in some <color=#6de38c>engineers</color> and seal this properly.
+Dialog/dialog_hero_03	What a whopper... Wake up! Get the shit out of your pants and move!
+Dialog/dialog_hero_05	Nowhere to lodge the volunteers. Build some <#6de38c>living tents</color>.
+Dialog/dialog_hero_07	<#6de38c>Burning barrels</color> will help our friends recover their energy.
+Dialog/dialog_hero_08	Alright men, let’s get to work! Follow my orders, explore our surroundings, build this place up, and stay alive!
+Dialog/dialog_hero_09	For the <#6de38c>workshop</color> to start operating, you need to send a worker in there.
+Dialog/dialog_hero_10	Great. It’s safe behind the wall. Now, let’s make a <#6de38c>shovel workshop</color>. A shovel is a soldier’s friend!
+Dialog/dialog_hero_11	<#6de38c>Generator</color> started. We can set up our camp.
+Dialog/dialog_hero_12	Now we need to improve our defenses by building a <#6de38c>wall</color>.
+Dialog/dialog_hero_13	First of all, let’s start the <#6de38c>generator</color>.
+Dialog/dialog_hero_14	Our <#6de38c>engineers</color> need to find a way for us to get over to the other side.
+Dialog/dialog_hero_15	We should be prepared... No one knows what lies ahead.
+Dialog/dialog_hero_16	<#6de38c>Molotovs</color> are very effective against mutants.
+Dialog/dialog_hero_17	When given the command, the nearest <#6de38c>stalker</color> throws a Molotov.
+Dialog/dialog_hero_18	<#6de38c>Landmines</color> go off when a group of mutants steps on them. They are especially effective against big individuals.
+Dialog/dialog_hero_19	<#6de38c>Shields</color> are effective against corrosive slugs and mutants. When given the command, the units on the team cover themselves with shields.
+Dialog/dialog_hero_20	These outgrowths are very tenacious. We'll have to chop them with <#6de38c>shovels</color> or <#6de38c>burn</color> them.
+Dialog/dialog_hero_21	The <#6de38c>fog</color> is thickening... Let’s fall back behind the walls.
+Dialog/dialog_hero_22	The men are unwilling to work on the construction site! They’re saying it’s too dangerous. We need to repair the <#6de38c>walls</color> first.
+Dialog/dialog_research_01	Technology researched!\n \nYou can build a <color=#6de38c>warehouse</color>. The merchant will leave more <color=#6de38c>scrap</color>.\nThe speed of looting scrap near the warehouse is doubled.
+Dialog/dialog_research_02	Technology researched!\n \n<color=#6de38c>Engineers</color> can now break doors open.
+Dialog/dialog_research_03	Technology researched!\n \nYou can now build more durable <color=#6de38c>walls</color>.
+Dialog/dialog_research_04	Technology researched!\n \nYou can now build <color=#6de38c>slug farms</color>. Slugs are an excellent source of <color=#6de38c>food</color>.
+Dialog/dialog_research_05	Technology researched!\n \nYou can upgrade <color=#6de38c>living tents</color> to <color=#6de38c>barracks</color>. Barracks accommodate more dwellers.
+Dialog/dialog_research_06	Technology researched!\n \n<color=#6de38c>Mines</color> are produced by <color=#6de38c>engineers</color> and are automatically placed against the walls.
+Dialog/dialog_research_08	Technology researched!\n \nThe <color=#6de38c>handcar</color> can be upgraded to a wheeled tank.
+Dialog/dialog_research_09	Technology researched!\n \nYou can now build very durable <color=#6de38c>walls</color>.
+Dialog/dialog_story_updated	Storyline updated.
+Dialog/dialog_tools_01	Equipment upgraded. The workshops will produce<color=#6de38c>tools</color> and <color=#6de38c>weapons</color> faster.
+Dialog/dialog_trolley_01	I'm back. I see you could use more more help around here. If you provide me with <#6de38c>food</color>, I’ll get you <#6de38c>volunteers</color> and <#6de38c>scrap</color>.
+Dialog/dialog_trolley_02	I got you a volunteer. He’s skinny, yes. But sinewy! He’s yours for the taking.
+Dialog/dialog_trolley_03	I found another volunteer. He’s all yours.
+Dialog/dialog_trolley_04	Hey, Commander! I brought some more volunteers.
+Dialog/dialog_trolley_05	I brought along a couple of skilled recruits. They're awaiting your orders. 
+Dialog/dialog_trolley_06	Commander, the tramps are unwilling to come. They’re saying your base has no room for their asses.\n
+Dialog/dialog_trolley_07	We need more <#6de38c>living tents</color>.
+Dialog/dialog_trolley_08	Will you help me out? Get me some <#6de38c>scrap</color> so I can fix the handcar.
+Dialog/dialog_trolley_09	I see you have a warehouse now. Good, I'll bring more <#6de38c>scrap</color>.
+Dialog/dialog_wall_01	Mutants spotted by the <#6de38c>left wall</color>!
+Dialog/dialog_wall_02	Mutants spotted by the <#6de38c>right wall</color>!
+Dialog/dialog_wall_03	<#6de38c>Right wall</color> destroyed. Let’s fall back!
+Dialog/dialog_wall_04	<#6de38c>Left wall</color> destroyed. Let’s fall back!
+Dialog/dialog_workshop_01	Production expanded. You can add another <#6de38c>engineer</color> to increase the factory’s efficiency.
+Dialog/dialog_hero_23	Commander, there’s a huge wave of mutants coming from the <#6de38c>left</color>. Get ready!
+Dialog/dialog_hero_24	Commander, there’s a huge wave of mutants coming from the <#6de38c>right</color>. Get ready!
+Dialog/dialog_hero_25	Commander, they’re all around us! Freaking mutants!
+Dialog/dialog_trolley_10	I'm back!
+Dialog/dialog_hero_26	Ugh .. we survived! Hey, whoever is still on his feet, help look for the wounded. No time to relax, lads.
+Dialog/dialog_engineers_01	The laboratory was converted to the droneport. <#6de38c>Drones</color> gather <#6de38c>scrap</color> and move it to the warehouse.
+Dialog/dialog_research_10	Technology learned!\n \n<#6de38c>Diggers</color> gather supplies faster.
+Dialog/dialog_research_11	Technology learned!\n \n<color=#6de38c>Auto turret</color> - an imposing weapon against creatures. <color=#6de38c>Auto turrets</color> are automatically deployed while <#6de38c>engineers</color> are assigned to <#6de38c>walls</color>.
+Dialog/dialog_trader_01	Great deal! Come back <#6de38c>tomorrow</color>, I'll bring some more.
+Dialog/dialog_trader_02	I have nothing left to trade, Comrade. I'll be back in a <#6de38c>few days</color> with new stuff.
+Dialog/dialog_trader_03	Glad to see you in one piece, Comrade! Why have the prices gone up? Well, it was not an easy ride to get this stuff, you know.
+Dialog/dialog_trader_04	I can smell their stench a mile away, but it has never been this strong... To hell with this, I'm getting out of here!!!
+Dialog/dialog_trolley_11	I see you've made some progress. My advice is to build more <#6de38c>walls</color>! Other settlements that I saw along the way were better protected, but it did not help them...
+Dialog/dialog_trolley_12	All I do now is pick up survivors scattered though the tunnels...
+Dialog/dialog_trolley_13	Outgrowths with creatures are appearing more often along the tunnels. Boy, they nearly got me!
+Dialog/dialog_trolley_14	There is nowhere to go, Commander. Those monsters are flooding out of every tunnel for miles around. We shall fight until we die!
+Dialog/dialog_stalker_01	Boy, how glad we are to meet other survivors!
+Dialog/dialog_hint_01	You can assign people from your squad to <#6de38c>walls</color> by sending them to the <#6de38c>flag</color>.
+Dialog/dialog_hint_02	<#6de38c>Engineers</color> and <#6de38c>dwellers</color> that are assigned to walls will repair them when needed.
+Dialog/dialog_hint_03	<#6de38c>Diggers</color> can get meat from slugs.
+Dialog/dialog_hint_04	<#6de38c>Walls</color> can be upgraded at some point after researching a special <#6de38c>tech</color> in the lab.
+Dialog/dialog_hint_05	With help of the <#6de38c>elevator</color>, stalkers can reach the surface and gather <#6de38c>scrap</color> and <#6de38c>fuel</color>.
+Dialog/dialog_hint_06	<#6de38c>Diggers</color> can stun their enemies.
+Dialog/dialog_hint_07	Limity zdrojů zjistíte podržením tlačítka {arg1}.
+Dialog/dialog_hint_08	You can find out resource limits by holding the button {arg1}.
+Dialog/dialog_hint_09	<#6de38c>Mushrooms</color> only appear outside your perimeter where the floor is covered with sludge, leafs, and other detritus from the surface.
+Dialog/dialog_hint_10	Destroying the growths will force other growths to evolve faster.
+Dialog/dialog_hint_11	Creatures are <#6de38c>spawned</color> from eggs by night.
+Dialog/dialog_hint_12	You can get protected from some creatures constructing a barricade near tunnel <#6de38c>entrances</color>.
+Dialog/dialog_hint_13	In order to build a barricade, you need to expand your base borders until the <#6de38c>entrance</color>.
+Dialog/dialog_hint_14	<#6de38c>Drones</color> gather <#6de38c>scrap</color> and move it to the warehouse. To control a drone you will need to assign an <#6de38c>engineer</color> as an operator.
+Dialog/dialog_hint_15	The <#6de38c>laboratory</color> will be converted to the <#6de38c>drone port</color> when all technologies are researched.
+Dialog/dialog_hint_16	The second level generator allows building slug farms. Slugs are a great food source.
+Dialog/dialog_hint_17	The third level generator allows you to upgrade tents into bunkhouses. Bunkhouses have more space for dwellers.
+Dialog/dialog_hint_18	You can reorder your squad by pressing {arg1}.
+Dialog/dialog_trolley_15	Commander, we are approaching the station.
+Dialog/dialog_trolley_16	The handcar is back on the move, I'll be back <#6de38c>tomorrow</color> with reinforcements.
+Dialog/dialog_hero_27	Be careful in the tunnels. There's no telling what might be lurking past our perimeter...
+Dialog/dialog_civil_0	The workshop produces <#6de38c>tools</color> every day.
+Dialog/dialog_tools_02	Equipment upgraded. Now all followers are better protected from enemy attacks.
+Dialog/dialog_hero_28	A <#6de38c>field kitchen</color> can be set up here. This will help attract new followers.
+Dialog/dialog_trolley_17	Collect <#6de38c>scrap</color> that I brought, so that I can return to the tunnels for the next batch.
+Dialog/dialog_hint_19	The hero goes into danger mode for a while if enemies are near or if the hero was injured. In this mode, you cannot interact with objects or assign people to jobs.
+Dialog/dialog_tools_03	Tools upgraded. Now you can produce shields, Molotov cocktails and mines faster.
+Dialog/dialog_hero_29	These slugs are great source of <#6de38c>food</color>, but they pop when shot. Hit them with <#6de38c>shovels</color> instead- but be careful around the larger ones...
+Dialog/dialog_hint_digger_1	<#6de38c>Diggers</color> are powerful melee fighters.
+Dialog/dialog_hint_digger_2	If you assign a <#6de38c>digger</color> to a wall, he will protect it with his shovel.
+Dialog/dialog_hint_digger_3	They are excellent at clearing <#6de38c>outgrowths</color>.
+Dialog/dialog_hint_digger_4	<#6de38c>Diggers</color> are also good looters and can hunt <#6de38c>slugs</color>.
+Dialog/dialog_hint_engineer_1	<#6de38c>Engineers</color> are a great support. They can study technologies in the laboratory, unlocking new station improvements.
+Dialog/dialog_hint_engineer_2	<#6de38c>Engineers</color> can build every type of structure, and will passively repair any wall they are stationed at.
+Dialog/dialog_hint_engineer_3	<#6de38c>Engineers</color> don't fight, but at a certain tech level they will be able to protect walls using <#6de38c>auto turrets</color>.
+Dialog/dialog_hint_stalker_1	<#6de38c>Stalkers</color> are strong ranged fighters and excellent at protecting walls.
+Dialog/dialog_hint_stalker_2	<#6de38c>Stalkers</color> can gather supplies, but very slowly.
+Dialog/dialog_hint_sniper_1	<#6de38c>Snipers</color> do a lot of damage but have a low rate of fire. They are great at protecting walls from large mutants.
+Dialog/dialog_hero_30	There is a ventilation shaft behind this door. Once cleared, it will be possible to send stalkers to the surface through it to look for <#6de38c>fuel</color>.
+Dialog/dialog_hero_31	Our base needs <#6de38c>fuel</color>. We'll perish without it.
+Dialog/dialog_hint_outgrowths	By destroying one <#6de38c>growth</color>, others will evolve faster and spawn additional <#6de38c>eggs</color>.
+Dialog/dialog_hint_outgrowths2	During the <#6de38c>final wave</color>, all growths will burst and spawn a large number of mutants. Large individuals can be born from old growths.
+Dialog/dialog_hint_flower	When facing particularly dangerous beasts, it is best to pull your men back to safety and wait for an opening to strike!
+Dialog/dialog_hint_barrel_1	<#6de38c>Lit braziers</color> help our friends recover their <#6de38c>health</color>.
+Dialog/dialog_hint_barrel_2	The Commander also catches his breath faster after long <#6de38c>sprints</color> by resting near them.
+Dialog/dialog_hint_shields_1	<#6de38c>Engineers</color> and <#6de38c>civilians</color> can protect comrades in the squad with <#6de38c>shields</color>. To use the shields you have, press <#6de38c>{arg1}</color>.
+Dialog/dialog_hint_pawn_level_up	<#6de38c>Diggers</color> get more experienced every <#6de38c>5</color> days. They hit harder and can dodge incoming blows.
+Dialog/dialog_hint_player_regroup	Press the <#6de38c>{arg1}</color>{arg2}<#6de38c>{arg3}</color> button to reorder your squad
+Dialog/ui_small_hint_1	Get back!
+Dialog/ui_small_hint_2	I'm needed in the base.
+Dialog/ui_small_hint_3	We need to expand.
+Dialog/ui_small_hint_4	Why don't we use the laboratory?
+Dialog/ui_small_hint_5	We need to improve the generator...
+Dialog/ui_small_hint_6	In the Left tunnel there is a great place for the kitchen!
+Dialog/ui_small_hint_7	Our walls are weak...
+Dialog/ui_small_hint_8	There is a ventilation shaft down the Right tunnel.
+Dialog/ui_small_hint_9	There may be fuel on the surface
+Dialog/ui_small_hint_10	We need to make sorties to the surface.
+Dialog/ui_small_hint_11	Maybe we will build the kitchen?
+Dialog/ui_small_hint_12	We will be able to open more workshops with the improved generator.
+Dialog/ui_small_hint_13	Shields perfectly protect against ranged attacks of mutants.
+Dialog/ui_small_hint_14	We can restore health near lit braziers.
+Dialog/ui_small_hint_15	Why don't we use the barrels as braziers?
+Dialog/ui_small_hint_16	There is space in the tunnels for slug farms.
+Dialog/ui_small_hint_17	
+Dialog/ui_small_hint_18	Survivors can hide in rooms.
+Dialog/ui_small_hint_19	We fought back!
+Dialog/ui_small_hint_20	All good fellas!
+Dialog/ui_small_hint_21	That was close!
+Dialog/ui_small_hint_22	We have many wounded.
+Dialog/ui_small_hint_23	It's quiet in the tunnels today.
+Dialog/ui_small_hint_24	Get out of here!
+Dialog/ui_small_hint_25	I'm scared...
+Dialog/ui_small_hint_26	These walls don't look very reliable...
+Dialog/ui_small_hint_27	Die!!!
+Dialog/ui_small_hint_28	We need to expand ...
+Dialog/ui_small_hint_29	If we had fuel, we could make Molotov cocktails.
+Dialog/ui_small_hint_30	We can handle it, right?
+Dialog/ui_small_hint_31	We survived one more night...
+Dialog/ui_small_hint_32	Backstab!
+Dialog/dialog_mutant_left_0	rrrrrgkh .... kh..kh ...
+Dialog/dialog_mutant_left_1	The mutants have made their way through the <#6de38c>unclosed breach</color> in the left tunnel! We'll have to defend both sides!
+UI/ui_cancel	No
+UI/ui_sumbit	Yes
+UI/ui_accept_start_game	Ready to return to the subway?
+UI/ui_new_game	Are you sure you want to start a new game?\nAll progress will be lost.
+UI/ui_menu_continue	Continue
+UI/ui_menu_new_game	New game
+UI/ui_menu_restart	Restart
+UI/ui_menu_restart_accept	Do you really want to restart the game?
+UI/ui_menu_story	Story
+UI/ui_menu_options	Settings
+UI/ui_menu_quit	Save and exit
+UI/ui_menu_quit_accept	Do you really want to quit the game?
+UI/ui_options_volume_master	Master volume
+UI/ui_options_volume_sounds	Effects volume
+UI/ui_options_volume_music	Music volume
+UI/ui_options_fullscreen	Screen mode
+UI/ui_options_fullscreen_fullscreen	Full screen
+UI/ui_options_fullscreen_window	Windowed
+UI/ui_options_fullscreen_window_without_frame	Borderless windowed
+UI/ui_options_language	Language
+UI/ui_options_resolution	Resolution
+UI/ui_options_interface	Dialogs
+UI/ui_options_interface_all	All
+UI/ui_options_interface_without_dialogs	Only important
+UI/ui_options_background	Run in background
+UI/ui_options_integration	Integration {[platform]}
+UI/ui_options_on	On
+UI/ui_options_off	Off
+UI/ui_options_web_page	Web page
+UI/ui_options_feedback	Feedback
+UI/ui_options_subscribe	Newsletter
+UI/ui_back	Back
+UI/ui_story_plot	Story line
+UI/ui_story_notes	Notes
+UI/ui_game_day	Day
+UI/ui_wave_01	Fought off!
+UI/ui_wave_02	Well done!
+UI/ui_wave_03	Wave passed
+UI/ui_wave_04	Mutants slain
+UI/ui_wave_05	Survived!
+UI/ui_menu_difficulty_01	Difficulty mode
+UI/ui_menu_difficulty_02	<#6de38c>Until We Die </color> is a game about defending your base. To win, you need to survive a certain number of days fighting off hordes of mutants.  Depending on the difficulty level, the more days you have to go through, the easier the game is, as you have more time to prepare.
+UI/ui_menu_difficulty_05	Normal
+UI/ui_menu_difficulty_07	Nightmare
+UI/ui_menu_difficulty_06	Seasoned
+UI/ui_info_save	The game uses the autosave function. Please, do not turn off the system while the autosave icon is visible on the screen.
+UI/ui_credits_01	We survived...
+UI/ui_credits_02	This time!
+UI/ui_credits_03	Followers died
+UI/ui_credits_04	Stations lost
+UI/ui_credits_05	Creatures slain
+UI/ui_credits_06	Resources gathered
+UI/ui_credits_07	Final score
+UI/ui_credits_08	Followers survived
+UI/ui_credits_09	Walls lost
+UI/ui_credits_10	Growths slain
+UI/ui_intro_01	I remember that day.
+UI/ui_intro_02	When the skies pounded the Earth.
+UI/ui_intro_03	Those of us, who survived the cataclysm, and were not mauled by the creatures, fled in the Metro.
+UI/ui_intro_04	There, in the utter darkness of the tunnels, we found refuge.
+UI/ui_intro_05	And we will fight for our future, UNTIL WE DIE.
+UI/ui_tip_01	Enter
+UI/ui_tip_02	Expedition
+UI/ui_tip_03	Buy
+UI/ui_tip_04	Exit
+UI/ui_tip_05	Give supplies
+UI/ui_tip_06	Pay
+UI/ui_tip_07	Select hero
+UI/ui_tip_08	Order handcar
+UI/ui_tip_09	Send
+UI/ui_tip_10	To skip tutorial
+UI/ui_tip_11	Hold
+UI/ui_tip_12	Summon <sprite=0>
+UI/ui_tip_13	Attack
+UI/ui_tip_14	Send
+UI/ui_tip_15	Reload
+UI/ui_tip_16	Continue
+UI/ui_tip_17	Press {arg1} to start
+UI/ui_tip_18	Press any key to continue
+UI/ui_start_1	Building a handcar
+UI/ui_start_2	Distributing hats
+UI/ui_start_3	Giving shovels
+UI/ui_start_4	Cleaning weapons
+UI/ui_start_5	Boosting morale
+UI/ui_start_6	Go!
+UI/ui_meta_01	Survive for {arg1} days to open new room
+UI/ui_btn_0	Ability 1
+UI/ui_btn_1	Ability 2
+UI/ui_btn_2	Reorder units
+UI/ui_btn_3	Call unit
+UI/ui_btn_4	Reload
+UI/ui_btn_5	Shoot
+UI/ui_btn_6	Send unit
+UI/ui_btn_7	Show resources
+UI/ui_btn_8	Rush
+UI/ui_btn_9	Move
+UI/ui_btn_10	Main menu
+UI/ui_btn_hint_press	Press
+UI/ui_unit_limit	Limit increased
+UI/ui_names	Arsen, Artem, Alexander, Alexey, Anton, Arthur, Alan, Andrey, Gleb, David, Arkady, Boris, Stepan, Ruslan, Denis, German, Georgy, Leonid, Makar, Nikita, Taras, Nikola, Fedor, Platon, Philip, Jacob, Zakhar, Konstantin, Matvey, Rodion, Semyon, Timofey, Yaroslav, Vasily, Peter, Dmitry, Ivan, Sergey, Vladimir, Vladislav, Slava, Ilya, Lev, Oleg, Stanislav, Vadim, Evgeny, Valery, Igor, Maxim, John, Cyril, Eduard, Nikolay, Pavel, Timur, Roman, Egor, Mikhail, Taras, Buzen
+UI/ui_names_hero	Ivan, Anna
+UI/ui_diff_normal	Difficulty: Normal
+UI/ui_diff_hard	Difficulty: Seasoned
+UI/ui_diff_nightmare	Difficulty: Nightmare
+UI/ui_diff_survive	Objective: Survive {arg1} days
+UI/ui_diff_objective	Objective
+UI/ui_diff_survive_1	Survive {[survive_days]} days
+UI/ui_credits	<#4A5560><size=48>PIXEYE GAMES</size></color>\nAleksey Okhezin\nAlexandr Yazinin\nArtem Akmulin\nDmitry Mitrofanov\n \n \n<#4A5560><size=48>VOLKOV STUDIO </size></color>\n<#4A5560><size=42>Sound design</size></color>\nIlya Volkov\nNatalya Pahomova\nFedor Shapovalov\n \n<#4A5560><size=42>Voice acting</size></color>\nAleksey Nikitin - Intro voice\nChristina Sherman - Anka\nDuffy P. Weber - Intro voice / Ivan\n\n \n \n<#4A5560><size=48>SPECIAL THANKS TO</size></color>\nArtem Drebot\nArtem Jimm\nAlexey Kvit Haritonov\nVera Arai Nikolaevna - Queen of testers\nDaniel Toporkov\nDavide Raffagnato\nHelen Blizzard\nIlya Yazinin\nIvan Migay\nKsenia Mitrofanova\nLev Yazinin\nMateusz Filipek\nMaxim Kamnev\nMaxim Vatulich\nNikita Pronin\nNina Vatulich\nPavel Milutin\nPavel Suranov\nRuslan Yusupov\nSam Denham\nSergey Kozyakov\n \n<#4A5560><size=48>In memory of our friend and colleague,</size></color> \nEvgeny Cherenkov\n \n<size=86>THANKS FOR PLAYING</size>
+UI/ui_patch_notes	Patch Notes
+UI/ui_patch_notes_hint	<sprite=0> - Based on community feedback!
+UI/ui_meta_02	Days survived {arg1}
+UI/ui_meta_03	Survive {arg1} days in the next run to open new room
+UI/ui_send_unit	Send <sprite=1> to attack!
+UI/ui_score_rank	Rank: {arg1}
+UI/ui_score_rank_simple	Rank
+UI/ui_tip_19	Order <sprite=0> to loot crates
+UI/ui_tip_20	Order <sprite=0> to repair
+UI/ui_tip_21	Order <sprite=0> to build
+UI/ui_tip_22	Turn <sprite=0> into <sprite=2>
+UI/ui_tip_23	Send <sprite=0> to workshop
+UI/ui_state_dodged	Dodged
+UI/ui_condition_negative_0	<size=36>Lean Land</size>\nThere are fewer mushrooms and supply crates on the map
+UI/ui_condition_negative_1	<size=36>Bunglers</size>\nConstruction take {[color_start]}20%{[color_end]} longer
+UI/ui_condition_negative_2	<size=36>Tough Mutants</size>\nMutants health increased by {[color_start]}40%{[color_end]}
+UI/ui_condition_negative_3	<size=36>Long Routes</size>\nMerchant spends {[color_start]}30%{[color_end]} more travel time and consumes more food
+UI/ui_condition_negative_4	<size=36>Unpopular</size>\nThe player starts the game with {[color_start]}2{[color_end]} followers
+UI/ui_condition_negative_5	<size=36>Expensive Constructions</size>\nWall and tent cost increased by {[color_start]}15%{[color_end]}
+UI/ui_condition_negative_6	<size=36>Aggressive Growth </size>\nGrowths appear {[color_start]}1{[color_end]} day earlier and evolve faster
+UI/ui_condition_negative_7	<size=36>Parasites</size>\nSpiders emerge from slain mutant brutes and spitters
+UI/ui_condition_negative_8	<size=36>No one survived</size>\nThere will be no additional tramps on the map
+UI/ui_condition_negative_9	<size=36>Unpalatable food rations</size>\nThe kitchen attracts {[color_start]}1{[color_end]} less tramp per shift
+UI/ui_condition_negative_11	<size=36>Bad soil</size>\nMushroom fields produce {[color_start]}1{[color_end]} unit less food
+UI/ui_condition_negative_12	<size=36>Short night</size>\nThe night is {[color_start]}30{[color_end]} sec shorter
+UI/ui_condition_negative_name_0	Lean Land
+UI/ui_condition_negative_name_1	Bunglers
+UI/ui_condition_negative_name_2	Tough Mutants
+UI/ui_condition_negative_name_3	Long Routes
+UI/ui_condition_negative_name_4	Unpopular
+UI/ui_condition_negative_name_5	Expensive Constructions
+UI/ui_condition_negative_name_6	Aggressive Growth
+UI/ui_condition_negative_name_7	Parasites
+UI/ui_condition_negative_name_8	No one survived
+UI/ui_condition_negative_name_9	Unpalatable food rations
+UI/ui_condition_negative_name_11	Bad soil
+UI/ui_conditions	Conditions
+UI/ui_start_game	Start game
+UI/ui_game_state_tutorial_off	Tutorial mode off
+UI/ui_game_state_tutorial_on	Tutorial mode on
+UI/ui_game_state_duration	Survive for <#fff94c>{arg1}</color> days
+UI/ui_game_state_rank	Max rank <#fff94c>{arg1}</color>
+UI/ui_game_state_hatch_eggs	Once you damage an outgrowth or a clutch of eggs, all nearby eggs will spawn mutants.
+UI/ui_condition_positive_name_0	Early Blueprints
+UI/ui_condition_positive_name_1	Extra Supplies
+UI/ui_condition_positive_name_2	Experimental Vaccine
+UI/ui_condition_positive_name_3	Digger team
+UI/ui_condition_positive_name_4	Engineering team
+UI/ui_condition_positive_name_5	Effective renovation
+UI/ui_condition_positive_name_6	Industrialists
+UI/ui_condition_positive_name_7	Proper nutrition
+UI/ui_condition_positive_name_8	Experienced Commander
+UI/ui_condition_positive_name_9	Military
+UI/ui_condition_positive	Positive conditions
+UI/ui_generator_levelup	Select bonus for upgrading <#6de38c>generator</color>
+UI/ui_tooltip_select	Select
+UI/ui_bonus_1	<size=32>Agitator</size>\nFor the next 2 trips, the merchant brings an additional follower. For each dwelling of the 4th level, one tramp will come to the base.
+UI/ui_bonus_2	<size=32>Leader</size>\n<#6de38c>Followers work faster</color> when close to the commander and gain significant resistance to all types of damage
+UI/ui_bonus_3	<size=32>Combat training</size>\nThe merchant will bring an additional digger next time. New diggers get veteran status immediately. Diggers clear <#6de38c>rubble</color> faster.<#6de38c> Dash</color> will consume less energy
+UI/ui_bonus_4	<size=32>Shelter network</size>\nAfter lighting the first brazier, 1 tramp will come to the base. An active brazier increases the population cap by 1. The ground ignites around the braziers as mutants run by
+UI/ui_bonus_5	<size=32>Army cache</size>\nGain several mines and 4 Molotov cocktails. The mines will be placed on both sides of the generator.\n
+UI/ui_bonus_7	<size=32>Civilian supplies</size>\nGain several blue flasks and medicine. When near death, the commander will throw a flash-bang grenade to stun mutants and will heal himself. This ability can be used once.
+UI/ui_bonus_8	<size=32>Sorting</size>\nThe warehouse is replenished with 1 scrap for every second shield, mine or Molotov cocktail produced.
+UI/ui_bonus_9	<size=32>Fire Traps</size>\nA fire trap is placed at <#6de38c>every second</color> wall. The trap is triggered when the health of the wall falls below <#6de38c>{[bonus_fire_trap_modificator]}</color>
+UI/ui_bonus_10	<size=32>Scientific approach </size>\nThe cost of all the future technologies will be reduced by 1 blue flask. Walls will become 5% stronger for each technology researched.
+UI/ui_bonus_12	<size=32>Strengthening the Borders</size>\nWalls of all levels become stronger by 20% and barriers further slow down the advancing enemies
+UI/ui_bonus_13	<size=32>Improved Turrets </size>\nEngineers place two turrets against the wall. Turrets take longer to overheat
+UI/ui_bonus_14	<size=32>Engineering Approach</size>\nThe merchant will bring an additional engineer next time. Engineers will build faster and will place two turrets instead of one after researching the appropriate technology.
+UI/ui_meta_04	Rooms open access to new bonuses
+UI/ui_workshop_levelup	Select a bonus for improving <#6de38c>warehouse</color>
+UI/ui_bonus_workshop_1	<size=32>Industry</size>\nTools, shields, Molotov cocktails and mines will be produced 30% faster. When full, the workshop will generate scrap.
+UI/ui_bonus_workshop_2	<size=32>Barricades</size>\nThe outer walls will be reinforced with a tire barricade before each nightfall. Barricade durability will be equal to 50% of the wall durability. Barricades will reduce explosion damage.
+UI/ui_bonus_walls_1	<size=32>Flash-Bang Traps</size>\nA flash-bang trap will be placed at each wall. The trap will be triggered when the wall's health falls below {[bonus_flash_bang_modificator]}. Once triggered, the trap stuns enemies for a short time.
+UI/ui_walls_levelup	Choose a bonus for expanding borders by <#6de38c>{[bonus_walls_count]} walls </color>
+UI/ui_wave_survived_levelup	Select a bonus for <#6de38c>surviving</color>
+UI/ui_wave_survived_1	<size=32>Refugee</size>\n1 tramp will join the camp
+UI/ui_wave_survived_2	<size=32>Experienced in defense</size>\nEngineers will construct faster.
+UI/ui_demo_disclaimer	<size=32>Досвід в обороні</size>\nІнженери швидше будують споруди
+UI/ui_bonus_15	<size=32>The Last Stand</size>\nMutants attacking the generator will be blown up by a mine
+UI/ui_meta_05	Survive for {arg1} days with difficulty "seasoned" or higher to open the new room
+UI/ui_meta_06	New room unlocked!
+UI/ui_wave_survived_3	<size=32>Cache</size>\nA supply box will appear at the generator
+UI/ui_hint_shovels	<#6de38c>Diggers</color> can clear <#6de38c>rubble</color> with shovels! Send two diggers to make the work go faster.
+UI/ui_elevator_returned	On the surface, stalkers found ...
+UI/ui_bonuses_in_last_session	Used bonuses
+UI/ui_scenario_tittle	Scenario
+UI/ui_scenario_options	Game Setup
+UI/ui_scenario_0	Electrozavodskaya
+UI/ui_wishlist	Add to wishlist
+UI/ui_win	Win
+UI/ui_stats	Statistics
+UI/ui_score	Score
+UI/ui_bonus_25	<size=32>Barbed wire</size>\nEnemies take 2 point of damage for every 2 seconds inside the barrage line.
+UI/ui_options_type_keyboard	Keyboard layout
+UI/ui_menu_difficulty_08	Hell
+UI/ui_menu_quit2	Exit
+UI/ui_no_saves	<#DE3838>Warning!</color>\nIn the current state, the game doesn't have a save system. We’re doing everything we can to add them with the updates soon.
+Statistics/stat_flower_kills	Flowers unrooted
+Statistics/stat_best_score	Best score
+Statistics/stat_attempts	Attempts made
+Statistics/stat_wins	Victories
+Statistics/stat_mutants_slayed	Mutants slayed
+Statistics/stat_pawns_survived	Followers survived
+Statistics/stat_pawns_died	Followers died
+Statistics/stat_dwellings_destroyed	Overgrowths destroyed
+Statistics/stat_mushrooms_picked	Mushrooms collected
+Statistics/stat_rats_roast	Rats fried
+Statistics/stat_mutants_slayed_sum	Mutants slayed by players
+Statistics/stat_distance	Distance travelled
+Achievements/ach_name_0000	First start
+Achievements/ach_desc_0000	Build a generator
+Achievements/ach_name_0001	Try again!
+Achievements/ach_desc_0001	Die from a flower
+Achievements/ach_name_0002	Gardener
+Achievements/ach_desc_0002	Kill the flower
+Achievements/ach_name_0003	He's lost!
+Achievements/ach_desc_0003	Survive the first wave
+Achievements/ach_name_0004	Well done!
+Achievements/ach_desc_0004	Survive the second wave
+Achievements/ach_name_0005	Survived!
+Achievements/ach_desc_0005	Survive the third wave
+Achievements/ach_name_0006	Rank B
+Achievements/ach_desc_0006	Get rank B or higher
+Achievements/ach_name_0007	Rank A
+Achievements/ach_desc_0007	Get rank A or higher
+Achievements/ach_name_0008	Rank S
+Achievements/ach_desc_0008	Get the S rank
+Achievements/ach_name_0009	Settlement
+Achievements/ach_desc_0009	Upgrade the generator to the second level
+Achievements/ach_name_0010	Fortress
+Achievements/ach_desc_0010	Upgrade the generator to the third level
+Achievements/ach_name_0011	Fully armed!
+Achievements/ach_desc_0011	Build all workshops
+Achievements/ach_name_0012	First blood
+Achievements/ach_desc_0012	Kill one mutant
+Achievements/ach_name_0013	Skirmish
+Achievements/ach_desc_0013	Kill 50 mutants
+Achievements/ach_name_0014	Carnage
+Achievements/ach_desc_0014	Kill 1000 mutants
+Achievements/ach_name_0015	Slayer
+Achievements/ach_desc_0015	Kill 10,000 mutants
+Achievements/ach_name_0016	Fuel
+Achievements/ach_desc_0016	Get fuel
+Achievements/ach_name_0017	At any cost
+Achievements/ach_desc_0017	Lose stalkers during an expedition to the surface
+Achievements/ach_name_0018	Survivors
+Achievements/ach_desc_0018	Pick up the stalkers on the other side of the bridge
+Achievements/ach_name_0019	No losses!
+Achievements/ach_desc_0019	Win without losing a single follower
+Achievements/ach_name_0020	Scoleciphobia
+Achievements/ach_desc_0020	Kill 25 slugs as a hero
+Achievements/ach_name_0021	The historian
+Achievements/ach_desc_0021	Find all notes
+Achievements/ach_name_0022	Let's go!
+Achievements/ach_desc_0022	Take a ride on a trolley
+Achievements/ach_name_0023	Armored train
+Achievements/ach_desc_0023	Fully arm the trolley
+Achievements/ach_name_0024	Bad luck
+Achievements/ach_desc_0024	Lose on the first day
+Achievements/ach_name_0025	Bagel
+Achievements/ach_desc_0025	Earn 0 points
+Achievements/ach_name_0026	Marathon runner
+Achievements/ach_desc_0026	Walk 42,195 meters
+Achievements/ach_name_0027	Battle
+Achievements/ach_desc_0027	Kill 100 mutants
+Terminology/survive	sağ kurtulmak
+Terminology/Rank	Kademe
+Terminology/mutant	mutant
+Terminology/fuel	yakıt
+Terminology/follower	yoldaş
+Terminology/rat	fare
+Terminology/slug	salyangoz
+Terminology/workshop	atölye
+Terminology/spitter	tüküren
+Terminology/tramp	aylak
+Terminology/digger	kazıcı
+Terminology/rubble	moloz
+Terminology/brazier	maltız
+Terminology/stalker	avcı
+Terminology/brute	yarma
+Terminology/unit	birim
+Terminology/living tent	barınma çadırı
+Terminology/outgrowth	tümör
+Terminology/growth	ur
+Terminology/field kitchen	saha mutfağı

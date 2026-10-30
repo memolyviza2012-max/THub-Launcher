@@ -1,0 +1,17 @@
+﻿FONT EXTRACTION STATUS: ❌ NOT POSSIBLE
+=======================================
+Game: Disco Elysium
+Engine: Unity (IL2CPP)
+
+Modding Framework: BepInEx
+Font Asset: thai_font.bundle (86 KB)
+
+Why it cannot be extracted:
+The font is stored as a Unity TextMesh Pro (TMP) asset.
+In Unity, TMP fonts are NOT raw vector TTF/OTF files. Instead, they are 
+pre-rendered SDF (Signed Distance Field) texture atlases (images) accompanied by 
+glyph metric data. 
+
+Because the modder has already converted the Thai vector font into a TMP SDF Atlas, 
+the original TTF/OTF is gone. Extracting this bundle would only yield an image file 
+(Texture2D) and a Material/TMP_FontAsset metadata file, not an installable Windows font.

@@ -1,0 +1,1 @@
+No valid installable TTF/OTF could be carved from the supplied range payloads. A 00 01 00 00 sequence at offset 0x17 in the PAK payload does not parse as a TrueType font (missing name table), so it is an embedded binary field/signature, not proof of a font. The mod documentation names Chakra Petch, but its original font file is not separately supplied.

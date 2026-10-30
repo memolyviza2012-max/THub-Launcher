@@ -1,0 +1,1 @@
+﻿TxtRes files are packed inside UCAS IoStore container (compressed, entropy 7.7). Require UnrealPak with IoStore support to extract. The 12 TxtRes files contain all game dialogue organized by chapter/region.

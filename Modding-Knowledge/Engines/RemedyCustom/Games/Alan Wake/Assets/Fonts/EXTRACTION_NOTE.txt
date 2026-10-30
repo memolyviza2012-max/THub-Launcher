@@ -1,0 +1,1 @@
+Fonts for Alan Wake are embedded inside .rmdp archives and cannot be directly extracted as TTF without specialized unpackers for Remedy Custom Engine.

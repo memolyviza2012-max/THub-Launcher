@@ -1,0 +1,1 @@
+Font is baked into a raster TGA atlas with .LFR mapping. Native TTF data is destroyed during the mod baking process.

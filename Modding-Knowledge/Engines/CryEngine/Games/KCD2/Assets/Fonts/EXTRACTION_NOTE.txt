@@ -1,0 +1,8 @@
+No installable TTF/OTF is contained in the KCD2 Thai mod.
+
+The supplied assets are Scaleform GFx resources, retained here as research/repacking assets:
+- gfxfontlib.gfx: 67,261 B, magic CFX 08, zlib begins at offset 0x08 (78 DA)
+- Modern/gfxfontlib_glyphs.gfx: 3,194,100 B, magic CFX 0F, zlib begins at 0x08 (78 9C)
+- Ancient/gfxfontlib_glyphs.gfx: 5,409,415 B, magic CFX 0F, zlib begins at 0x08 (78 9C)
+
+GFx is the game runtime resource; it does not expose a standalone TrueType/OpenType face to carve. Renaming these files to TTF would create invalid fonts and destroy the relationship between Scaleform font definitions and glyph data.

@@ -1,0 +1,23 @@
+﻿=== FF7 REBIRTH Main UTOC Asset Listing ===
+IoStore Version: 3
+
+--- TxtRes (Text Resource) Files per Chapter ---
+0005-TITLB_TxtRes.uasset  = Title/Intro
+4000-MIDGR_TxtRes.uasset  = Midgar (Chapter 1-ish)
+8100-GRASE_TxtRes.uasset  = Grasslands
+8200-JUNOE_TxtRes.uasset  = Junon
+8300-CORLE_TxtRes.uasset  = Corel
+8400-GOLDE_TxtRes.uasset  = Gold Saucer
+8500-GONGE_TxtRes.uasset  = Gongaga
+8600-COSME_TxtRes.uasset  = Cosmo Canyon
+8700-NIBLE_TxtRes.uasset  = Nibelheim
+8800-FOREE_TxtRes.uasset  = Forgotten Capital / Forest
+8900-CAPIT_TxtRes.uasset  = Final Chapter
+Resident_TxtRes.uasset    = Common/Shared text (always loaded)
+
+--- Font Definition Assets ---
+LatinFontLarge.uasset, LatinFontLarge4K.uasset
+SystemFont{Large,Normal,Small,XLarge}.uasset (+4K variants)
+U_Com_JP_* variants of all font definitions
+
+Total: 32 assets (12 TxtRes + 20 Font definitions)

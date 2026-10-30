@@ -1,0 +1,59 @@
+{
+ "version": "1.0",
+ "targets": [
+  {
+   "file": "bigfile4.viv",
+   "entry": 167,
+   "offset": 2032629760,
+   "size": 786432,
+   "blob": "base_167.z",
+   "orig_sha256": "4aa5f9c07a3bafb51386cc1f7f61f09edd95d9ad34153a063d2eec0e72ad39fe",
+   "mod_sha256": "c3b5a16295c5a930ef3f7855663318ca6d716943e6c7e127efa632bef9684385"
+  },
+  {
+   "file": "bigfile4.viv",
+   "entry": 410,
+   "offset": 2050336768,
+   "size": 393216,
+   "blob": "base_410.z",
+   "orig_sha256": "2e9959b4cea318a67841231e93830eab705a6e37aa59379a9d2eb2031bd814b4",
+   "mod_sha256": "3f213d61f11069baa6a85d7d3278623c3f83c8bf2f8bd4cf56544c445239065c"
+  },
+  {
+   "file": "dlc/map_epilogue/map_epilogue.viv",
+   "entry": 29,
+   "offset": 356896768,
+   "size": 131072,
+   "blob": "dlc_29.z",
+   "orig_sha256": "efeb265d255f3b63a4baddb50ec854212c265363cbdfa0f4288ca59aba3f8a3b",
+   "mod_sha256": "f4fa1ae5ab64551eadb63b76cbfa65fa24bfad839e58cdbba4601c7000e92efd"
+  },
+  {
+   "file": "dlc/map_epilogue/map_epilogue.viv",
+   "entry": 64,
+   "offset": 424669184,
+   "size": 262144,
+   "blob": "dlc_64.z",
+   "orig_sha256": "26dd6e986f11f3d644238326b7a567a13d390475ac6b1395fa347fd57eb28ffc",
+   "mod_sha256": "8de096d6f1e90faaaa7c09e111693e10be8536630521b9602d15ad9bd98a3cbd"
+  },
+  {
+   "file": "dlc/map_epilogue/map_epilogue.viv",
+   "entry": 255,
+   "offset": 355975168,
+   "size": 786432,
+   "blob": "dlc_255.z",
+   "orig_sha256": "4304d902165ff2db217f87c877561632775f8f771520f2645d9408080346e53d",
+   "mod_sha256": "4583be6b40087fefb5ba68ff870f510d78cf3fa2835b7337a2cad54b59fed3dd"
+  },
+  {
+   "file": "dlc/map_epilogue/map_epilogue.viv",
+   "entry": 650,
+   "offset": 426242048,
+   "size": 11010048,
+   "blob": "dlc_650.z",
+   "orig_sha256": "037e1ce8deff7962e901c1425a368c2481bfe7b8dd7a33b7206a5eaa76474ae0",
+   "mod_sha256": "23ab95f2cd19f530448309bd12bf585f8705326f928e028e1931ccd283fa1493"
+  }
+ ]
+}

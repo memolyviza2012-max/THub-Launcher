@@ -1,0 +1,211 @@
+﻿[Y425]
+Name=ydeng
+Description=ช่องข้อมูลจำลอง
+
+[Hjas]
+Name=จอมเวทอารค
+Propernames:hd=Jaina Proudmoore
+
+[Uart]
+Name=อัศวินมรณะ
+Propernames:hd=Arthas Menethil
+
+[Ekce]
+Name=ผู้พิทักษ์แห่งไพร
+Propernames:hd=เซนารอุส
+
+[Ofth]
+Name=ผู้หยังรู้
+Propernames:hd=Thrall
+
+[Udef]
+Name=อัศวินมรณะ
+Propernames=Lady Nightsorrow,Lady Soulrender,Lady Dethstorm,Lady Maldazzar,Lady Darkhallow,Lady Lightstalker,Baroness Bloodbane,Baroness Felblade,Dutchess Dreadmoore,Dutchess Ragereaver,Baroness Frostfel,Lady Darkscythe,Dutchess Wintermaul,Baroness Perenolde,Baroness Morte
+
+[Edef]
+Name=นักล่าปศาจสาว
+Propernames=Shadowsong,Shadowfury,Shadowstalker,Flameseeker,Darkweaver,Darkterror,Darksorrow,Sindweller,Painkiller,Hellbourne,Wrathbringer,Ragerunner,Firebrand,Bloodwrath,Terrorblade
+
+//////////////////////////////////////////////////////////
+// 2.0.0
+//////////////////////////////////////////////////////////
+
+[Ewam]
+Name=วอรเดน
+Propernames:hd=Maiev
+
+[Edei]
+Name=นักล่าปศาจ
+Propernames=Illidan ผู้ชัวราย
+
+[Emot]
+Name=นักบวชหญิงแห่งจันทรา
+Propernames:hd=Tyrande
+
+[Ekec]
+Name=ผู้พิทักษ์แห่งไพร
+Propernames:hd=เซนารอุส
+
+[Ekem]
+Name=ผู้พิทักษ์แห่งไพร
+Propernames=Malfurion
+
+[Ulik]
+Name=ลิช
+Propernames:hd=Kel'Thuzad
+
+[Udrb]
+Name=ลอรดหวาดกลัว
+Propernames=บัลนาซซาร
+
+[Udda]
+Name=ลอรดหวาดกลัว
+Propernames:hd=Dalvengyr
+
+[Udde]
+Name=ลอรดหวาดกลัว
+Propernames:hd=Detheroc
+
+[Udrm]
+Name=ลอรดหวาดกลัว
+Propernames:hd=มาลกานิส
+
+[Udrt]
+Name=ลอรดหวาดกลัว
+Propernames=ทิคอนดรอุส
+
+[Udrv]
+Name=ลอรดหวาดกลัว
+Propernames=Varimathras
+
+[Ucra]
+Name=ลอรดหลุมฝงศพ
+Propernames=Anub'arak
+
+[Hpap]
+Name=แพลาดิน
+Propernames=พลเรอเอก Proudmoore
+
+[Hpaa]
+Name=แพลาดิน
+Propernames=Arthas
+
+[Hpaf]
+Name=แพลาดิน
+Propernames=Arthas Frostmourne
+
+[Hpdo]
+Name=แพลาดิน
+Propernames=Dagren the Orcslayer
+
+[Hphl]
+Name=แพลาดิน
+Propernames=Halahk the Lifebringer
+
+[Hpnb]
+Name=แพลาดิน
+Propernames=Lord Nicholas Buzan
+
+[Hpmd]
+Name=แพลาดิน
+Propernames:hd=Magroth the Defender
+
+[Hpge]
+Name=แพลาดิน
+Propernames=Sir Gregory Edmunson
+
+[Hpau]
+Name=แพลาดิน
+Propernames=Uther
+
+[Haks]
+Name=จอมเวทอารค
+Propernames=Kelen the Seeker
+
+[Haan]
+Name=จอมเวทอารค
+Propernames:hd=Antonidus
+
+[Hmmb]
+Name=ราชันย์แห่งขุนเขา
+Propernames=Muradin Bronzebeard
+
+[Hblk]
+Name=จอมเวทเลือด
+Propernames:hd=Kael
+
+[Ofad]
+Name=ฟารซีร
+Propernames:hd=Drek'Thar
+
+[Ofat]
+Name=ฟารซีร
+Propernames=Thrall
+
+[Obbc]
+Name=จอมดาบ
+Propernames=เบลดมาสเตอรแห่งเผ่าแบล็ก รอก
+
+[Oblh]
+Name=จอมดาบ
+Propernames=Grommash Hellscream
+
+[Obhp]
+Name=จอมดาบ
+Propernames=Grommash Hellscream (ออรคอสูร)
+
+[Obls]
+Name=จอมดาบ
+Propernames=Samuro
+
+[Otcb]
+Name=หัวหน้าเผ่าทอเรน
+Propernames=Cairne Bloodhoof
+
+[Oshr]
+Name=นักล่าเงา
+Propernames=Rokhan
+
+[Npcs]
+Name=แพนด้า
+Propernames:hd=Chen Stormstout
+
+[Nbrx]
+Name=จอมเวทมนตรสัตว์
+Propernames=Rexxar
+
+[Nbrs]
+Name=เรนเจอรมืด
+Propernames=Sylvanas Windrunner
+
+[Nbru]
+Name=เรนเจอรมืด
+Propernames=Sylvanas (อันเดด)
+
+[Nngv]
+Name=Naga Seawitch
+Propernames=เลดี Vashj
+
+[Ntig]
+Name=ช่างกล
+Propernames:hd=Engineer Gazlowe
+
+[Npma]
+Name=เจ้าแห่งหลุม
+Propernames:hd=Magtheridon
+
+[Npla]
+Name=เจ้าแห่งหลุม
+Propernames=Azgalor
+
+[Ekgh]
+Name=ผู้พิทักษ์แห่งไพร
+Propernames=ผู้พิทักษ์แห่งไพรผี
+
+[Haga]
+Name=จอมเวทอารค
+Propernames=Antonidas ผู้เปนวิญญาณ
+
+[Haja]
+Name=จอมเวทอารค
+Propernames=Jaina

@@ -1,0 +1,59 @@
+﻿=== Clair Obscur: Expedition 33 — PAK Content Listing ===
+File: PlaeWaiLenEng-Windows_P.pak (5.53 MB)
+PAK Version: 11
+Mount Point: ../../../Sandfall/Content/
+Entry Count: 37
+UAsset Headers: 0 (fonts embedded as raw TTF inside .ufont wrappers)
+
+--- Game Fonts: EB Garamond (9 weights) ---
+Sandfall/Content/.../Fonts/
+  EBGaramond-Bold.ufont
+  EBGaramond-BoldItalic.ufont
+  EBGaramond-ExtraBold.ufont
+  EBGaramond-ExtraBoldItalic.ufont
+  EBGaramond-Italic.ufont
+  EBGaramond-Medium.ufont
+  EBGaramond-MediumItalic.ufont
+  EBGaramond-Regular.ufont
+  EBGaramond-SemiBold.ufont
+
+--- Thai Fonts: Bai Jamjuree (12 weights) ---
+  FF_BaiJamjuree-Bold.ufont
+  FF_BaiJamjuree-BoldItalic.ufont
+  FF_BaiJamjuree-ExtraLight.ufont
+  FF_BaiJamjuree-ExtraLightItalic.ufont
+  FF_BaiJamjuree-Light.ufont
+  FF_BaiJamjuree-LightItalic.ufont
+  FF_BaiJamjuree-Medium.ufont
+  FF_BaiJamjuree-MediumItalic.ufont
+  FF_BaiJamjuree-Regular.ufont
+  FF_BaiJamjuree-RegularItalic.ufont
+  FF_BaiJamjuree-SemiBold.ufont
+  FF_BaiJamjuree-SemiBoldItalic.ufont
+
+--- Other Game Fonts ---
+  IMFellDoublePica-Italic.ufont
+  IMFellDoublePica-Regular.ufont
+  ImFellDWPica-Regular.ufont
+  LibreBaskerville-Bold.ufont
+  LibreBaskerville-Italic.ufont
+  LibreBaskerville-Regular.ufont
+  Portmanteau_Regular.ufont
+  SherlockVintage_Font.ufont
+  Trajan_Pro_Bold.ufont
+  Trajan_Pro_Regular.ufont
+
+--- Slate Fonts ---
+  RobotoCondensed-Bold.ttf
+  RobotoCondensed-BoldItalic.ttf
+  RobotoCondensed-Light.ttf
+  RobotoCondensed-LightItalic.ttf
+  RobotoCondensed-Regular.ttf
+
+--- Localization ---
+  Game.locres ★ Thai translations
+
+--- Extracted TTF Fonts (from inside .ufont wrappers) ---
+  Sarabun family: 14 weights (Regular to ExtraBold, all italics)
+  Noto Sans Thai Looped Regular (270 KB)
+  Sherlock Vintage (1014 KB) - game display font

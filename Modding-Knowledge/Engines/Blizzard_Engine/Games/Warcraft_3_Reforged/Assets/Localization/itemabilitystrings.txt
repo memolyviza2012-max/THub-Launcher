@@ -1,0 +1,1137 @@
+﻿// Item abilities are generally activated via the inventory UI and not through their own hotkeys
+
+// Rune of the Watcher
+[APwt]
+Name=รูนผู้เฝาดู
+
+// Blink (item)
+[AIbk]
+Name=กระพรบ (เวอรชันไอเทม)
+
+// One time permanent strength gain ability, usually on a Tome
+[AIsm]
+Name=ไอเทมเพิมความแข็งแกรง
+
+// One time permanent agility gain ability, usually on a tome
+[AIam]
+Name=ไอเทมเพิมความคล่องแคล่ว
+
+// short duration single target speed bonus
+[AIsp]
+Name=ไอเทมโบนัสความเรวชัวคราว
+
+// continuous Attack Bonus
+[AIat]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+3)
+
+// continuous Defense Bonus
+[AIde]
+Name=ไอเทมโบนัสเกราะ
+
+// area of effect damage of destructables
+[AIdm]
+Name=ไอเทมความเสียหายพืนที ต้นไม้/กำแพง
+
+// One time permanent hero experience gain, usually on a tome
+[AIem]
+Name=ไอเทมเพิมประสบการณ์
+
+[AIe2]
+Name=ไอเทมเพิมประสบการณ์
+EditorSuffix= (ขันสูง)
+
+// Cloud of Fog
+[AIfg]
+Name=เมฆหมอก
+Tip=เมฆหมอก
+Ubertip="สรางเมฆขนาดเล็กทีหยุด สิงก่อสรางโจมตีระยะไกล ภายในไม่ให้โจมตี |nอยู่ได้ <Aclf,Dur1> วินาที"
+Hotkey=C
+
+// Flag Ability, to show something on a hero carrying the flag
+[AIfl]
+Name=ไอเทมยึดธง
+
+// human flag
+[AIfm]
+Name=ไอเทมยึดธง
+EditorSuffix=(มนุษย์)
+
+// night elf flag
+[AIfn]
+Name=ไอเทมยึดธง
+EditorSuffix=(ไนท์เอลฟ)
+
+// orc flag
+[AIfo]
+Name=ไอเทมยึดธง
+EditorSuffix=(ออรค)
+
+// undead flag
+[AIfe]
+Name=ไอเทมยึดธง
+EditorSuffix=(อันเดด)
+
+// One time permanent hero level gain, usually on a tome
+[AIlm]
+Name=ไอเทมเพิมเลเวล
+
+// One time permanent intelligence gain, usually on a Tome
+[AIim]
+Name=ไอเทมเพิมสติปญญา
+
+// One time permanent int/agi/str gain
+[AIxm]
+Name=ไอเทมเพิมสติปญญา/ความคล่องแคล่ว/ความแข็งแกรง
+
+// single shot one target healing (potions, typically)
+[AIhe]
+Name=ไอเทมบำบัด
+
+[AIhx]
+Name=ไอเทมบำบัด
+EditorSuffix=(ตำสุด)
+
+// single shot group area effect healing (scrolls, typically)
+[AIha]
+Name=ไอเทมบำบัดพืนที
+
+[AIhb]
+Name=ไอเทมบำบัดพืนที
+EditorSuffix= (ขันสูง)
+
+// single shot group area effect healing (powerup, lesser)
+[APh1]
+Name=พาวเวอรอัปบำบัดพืนที ชันตำ
+
+// single shot group area effect healing (powerup)
+[APh2]
+Name=รกษาพืนทีจากไอเทม
+
+// single shot group area effect healing (powerup, greater)
+[APh3]
+Name=พาวเวอรอัปบำบัดพืนที ขันสูง
+
+
+// short duration single target invisibility (potion)
+[AIvi]
+Name=ไอเทมล่องหนชัวคราว
+
+// short duration single target invulnerability (potion)
+[AIvu]
+Name=ไอเทมอมตะชัวคราว
+
+[AIvl]
+Name=ไอเทมอมตะชัวคราว
+EditorSuffix= (ชันตำ)
+
+[AIvg]
+Name=ไอเทมอมตะชัวคราว
+EditorSuffix= (เทวสิทธิ)
+
+// single shot one target mana regain (potions, typically)
+[AIma]
+Name=ไอเทมฟนฟูมานา
+
+// single shot group area effect mana regain (scrolls, typically)
+[AImr]
+Name=ไอเทมฟนฟูมานาพืนที
+
+// single shot group area effect mana regain (rune)
+[APmr]
+Name=รูนฟนฟูมานาพืนที
+
+// single shot group area effect mana regain (rune, greater)
+[APmg]
+Name=รูนฟนฟูมานาพืนที ขันสูง
+
+// single shot one target life/mana restore (potion)
+[AIre]
+Name=ไอเทมบำบัด/ฟนฟูมานา
+
+// single shot group area effect life/mana restore (scroll)
+[AIra]
+Name=ไอเทมบำบัด/ฟนฟูมานาพืนที
+
+// single shot group area effect life/mana restore (rune)
+[APra]
+Name=รูนบำบัด/ฟนฟูมานาพืนที
+
+// area of effect application of a defensive buff (scroll of protection)
+[AIda]
+Name=ไอเทมโบนัสเกราะพืนที ชัวคราว
+
+// area of effect application of a defensive buff (scroll of protection) (with healing)
+[AIdb]
+Name=ไอเทมโบนัสเกราะพืนที ชัวคราว
+EditorSuffix= (พรอมบำบัดพลังชีวิตและมานา)
+
+// buff that AIda applies
+[Bdef]
+Bufftip=ม้วนคัมภีรปองกัน
+Buffubertip="หน่วยนีได้รบผลจากม้วน คัมภีรปองกัน เกราะเพิมขึนชัวคราว"
+
+// area of effect detection (crystal ball)
+[AIta]
+Name=ไอเทมตรวจจับพืนที
+
+// continuous Mana regeneration (ring)
+[AIrm]
+Name=ไอเทมฟนฟูมานาต่อเนือง
+
+[AIfi]
+Name=ไอเทมลูกไฟ
+
+// Illusion generator
+[AIil]
+Name=ไอเทมภาพลวงตา
+
+[BIil]
+Bufftip=ภาพลวงตา
+Buffubertip="หน่วยนีเปนภาพลวงตา รบความเสียหายเพิมขึนจาก ศัตรู"
+
+// Dispel effect
+[AIdi]
+Name=ไอเทมสลายเวทมนตร
+
+[AIds]
+Name=ไอเทมสลายเวทมนตร
+EditorSuffix= (มีคูลดาวน์)
+
+// Dispel effect (powerup)
+[APdi]
+Name=พาวเวอรอัปสลายเวทมนตร
+
+// Hero attacks get fire damage bonus, persistent, Orb of Fire
+[AIfb]
+Name=ไอเทมโบนัสโจมตีไฟ
+
+// Hero attacks get lightning damage bonus, persistent, Orb of Lightning
+[AIlb]
+Name=ไอเทมโบนัสโจมตีสายฟา
+
+// Hero attacks get black arrow bonus
+[AIdf]
+Name=ไอเทมโบนัสโจมตีลูกศรดำ
+
+// purge portion of lightning orb
+[AIlp]
+Name=ไอเทมชำระล้าง
+EditorSuffix= (1)
+
+// Hero attacks get frost damage bonus, persistent, Orb of Frost
+[AIob]
+Name=ไอเทมโบนัสโจมตีนำแข็ง
+
+[AIpb]
+Name=ไอเทมโบนัสโจมตีพิษ
+
+[AIcb]
+Name=ไอเทมโบนัสโจมตีเสือมทราม
+
+[BIcb]
+Bufftip=เสือมทราม
+Buffubertip="หน่วยนีถูกโจมตีด้วยทรงกลม เสือมทราม เกราะลดลงชัวคราว"
+
+// Hero sight range increase, persistent, Telescope
+[AIsi]
+Name=ไอเทมโบนัสระยะสายตา
+
+// Soul Gem Hero soul theft ability
+[AIso]
+Name=ไอเทมขโมยวิญญาณ
+
+// Soul Gem Hero soul-carying ability - remove this to release the soul
+[Asou]
+Name=ไอเทมครอบครองวิญญาณ
+
+// caster buff for AIso
+[BIsv]
+Bufftip=ขโมยวิญญาณ
+Buffubertip="นีคือวิญญาณของฮีโร"
+
+// reincarnation (ankh)
+[AIrc]
+Name=ไอเทมกลับชาติมาเกิด
+
+// recall (amulet)
+[AIrt]
+Name=ไอเทมเรยกกลับ
+
+[AItp]
+Name=ไอเทมประตูมิติเมือง
+
+[AIco]
+Name=ไอเทมบัญชาการ
+
+// scepter of avarice, transmute ability
+[AIts]
+Name=ไอเทมแปรสภาพ
+
+// figurine unit summon ability - red drake
+[AIfd]
+Name=ไอเทมเรยกเดรกแดง
+
+// blue drake
+[AIfd]
+Name=ไอเทมเรยกเดรกนำเงิน
+
+// furbolg
+[AIff]
+Name=ไอเทมเรยกเฟอรโบลก์
+
+// furbolg tracker
+[AIut]
+Name=ไอเทมเรยกเฟอรโบลก์นัก ตามรอย
+
+// rock golem
+[AIfr]
+Name=ไอเทมเรยกโกเลมหิน
+
+// doom guard
+[AIfu]
+Name=ไอเทมเรยกผู้พิทักษ์วิบัติ
+
+// felhound
+[AIfh]
+Name=ไอเทมเรยกเฟลสตอล์คเกอร
+
+// skeleton
+[AIfs]
+Name=ไอเทมเรยกโครงกระดูก
+
+// Ice Revenant
+[AIir]
+Name=ไอเทมเรยกวิญญาณนำแข็ง ขัว
+
+// Ursa Warrior
+[AIuw]
+Name=ไอเทมเรยกเออรซานักรบ
+
+// Blue Dragonspawn Overseer
+[AIff]
+Name=ไอเทมเรยกผู้ควบคุมทายาท มังกรนำเงิน
+
+[BFig]
+Bufftip=หน่วยทีถูกเรยก
+Buffubertip="หน่วยทีถูกเรยกรบ ความเสียหายเพิมขึนจากการ สลายเวทมนตร"
+
+// place goblin land mine
+[AIpm]
+Name=ไอเทมวางกับระเบิดก็อบลิน
+
+// permanent attack bonus
+[AIaa]
+Name=ไอเทมเพิมความเสียหายถาวร, ไอเทมเพิมความเสียหายการ โจมตี
+
+// permanent hit point bonus
+[AImi]
+Name=ไอเทมเพิมพลังชีวิตถาวร, ไอเทมเพิมพลังชีวิต
+
+[AIpx]
+Name=ไอเทมเพิมพลังชีวิตถาวร
+EditorSuffix=(ชันตำ)
+
+// vampiric life steal ability
+[AIva]
+Name=ไอเทมดูดพลังชีวิต
+
+// cloak of flames immolation
+[AIcf]
+Name=ไอเทมเปลวเผาผลาญ
+
+// Cloak of Flames immolation buff
+[BIcf]
+Bufftip=เสือคลุมเพลิง
+Buffubertip="หน่วยนีสวมเสือคลุมเพลิง หน่วยภาคพืนศัตรูใกล้เคียง จะได้รบความเสียหายตามเวลา"
+
+// hero stat bonus
+[AIab]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+
+// freeze damage bonus
+[AIzb]
+Name=ไอเทมโบนัสความเสียหาย แช่แข็ง
+
+// max life bonus
+[AIml]
+Name=ไอเทมโบนัสพลังชีวิต
+
+[AIlz]
+Name=ไอเทมโบนัสพลังชีวิต
+EditorSuffix=(ตำสุด)
+
+// regen life
+[Arel]
+Name=ไอเทมฟนฟูพลังชีวิต ต่อเนือง
+
+// anti-magic shield
+[Aami]
+Name=ไอเทมเปลือกต้านเวทมนตร
+
+// max mana bonus
+[AImm]
+Name=ไอเทมโบนัสมานา
+
+[AImz]
+Name=ไอเทมโบนัสมานา (100)
+
+[AImv]
+Name=ไอเทมโบนัสมานา (75)
+
+[AI2m]
+Name=ไอเทมโบนัสมานา (200)
+
+// attack speed increase
+[AIas]
+Name=ไอเทมโบนัสความเรวโจมตี
+
+[AIsx]
+Name=ไอเทมโบนัสความเรวโจมตี
+EditorSuffix= (ถุงมือความเรว)
+
+[AIs2]
+Name=ไอเทมโบนัสความเรวโจมตี
+EditorSuffix= (ขันสูง)
+
+[AIan]
+Name=ไอเทมบัญชาการศพ
+
+[AIrs]
+Name=ไอเทมคืนชีพ
+
+[AIrx]
+Name=ไอเทมคืนชีพ
+EditorSuffix=(คูลดาวน์)
+
+[APrl]
+Name=รูนคืนชีพชันตำ
+
+[APrr]
+Name=รูนคืนชีพชันสูง
+
+[AIaa]
+
+[AImi]
+
+[AIms]
+Name=ไอเทมโบนัสความเรว เคลือนที
+
+[AIa3]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+3 ความคล่องแคล่ว)
+
+[AIa4]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+4 ความคล่องแคล่ว)
+
+[AIa5]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+5 ความคล่องแคล่ว)
+
+[AIa6]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+6 ความคล่องแคล่ว)
+
+[AIaz]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+10 ความคล่องแคล่ว)
+
+[AIx5]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+5 ค่าสถานะทังหมด)
+
+[AIx2]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+2 ค่าสถานะทังหมด)
+
+[AIx3]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+3 ค่าสถานะทังหมด)
+
+[AIx4]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+4 ค่าสถานะทังหมด)
+
+[AIs3]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+3 ความแข็งแกรง)
+
+[AIs4]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+4 ความแข็งแกรง)
+
+[AIs5]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+5 ความแข็งแกรง)
+
+[AIs6]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+6 ความแข็งแกรง)
+
+[AIi3]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+3 สติปญญา)
+
+[AIi4]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+4 สติปญญา)
+
+[AIi5]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+5 สติปญญา)
+
+[AIi6]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+6 สติปญญา)
+
+[AIgm]
+Name=ไอเทมเพิมความคล่องแคล่ว
+EditorSuffix=(+2)
+
+[AItm]
+Name=ไอเทมเพิมสติปญญา
+EditorSuffix=(+2)
+
+[AInm]
+Name=ไอเทมเพิมความแข็งแกรง
+EditorSuffix=(+2)
+
+[AIt6]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+6)
+
+[AIt9]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+9)
+
+[AItc]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+12)
+
+[AItf]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+15)
+
+[AIcy]
+Name=พายุหมุน
+Tip=พายุหมุน
+Ubertip="โยนหน่วยศัตรูทีไม่ใช่ เครองจักรเปาหมายขึนไป ในอากาศ ทำให้เคลือนที โจมตี หรอรายเวทไม่ได้ และหยุดหน่วยอืนไม่ให้ โจมตีหรอรายเวทใส่มัน |nอยู่ได้ <AIcy,Dur1> วินาที"
+Hotkey=C
+EditorSuffix=(ไอเทม)
+
+[AId1]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+1)
+
+[AId2]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+2)
+
+[AId3]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+3)
+
+[AId4]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+4)
+
+[AId5]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+5)
+
+[AId7]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+7)
+
+[AId8]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+8)
+
+[AId0]
+Name=ไอเทมโบนัสเกราะ
+EditorSuffix=(+10)
+
+[AIin]
+EditorSuffix=(ไอเทม)
+
+[AIlf]
+Name=ไอเทมโบนัสพลังชีวิต
+EditorSuffix=(ตำสุด)
+
+[AIl1]
+Name=ไอเทมโบนัสพลังชีวิต
+EditorSuffix=(ชันตำ)
+
+[AIl2]
+Name=ไอเทมโบนัสพลังชีวิต
+EditorSuffix=(ขันสูง)
+
+[Arll]
+Name=ไอเทมฟนฟูพลังชีวิต ต่อเนือง
+EditorSuffix=(ชันตำ)
+
+[AIh1]
+Name=ไอเทมบำบัด
+EditorSuffix=(ชันตำ)
+
+[AIh2]
+Name=ไอเทมบำบัด
+EditorSuffix=(ขันสูง)
+
+[AIhw]
+Name=หลักบำบัด
+Ubertip="เรยกหลักทีเคลือนทีไม่ ได้ รกษา <Aoar,DataA1,%>% ของหน่วยพลังชีวิตหน่วย พันธมิตรทีไม่ใช่ เครองจักรใกล้เคียงต่อ วินาที |nอยู่ได้ <AIhw,Dur1> วินาที"
+EditorSuffix=(ไอเทม)
+
+[AIsw]
+Name=หลักยาม
+Ubertip="เรยกหลักล่องหนที เคลือนทีไม่ได้ ให้การมองเห็นในพืนที |nมองเห็นหน่วยล่องหนได้ |nอยู่ได้ <AIsw,Dur1> วินาที"
+EditorSuffix=(ไอเทม)
+
+[AIv1]
+Name=ไอเทมล่องหนชัวคราว
+EditorSuffix=(ชันตำ)
+
+[AIv2]
+Name=ไอเทมล่องหนชัวคราว
+EditorSuffix=(ขันสูง)
+
+[AIm1]
+Name=ไอเทมฟนฟูมานา
+EditorSuffix=(ชันตำ)
+
+[AIm2]
+Name=ไอเทมฟนฟูมานา
+EditorSuffix=(ขันสูง)
+
+[AIrn]
+EditorSuffix=(ชันตำ)
+
+[AIad]
+EditorSuffix=(ไอเทม)
+
+[AIcd]
+EditorSuffix=(ไอเทม)
+
+[AIwd]
+EditorSuffix=(ไอเทม)
+
+[AIba]
+EditorSuffix=(ไอเทม)
+
+[AIav]
+EditorSuffix=(ไอเทม)
+
+[AIar]
+EditorSuffix=(ไอเทม)
+
+[AIae]
+EditorSuffix=(ไอเทม)
+
+[AIau]
+EditorSuffix=(ไอเทม)
+
+[AIls]
+Name=โล่สายฟา
+Ubertip="สรางโล่ไฟฟารอบหน่วย เปาหมาย สรางความเสียหาย <AIls,DataA1> ต่อวินาทีให้หน่วยรอบข้าง |nอยู่ได้ <AIls,Dur1> วินาที"
+EditorSuffix=(ไอเทม)
+
+[AIrr]
+Name=คำราม
+Ubertip="ให้หน่วยพันธมิตรใกล้เคียง โบนัสความเสียหาย <AIrr,DataA1,%>% |nอยู่ได้ <AIrr,Dur1> วินาที"
+EditorSuffix=(ไอเทม)
+
+[AIev]
+Name=หลบหลีก
+Ubertip="ให้โอกาส <AIev,DataA1,%>% หลบเลียงการโจมตี"
+EditorSuffix=(ไอเทม)
+
+[AImx]
+Name=ภูมิคุ้มกันเวท
+Ubertip="ทำให้หน่วยนีต้านทาน เวทมนตรทังหมด"
+EditorSuffix=(ไอเทม)
+
+[AImb]
+Name=ไอเทมโบนัสมานา
+EditorSuffix=(ตำสุด)
+
+[AIbm]
+Name=ไอเทมโบนัสมานา
+EditorSuffix=(ขันสูง)
+
+[AIuv]
+Name=สายตาไกลพิเศษ
+EditorSuffix=(ไอเทม)
+
+[AImh]
+Name=ไอเทมเพิมพลังชีวิตถาวร
+EditorSuffix=(+50)
+
+[AIa1]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+1 ความคล่องแคล่ว)
+
+[AIx1]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+1 ค่าสถานะทังหมด)
+
+[AIs1]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+1 ความแข็งแกรง)
+
+[AIi1]
+Name=ไอเทมโบนัสค่าสถานะฮีโร
+EditorSuffix=(+1 สติปญญา)
+
+[AIfc]
+Name=พรมบิน
+
+// Healing Salve
+[AIrl]
+Name=ยาทาแผลบำบัด
+
+[BIrl]
+Bufftip=ฟนฟู
+Buffubertip="หน่วยนีมีฟนฟูติดตัว หน่วยพลังชีวิตจะฟนฟู ตามเวลา"
+
+// Clarity Potion
+[AIpr]
+Name=ยานำใสกระจ่าง
+
+[AIpl]
+Name=ยานำใสกระจ่างชันตำ
+
+// generic rejuv potion/scroll base
+[AIp1]
+Name=ผลไอเทมฟนฟูทัวไป
+
+[BIrm]
+Bufftip=ยานำใสกระจ่าง
+Buffubertip="หน่วยนีดืมยานำใสกระจ่าง มานาจะฟนฟูตามเวลา"
+
+[AIp2]
+Name=ผลไอเทมฟนฟูทัวไป
+EditorSuffix= (II)
+
+[AIp3]
+Name=ผลไอเทมฟนฟูทัวไป
+EditorSuffix= (III)
+
+[AIp4]
+Name=ผลไอเทมฟนฟูทัวไป
+EditorSuffix= (IV)
+
+[AIp5]
+Name=ผลไอเทมฟนฟูทัวไป
+EditorSuffix= (V)
+
+[AIp6]
+Name=ผลไอเทมฟนฟูทัวไป
+EditorSuffix= (VI)
+
+// Scroll of Regeneration
+[AIsl]
+Name=ม้วนคัมภีรฟนฟูพลัง
+
+[BIrg]
+Bufftip=ฟนคืนพลัง
+Buffubertip="หน่วยนีจะฟนฟูพลังชีวิต และมานาตามเวลา"
+EditorSuffix= (ไอเทม)
+
+// One time permanent gold increase
+[AIgo]
+Name=หีบทองคำ
+
+// One time permanent lumber increase
+[AIlu]
+Name=มัดไม้
+
+// Flare Gun
+[AIfa]
+Name=ปนพลุสัญญาณ
+
+[AIrv]
+Name=ไอเทมเปดเผยแผนทีทังหมด
+
+
+// Wand of Neutralization
+[AIdc]
+Name=ไอเทมสลายเวทมนตรลูกโซ่
+
+// Spider Silk
+[AIwb]
+Name=ไอเทมมัดใย
+
+// Monster Lure
+[AImo]
+Name=เหยือล่อสัตว์ราย
+
+[BImo]
+Bufftip=เหยือล่อสัตว์ราย
+Buffubertip="ครปใกล้เคียงจะถูกเรยกมา ทีเหยือล่อนี"
+
+// Random Item
+[AIri]
+Name=ไอเทมสุ่ม
+
+// Blight Placement
+[Ablp]
+Name=การวางปรสิตราย
+
+// Steal
+[Aste]
+Name=ขโมย
+
+// Change TOD
+[AIct]
+Name=เปลียนเวลาของวัน
+
+// Vampiric Potion
+[AIpv]
+Name=ยานำดูดเลือด
+
+[BIpv]
+Bufftip=ยานำดูดเลือด
+Buffubertip="ฮีโรนีใช้ยานำดูดเลือด มีความเสียหายเพิมขึนและ การโจมตีดูดพลังชีวิต"
+
+// Spell Damage Reduction
+[AIsr]
+Name=ลดความเสียหายเวทมนตร
+
+// Build Tiny Castle
+[AIbl]
+Name=สรางปราสาทจิว
+
+// Build Tiny Castle
+[AIbg]
+Name=สรางศาลาใหญ่จิว
+
+//build tiny tower
+[AIbt]
+Name=สรางหอสอดแนมจิว
+
+
+// Shadowsight
+[Ashs]
+Name=คทาสายตาเงา
+
+[Bshs]
+Bufftip=คทาสายตาเงา
+Buffubertip="หน่วยนีถูกโจมตีด้วยคทา สายตาเงา ถูกเปดเผยแก่ผู้เล่นฝาย ศัตรู"
+
+// Tome of Retraining
+[Aret]
+Name=ตำราฝกใหม่
+
+// Staff of Teleportation
+[AImt]
+Name=ธารพระกรเทเลพอรต
+
+// Staff of Preservation
+[ANpr]
+Name=ธารพระกรอนุรกษ์
+
+// Mechanical Critter
+[Amec]
+Name=สัตว์กลจักร
+
+[Bmec]
+Bufftip=สัตว์กลจักร
+Buffubertip="หน่วยทีถูกเรยกรบ ความเสียหายจากการสลาย เวทมนตร"
+
+// Spell Shield
+[ANss]
+Name=โล่เวท
+EditorSuffix= (สรอย)
+
+// Spell Shield (AOE)
+[ANse]
+Name=โล่เวท
+EditorSuffix= (รูน)
+
+[BNss]
+Bufftip=โล่เวท
+Buffubertip="โล่ปองกันทีปดกัน เวทมนตร"
+
+// Spell book
+[Aspb]
+Name=ตำราเวท
+
+// Raise Dead
+[AIrd]
+Name=ปลุกคนตาย (ไอเทม)
+
+// Staff of Sanctuary
+[ANsa]
+Name=ธารพระกรสถานศักดิสิทธิ
+
+[BNsa]
+Bufftip=สถานศักดิสิทธิ
+Buffubertip="หน่วยนีอยู่ภายใต้ผลของ ธารพระกรสถานศักดิสิทธิ หน่วยพลังชีวิตจะฟนฟู ตามเวลา แต่เคลือนที โจมตี หรอรายเวทไม่ได้"
+
+[AIsa]
+Name=ม้วนคัมภีรความเรว
+
+[APsa]
+Name=รูนความเรว
+
+[AItb]
+Name=ผงเปดเผยกาย
+
+[Bdet]
+Bufftip=ผงเปดเผยกาย
+Buffubertip="ผงเปดเผยกายเปดเผยหน่วย ล่องหนแก่ผู้เล่นฝายศัตรู"
+
+[AIsb]
+Name=ไอเทมโบนัสโจมตีชะลอ
+
+[AIll]
+Name=ไอเทมโบนัสโจมตีสายฟา (ใหม่)
+
+[AIos]
+Name=ไอเทมชะลอ
+Tip=ช้า
+Ubertip="ชะลออัตราโจมตีของหน่วย ศัตรูเปาหมาย <AIos,DataB1,%>% และความเรวเคลือนที <AIos,DataA1,%>% |nอยู่ได้ <AIos,Dur1> วินาที"
+EditorSuffix= (เวอรชันทรงกลม)
+
+// Orb of Darkness
+[ANbs]
+Name=ไอเทมลูกศรดำ
+
+// Spirit Link (AOE)
+[Aspp]
+Name=เชือมวิญญาณ
+EditorSuffix= (พืนที)
+
+[AIrb]
+Name=เกิดใหม่
+
+[BIrb]
+Bufftip=เกิดใหม่แล้ว
+Buffubertip="หน่วยนีเกิดใหม่แล้ว"
+
+// Dark Summoning
+[AUds]
+Name=การเรยกมืด
+Tip=การเรยกมืด
+Ubertip="เรยกหน่วยพันธมิตร <AUds,DataA1> ตัวจากพืนทีเปาหมายมายัง ผู้ราย"
+Hotkey=D
+Researchtip="เรยนรู้การเรยกมืด"
+Researchubertip="เรยกหน่วยพันธมิตร <AUds,DataA1> ตัวจากพืนทีเปาหมายมายัง ผู้ราย"
+Researchhotkey=D
+
+// anti-magic shield
+[AIxs]
+Name=ไอเทมเปลือกต้านเวทมนตร
+
+// divine shield item
+[AIdv]
+Name=ไอเทมโล่เทวสิทธิ
+
+// silence item
+[AIse]
+Name=ไอเทมปดปาก
+
+// item purge
+[AIpg]
+Name=ไอเทมชำระล้าง
+EditorSuffix= (2)
+
+// item purge
+[AIps]
+Name=ไอเทมชำระล้าง
+EditorSuffix= (3)
+
+// item purge
+[AIpw]
+Name=ไอเทมชำระล้าง
+EditorSuffix= (คทาปฏิเสธ)
+
+//#RESTNOBETA
+[AItg]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+1)
+
+[AIth]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+2)
+
+[AIti]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+4)
+
+[AItj]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+5)
+
+[AItk]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+7)
+
+[AItl]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+8)
+
+[AItn]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+10)
+
+[AItx]
+Name=ไอเทมโบนัสความเสียหาย
+EditorSuffix=(+20)
+
+[AIh3]
+Name=บำบัดน้อยทีสุด
+EditorSuffix=(คูลดาวน์ช้า)
+
+// orcish battle standard
+[AIfx]
+Name=ไอเทมธงรบออรค
+
+// Hero attacks get fire damage bonus, persistent, Orb of Gul'dan
+[AIgd]
+Name=ไอเทมโบนัสโจมตีไฟ
+EditorSuffix= (Gul'dan)
+
+
+// tiny altar of kings
+[AIbh]
+Name=สรางแท่นบูชากษัตรย์จิว
+
+// tiny blacksmith
+[AIbb]
+Name=สรางตีเหล็กจิว
+
+// tiny lumber mill
+[AIbr]
+Name=สรางโรงเลือยจิว
+
+// tiny farm
+[AIbf]
+Name=สรางฟารมจิว
+
+// tiny barracks
+[AIbs]
+Name=สรางค่ายทหารจิว
+
+[AIdn]
+Name=ความสามารถทรงกลมเงา
+
+[AInd]
+Name=ชุบชีวิต
+EditorSuffix= (ไอเทมแคมเปญพิเศษ)
+
+[AIuf]
+Name=บ้าคลังอัปมงคล
+EditorSuffix= (ไอเทม)
+
+[AIcm]
+Name=ควบคุมเวทมนตร
+EditorSuffix= (ไอเทม)
+
+[AIfz]
+Name=นิวมรณะ
+EditorSuffix= (ไอเทม)
+
+[AIdp]
+Name=สนธิสัญญามรณะ
+EditorSuffix= (ไอเทม)
+
+[AIdd]
+Name=ตังรบ, การปองกันแบบพาสซีฟ
+EditorSuffix= (ไอเทม)
+
+[AIbx]
+Name=กระแทก
+EditorSuffix= (ไอเทม)
+
+[AIwm]
+Name=บรวารแห่งสายนำ
+EditorSuffix= (ไอเทม)
+
+[AIsh]
+Name=เรยกนักล่าหัว
+EditorSuffix= (ไอเทม)
+
+[BIsh]
+Bufftip=วิญญาณนักล่าหัว
+
+[AIgx]
+Name=ออราฟนฟู
+EditorSuffix= (ไอเทม)
+
+[AIhl]
+Name=แสงศักดิสิทธิ
+EditorSuffix= (ไอเทม)
+
+[AIsz]
+Name=พิษชะลอ
+EditorSuffix= (ไอเทม)
+
+[AIpz]
+Name=เสียงจีดเพนกวิน
+
+[AIfw]
+Name=โบนัสความเสียหายไฟประชิด
+
+[AIft]
+Name=โบนัสความเสียหายเย็นประชิด
+
+[AIlx]
+Name=โบนัสความเสียหายสายฟา ประชิด
+
+[AIcs]
+Name=โจมตีครติคอล
+EditorSuffix= (ไอเทม)
+
+[AIdd]
+
+[AIcl]
+Name=สายฟาลูกโซ่
+EditorSuffix= (ไอเทม)
+
+[AIxk]
+Name=บ้าคลังศึก
+EditorSuffix= (ไอเทม)
+
+// Ritual Dagger
+[AIdg]
+Name=กรชพิธีกรรม
+EditorSuffix= (บำบัดทันที)
+
+// Ritual Dagger
+[AIg2]
+Name=กรชพิธีกรรม
+EditorSuffix= (ฟนฟู)
+
+// Ritual Dagger
+[AIg2]
+Name=กรชพิธีกรรม
+EditorSuffix= (ฟนฟู)
+
+[AIf2]
+Name=ไอเทมโบนัสโจมตีลดการบำบัด
+
+[BIhm]
+Bufftip=ลดการบำบัด
+Buffubertip="หน่วยนีฟนฟูพลังชีวิตใน อัตราทีลดลง"
+
+[AIno]
+Name=ชะลอ (ทรงกลมชะลอใหม่)
+
+[Bson]
+Bufftip=ทรงกลมชะลอ
+Buffubertip="หน่วยนีถูกชะลอ ความเรวเคลือนทีและอัตรา โจมตีลดลง"
+
+//----------------------------------------------------
+// Buffs with no in-game text
+// EditorName is for the Object Editor list only
+
+[BIwb]
+EditorName=ไอเทมมัดใย
+
+[Btrv]
+EditorName=เปดเผยจุดวารป
+
+

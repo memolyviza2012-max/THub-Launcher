@@ -1,0 +1,12 @@
+Font extraction result: no installable TTF/OTF was found.
+
+Evidence
+- Source: D:\Mods games\Thai Mods\0_Rivet Engineer\Metro Exodus\patch_th.vfs0
+- Raw TTF/OTF signatures were scanned and every candidate was table-directory invalid.
+- The archive contains named bitmap-font resources such as font\font_console and font\font_metro_for_menu_pt, not a standalone vector-font file.
+- A valid embedded DDS texture was carved separately in ../Textures; its semantic role cannot be assigned to a particular font without a 4A VFS extractor.
+
+Why conversion is not possible
+A DDS atlas contains raster pixels and no TrueType/OpenType outlines, naming tables, or glyph vectors. It cannot be converted into an installable TTF/OTF without obtaining the original source font or recreating it.
+
+Carved texture: embedded_texture_128x128_dx10.dds; source offset: 0xBFE866; size: 16532 bytes; SHA-256: 5880144a0834b09d92dd729494a27aa5b4df9c34e79e4b5c62e08e0169d8ab17

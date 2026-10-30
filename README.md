@@ -4,9 +4,9 @@
   <p><b>Ultimate Game Modding & Localization Environment</b></p>
    <p><b>โปรแกรมนี้ยังเป็นช่วง Beta อยู่นะครับ</b></p>
   
-  [![Version](https://img.shields.io/badge/Version-1.0.9-blue.svg?style=for-the-badge)](#)
+  [![Version](https://img.shields.io/badge/Version-2.2.0-blue.svg?style=for-the-badge)](#)
   [![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg?style=for-the-badge)](#)
-  [![Python](https://img.shields.io/badge/Built_with-Python_3.11-yellow.svg?style=for-the-badge)](#)
+  [![Python](https://img.shields.io/badge/Built_with-Python_3.10_PyQt6-yellow.svg?style=for-the-badge)](#)
 </div>
 
 <br/>
@@ -16,9 +16,18 @@
 
 ---
 
-## 🚀 What's New in THub 1.0.9 (อัปเดตล่าสุด)
+## 🚀 What's New in THub 2.2.0 (Flagship Suite - PyQt6 60 FPS Edition)
 
-**THub (Core Launcher)**
+**THub 2.2 (Core Flagship Launcher)**
+- **PyQt6 60 FPS Engine:** เปลี่ยนผ่านสู่สถาปัตยกรรมกราฟิก PyQt6 ลื่นไหลระดับ 60 FPS พร้อมหน้าต่าง Cyberpunk Dark Theme สวยงามทันสมัย
+- **Project Completion & Filter Workflow:** เพิ่มระบบทำเครื่องหมายโปรเจกต์ "เสร็จสิ้นแล้ว" พร้อมระบบตัวกรองแสดงเฉพาะโปรเจกต์ที่กำลังพัฒนาหรือโปรเจกต์ที่เสร็จแล้ว
+- **07_Image_Resources Media Suite:** ระบบสร้างโฟลเดอร์สื่อประชาสัมพันธ์อัตโนมัติ พร้อมเทมเพลต Photoshop (.PSD) ในตัวสำหรับทำ Facebook Cover, Post และ Header
+- **Steam Official Art Auto-Downloader:** ดึงภาพหน้าปกทางการของเกมจาก Steam CDN ครบทุกสัดส่วน (16:9, โปสเตอร์แนวตั้ง, แบนเนอร์ และโลโก้ PNG แท้)
+- **AI Thai Title Logo Prompts:** ระบบคำนวณและสร้าง Prompt AI สำหรับสร้างโลโก้ชื่อเกมภาษาไทย 3D เพื่อนำมาไดคัทลงเทมเพลต PSD ได้ทันที
+- **Retrofit Existing Projects:** ปุ่มคลิกเดียวจัดระเบียบ `07_Image_Resources` ให้กับโปรเจกต์เก่าที่สร้างไปแล้ว
+- **Offline Modding-Knowledge Base:** บันเดิลคลังความรู้การแปลเกมและไบเบิลกว่า 428 รายการ (58 เอนจิ้น และ 319 ไบเบิลเกม) ใช้งานออฟไลน์ได้ทันทีโดยไม่ต้องต่อเน็ต
+- **AI Helper Prompt Engine:** ปรับปรุงโครงสร้างพร้อมรองรับโหมด CLI และตัวช่วยคิดชื่อเกมภาษาไทย
+
 - **Project Wizard:** ยกเครื่องหน้าต่างสร้างโปรเจกต์ใหม่ให้ลื่นไหลกว่าเดิม
 - **Project Cards:** เพิ่มการรองรับรูปภาพหน้าปก (Cover) ให้กับการ์ดโปรเจกต์
 - **AI Helper:** อัปเกรดพลัง Prompt ให้โหดและแม่นยำยิ่งขึ้นเมื่อใช้งานร่วมกับ CLI

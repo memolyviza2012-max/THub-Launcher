@@ -1,0 +1,9 @@
+Font Extraction Note
+
+Game: Resident Evil 3 (1999)
+Format: Bitmap / Sprite Overlay via Classic REbirth
+
+Extraction Failure Reason:
+The Classic REbirth mod for Resident Evil 3 does not utilize TrueType or OpenType vector fonts (TTF/OTF). Instead, the mod replaces or hooks the game's original DirectDraw sprite-based text rendering. The Thai font characters are drawn as 2D pixels within sprite sheets. Therefore, it is impossible to extract a fully functional vector TTF/OTF font file.
+
+Original source font: Unknown. The Modder created a pixel-perfect Thai font tailored for the sprite atlas constraints.

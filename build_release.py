@@ -1,5 +1,6 @@
 import os
 import zipfile
+import sys
 import shutil
 
 def zipdir(path, ziph, arc_prefix=""):
@@ -15,8 +16,9 @@ def zipdir(path, ziph, arc_prefix=""):
 if not os.path.exists('Releases'):
     os.makedirs('Releases')
 
+version = sys.argv[1] if len(sys.argv) > 1 else "1.1.0"
 source_dir = os.path.join('dist', 'THub')
-output_zip = os.path.join('Releases', 'THub_1.1.0.zip')
+output_zip = os.path.join('Releases', f'THub_{version}.zip')
 
 print(f"Creating {output_zip} from {source_dir}...")
 if not os.path.exists(source_dir):

@@ -1,0 +1,4 @@
+﻿Game.locres is packed inside pakchunk99-Windows.pak (PAK v11, Zlib compressed).
+Requires UnrealPak to extract. Contains 3,293 Thai translation entries.
+LocRes is stored in "en/" folder (English slot override strategy).
+Total Thai UTF-16LE chars detected: ~4,988 in first 5MB of PAK.

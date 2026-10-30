@@ -1,0 +1,5 @@
+﻿Game.locres is inside PlaeWaiLenEng-Windows_P.pak (PAK v11).
+Mount: ../../../Sandfall/Content/
+Locale: en (English slot override)
+PAK name: PlaeWaiLenEng = แปลว่าเล่นอิง (Thai modder naming convention)
+Requires UnrealPak to extract .locres file.

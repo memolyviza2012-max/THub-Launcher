@@ -34,14 +34,5 @@
     "color": "#fab387",
     "exe": "tglyph_app.py",
     "icon": "assets/TGlyph.png"
-  },
-  {
-    "id": "TVox",
-    "name": "TVox",
-    "desc": "เล่นวิดีโอ & แปลซับไตเติ้ล FMV",
-    "repo": "memolyviza2012-max/TVox",
-    "color": "#f38ba8",
-    "exe": "tvox_app.py",
-    "icon": "assets/TVox.png"
   }
 ]

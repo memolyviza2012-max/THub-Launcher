@@ -19,6 +19,8 @@ from PyQt6.QtGui import QIcon
 
 from tpua_engine import TPUAEngine
 from tstudio_core import TStudioCore, CoreAI
+from translation_transport import TranslationGateway, snapshot_config, is_web, WebTransportError
+from translation_transport.qt_controls import TranslationChannelWidget
 
 
 class TRunWorkerSignals(QObject):
@@ -28,13 +30,16 @@ class TRunWorkerSignals(QObject):
     finished = pyqtSignal()               # completed normally
     stopped = pyqtSignal()                # user-requested stop
     error = pyqtSignal(str)               # fatal error
+    row_translated = pyqtSignal(int, str, str) # row_idx, game_id, translated text
 
 class TRunWorker(QRunnable):
-    def __init__(self, config, profile, input_csv, output_csv, batch_size, delay_ms, max_retries, use_mask, use_glossary, use_pua, peak_config=None):
+    def __init__(self, config, profile, input_csv, output_csv, batch_size=20, delay_ms=0, max_retries=3, use_mask=False, use_glossary=False, use_pua=False, peak_config=None, threads=1, token_burner=False, use_cjk_filter=True, use_eng_filter=False, auto_filter_engine=True, use_dedup=True, selected_row_indices=None, route_config=None):
         super().__init__()
         self.signals = TRunWorkerSignals()
-        self.config = config
-        self.profile = profile
+        self.config = snapshot_config(config, route_config)
+        from copy import deepcopy
+        self.profile = deepcopy(profile)
+        self._transport_error = None
         self.input_csv = input_csv
         self.output_csv = output_csv
         self.batch_size = batch_size
@@ -44,48 +49,271 @@ class TRunWorker(QRunnable):
         self.use_glossary = use_glossary
         self.use_pua = use_pua
         self.peak_config = peak_config
+        self.threads = 1 if is_web(self.config) else threads
+        self.token_burner = token_burner
+        self.use_cjk_filter = use_cjk_filter
+        self.use_eng_filter = use_eng_filter
+        self.auto_filter_engine = auto_filter_engine
+        self.use_dedup = use_dedup
+        self.selected_row_indices = set(selected_row_indices) if selected_row_indices is not None else None
         self._is_killed = False
+        self._web_disk_signature = self._disk_signature() if is_web(self.config) else None
+        self._last_save_time = 0.0
+        self.processed_count = 0
+        self.total_untrans = 0
+        self.result_summary = None
+        import threading
+        self.save_lock = threading.Lock()
+
+        # Check for companion glossary alongside input_csv for portability ("แปลคอมอื่น")
+        if self.input_csv and os.path.exists(self.input_csv):
+            try:
+                import json
+                csv_dir = os.path.dirname(os.path.abspath(self.input_csv))
+                base_no_ext = os.path.splitext(os.path.basename(self.input_csv))[0]
+                companion_candidates = [
+                    os.path.join(csv_dir, f"{base_no_ext}.glossary.json"),
+                    os.path.join(csv_dir, "glossary.json")
+                ]
+                for comp_path in companion_candidates:
+                    if os.path.exists(comp_path):
+                        with open(comp_path, 'r', encoding='utf-8') as gf:
+                            comp_data = json.load(gf)
+                        if isinstance(comp_data, dict) and comp_data:
+                            self.profile.setdefault("glossary", {})
+                            for k, v in comp_data.items():
+                                self.profile["glossary"][k] = v
+                        break
+            except Exception as e:
+                print(f"[Warning] Failed to load companion glossary in TRunWorker: {e}")
+
+    def _disk_signature(self):
+        import hashlib
+        if not os.path.exists(self.output_csv):
+            return None
+        with open(self.output_csv, 'rb') as handle:
+            return hashlib.file_digest(handle, 'sha256').hexdigest() if hasattr(hashlib, 'file_digest') else hashlib.sha256(handle.read()).hexdigest()
+
+    def _generate_translation(self, prompt, is_local):
+        try:
+            return TranslationGateway.generate_content(self.config, prompt, is_local=is_local,
+                                                        cancelled=lambda: self._is_killed)
+        except WebTransportError as error:
+            self._transport_error = str(error)
+            self._is_killed = True
+            raise
+
+    @staticmethod
+    def is_non_translatable_engine_string(src):
+        """Identify engine script internal lines, variables, and control codes that must NOT be sent to LLM."""
+        if not src or not isinstance(src, str):
+            return True
+        raw = src.strip()
+        if not raw:
+            return True
+
+        # 1. WOLF RPG & RPG Maker internal developer comments or event marks
+        # (Only skip if it's purely symbols/event markers or Japanese event headers, not prose/bullet lists like '■ MISSION')
+        if raw.startswith(('■', '★', '◆', '▲', '▼')):
+            stripped_after = raw.lstrip('■★◆▲▼ \t\r\n')
+            if not stripped_after or _re_module.match(r'^[0-9_.\-:=#]+$', stripped_after):
+                return True
+            if stripped_after.startswith(('文章', '条件', '変数', 'イベント', 'コモン', 'スイッチ', 'ピクチャ', 'SE', 'BGM')):
+                return True
+
+        # 2. Pure single ASCII letter or trivial punctuation/code fragments
+        if len(raw) == 1 and raw.isascii():
+            return True
+
+        # 3. Known engine keywords / variable identifiers that are NOT sentences
+        lower_raw = raw.lower()
+        ENGINE_EXACT = {
+            'unit', 'party', 'array', 'split', 'conv', 'alist', 'alistdb', 
+            'systemfile', 'tmpdb', 'flag', 'calc', 'key', 'none', 'null', 'temp', 'dummy',
+            'pic', 'sound', 'se', 'bgm', 'me', 'str', 'num', 'var', 'timer',
+            'sys', 'db', 'udb', 'cdb', 'sdb', 'x', 'y', 'z', 'w', 'h', 'c', 'l', 'r'
+        }
+        if lower_raw in ENGINE_EXACT:
+            return True
+
+        # 4. Japanese internal event headers / system tags
+        if raw.startswith(('Ev開始', '場所移動', '文章表示', 'システム設定', 'コモン処理')):
+            return True
+
+        # 5. Pure control tags or variables without prose
+        # Strip all known tag patterns (WOLF RPG, RPG Maker, Unity, Ren'Py, HTML/XML)
+        stripped = _re_module.sub(r'\\[a-zA-Z0-9]+(?:\[[^\]]*\])?', '', raw)
+        stripped = _re_module.sub(r'<[^>]+>', '', stripped)
+        stripped = _re_module.sub(r'\[[a-zA-Z0-9_.]+\]', '', stripped)
+        stripped = _re_module.sub(r'\{[^}\r\n]+\}', '', stripped)
+        stripped = _re_module.sub(r'%[0-9.]*[a-zA-Z0-9]', '', stripped)
+        stripped = _re_module.sub(r'[\r\n\t ]+', '', stripped)
+
+        if not stripped:
+            return True
+        if _re_module.match(r'^[0-9\.,:;/%+\-*$#@_()\[\]{}<>=!\'\"\\|&^~`?←→↑↓・…]+$', stripped):
+            return True
+
+        return False
 
     # Pre-compiled regex patterns at class level to avoid re-compiling on every call
     _RE_THAI = _re_module.compile(r'[\u0E00-\u0E7F]')
-    _RE_TAG = _re_module.compile(r'(<[^>]+>|\\n|\\r|\n|\r|%[sdiefg]|\{\d+\}|\[\[[^\]]+\]\])')
+    _RE_TAG = _re_module.compile(r'(<[^>]+>|\\n|\\r|\n|\r|\$\$[^\$]+\$\$|#[A-Za-z0-9_]+|~[A-Za-z0-9_]+|\{[^}\r\n]+\}|\[\[[^\]]+\]\]|\[(?!TAG_\d+\])[a-zA-Z0-9_.]+\]|%(?:[0-9.]*[a-zA-Z]+|[0-9]+)|@)')
+    _RE_BROKEN_TAG = _re_module.compile(r'\[TAG_\d+\]', _re_module.IGNORECASE)
+    _RE_FOREIGN_SCRIPTS = _re_module.compile(r'[\u0400-\u04FF\u0600-\u06FF\u0900-\u097F\uAC00-\uD7AF\u1100-\u11FF\u3040-\u30ff]')
     _RE_TSV_LINE = _re_module.compile(r'^"?([^"\t]+)"?\t(.*)')
     _RE_CODE_FENCE_START = _re_module.compile(r'^```[^\n]*\n?', _re_module.MULTILINE)
     _RE_CODE_FENCE_END = _re_module.compile(r'\n?```$', _re_module.MULTILINE)
 
+    _APPROVED_EXEMPT = {
+        'directx', 'opengl', 'vulkan', 'dlss', 'fsr', 'fps', 'nvidia', 'amd', 'intel',
+        'cpu', 'gpu', 'ram', 'vram', 'hdr', 'sdr', 'vsync', 'wasd', 'spacebar', 'space',
+        'shift', 'ctrl', 'alt', 'tab', 'esc', 'enter', 'backspace', 'delete', 'ok',
+        'cancel', 'yes', 'no', 'on', 'off', 'true', 'false', 'n/a', 'hud', 'ui',
+        'm16', 'ak-47', 'rpg-7', 'smg', 'lmg', 'dmr', 'humvee', 'apc', '9mm', '5.56mm'
+    }
+
     def is_translated(self, text):
         if not text or not isinstance(text, str): return False
-        return bool(self._RE_THAI.search(text))
+        cleaned = text.strip()
+        if not cleaned: return False
+        if self._RE_BROKEN_TAG.search(cleaned): return False
+        if self._RE_FOREIGN_SCRIPTS.search(cleaned): return False
+        if getattr(self, 'use_cjk_filter', True) and TStudioCore.has_cjk(cleaned):
+            return False
+        if self._RE_THAI.search(cleaned): return True
+        if cleaned.lower() in self._APPROVED_EXEMPT: return True
+        if _re_module.match(r'^[0-9\.,:;/%+\-*$#@_()\[\]{}<>=!\'\s]+$', cleaned): return True
+        return False
 
     def mask_tags(self, text):
-        tags = self._RE_TAG.findall(text)
-        masked_text = text
+        if not text:
+            return "", {}
         placeholders = {}
-        for idx, tag in enumerate(tags):
-            placeholder = f"[TAG_{idx}]"
-            if placeholder not in placeholders:
-                placeholders[placeholder] = tag
-            masked_text = masked_text.replace(tag, placeholder, 1)
-        return masked_text, placeholders
+        parts = []
+        last_end = 0
+        for idx, m in enumerate(self._RE_TAG.finditer(text)):
+            ph = f"[TAG_{idx}]"
+            placeholders[ph] = m.group(0)
+            parts.append(text[last_end:m.start()])
+            parts.append(ph)
+            last_end = m.end()
+        parts.append(text[last_end:])
+        return "".join(parts), placeholders
 
     def unmask_tags(self, translated_text, placeholders):
-        unmasked = translated_text
+        if not translated_text or not placeholders:
+            return translated_text
+        tag_lookup = {}
+        for k, v in placeholders.items():
+            tag_lookup[k.upper()] = v
+            m = _re_module.search(r'\[TAG_(\d+)\]', k, _re_module.IGNORECASE)
+            if m:
+                tag_lookup[m.group(1)] = v
+
+        def _replace_placeholder(match):
+            full = match.group(0)
+            idx = match.group(1)
+            if full.upper() in tag_lookup:
+                return tag_lookup[full.upper()]
+            if idx in tag_lookup:
+                return tag_lookup[idx]
+            return full
+
+        unmasked = _re_module.sub(r'\[TAG_(\d+)\]', _replace_placeholder, translated_text, flags=_re_module.IGNORECASE)
         for placeholder, original_tag in placeholders.items():
-            unmasked = unmasked.replace(placeholder, original_tag)
+            if placeholder in unmasked:
+                unmasked = unmasked.replace(placeholder, original_tag)
         return unmasked
 
+    def extract_english_leaks(self, text):
+        from tstudio_core import TStudioCore
+        glossary_targets = []
+        if self.profile and isinstance(self.profile.get("glossary"), dict):
+            for v in self.profile["glossary"].values():
+                val = v[0] if isinstance(v, list) and v else v
+                if isinstance(val, str) and val.strip():
+                    glossary_targets.append(val.strip())
+        return TStudioCore.extract_english_leaks(text, allowed_words=glossary_targets)
+
     def enforce_glossary(self, text):
-        # Fix 3: Use word boundary to avoid replacing substrings
+        if not text:
+            return ""
         glossary = self.profile.get("glossary", {})
-        for wrong_word, correct_word in glossary.items():
-            if isinstance(correct_word, list):
-                correct_word = correct_word[0]
-            try:
-                text = _re_module.sub(r'\b' + _re_module.escape(str(wrong_word)) + r'\b',
-                                      str(correct_word), text)
-            except _re_module.error:
-                text = text.replace(str(wrong_word), str(correct_word))
-        return text
+        if not isinstance(glossary, dict) or not glossary:
+            return text
+        tag_pat = _re_module.compile(r'(<[^>]+>|\[TAG_\d+\])', _re_module.IGNORECASE)
+        parts = tag_pat.split(text)
+        sorted_terms = sorted(glossary.items(), key=lambda x: len(str(x[0])), reverse=True)
+        for index in range(0, len(parts), 2):
+            for wrong_word, correct_val in sorted_terms:
+                wrong = str(wrong_word).strip()
+                correct = correct_val[0] if isinstance(correct_val, list) and correct_val else correct_val
+                right = str(correct or '').strip()
+                if wrong and right:
+                    flags = _re_module.IGNORECASE if len(wrong) > 2 else 0
+                    parts[index] = _re_module.sub(_re_module.escape(wrong), lambda match: right, parts[index], flags=flags)
+        return ''.join(parts)
+
+    def _placeholders_valid(self, text, placeholders):
+        actual = [match.group().upper() for match in self._RE_BROKEN_TAG.finditer(text)]
+        return actual == [key.upper() for key in placeholders]
+
+    def _translation_valid(self, source, target, game_id=''):
+        """Fail closed before commit, resume and PUA conversion."""
+        from collections import Counter
+        if not isinstance(target, str) or not target.strip():
+            return False
+        if '\ufffd' in target or _re_module.search(r'\[TAG_', target, _re_module.IGNORECASE):
+            return False
+        if '\t' in target and '\t' not in source:
+            return False
+        if game_id and game_id not in source and game_id in target:
+            return False
+        for match in _re_module.finditer(r'(?m)^\s*([A-Za-z0-9][A-Za-z0-9_:#./-]{4,})(?:[ \t]|$)', target):
+            candidate = match.group(1)
+            if ('_' in candidate or ':' in candidate or candidate in getattr(self, '_input_ids', ())) and candidate not in source:
+                return False
+        source_tokens = self._RE_TAG.findall(source)
+        target_tokens = self._RE_TAG.findall(target)
+        if source_tokens != target_tokens:
+            return False
+        source_prose = self._RE_TAG.sub('', source)
+        target_prose = self._RE_TAG.sub('', target)
+        if Counter(self._RE_FOREIGN_SCRIPTS.findall(target_prose)) - Counter(self._RE_FOREIGN_SCRIPTS.findall(source_prose)):
+            return False
+        if self.use_cjk_filter and TStudioCore.has_cjk(target_prose):
+            return False
+        if self.use_eng_filter and target_prose.strip().lower() not in self._APPROVED_EXEMPT and self.extract_english_leaks(target_prose):
+            return False
+        return True
+
+    def _write_atomic(self, headers, rows):
+        import tempfile
+        if is_web(self.config) and self._disk_signature() != self._web_disk_signature:
+            import uuid
+            recovery = self.output_csv + '.web-conflict-' + uuid.uuid4().hex + '.csv'
+            with open(recovery, 'x', encoding='utf-8-sig', newline='') as handle:
+                writer = csv.writer(handle)
+                writer.writerow(headers)
+                writer.writerows(rows)
+            raise WebTransportError("ไฟล์ปลายทางถูกแก้ จึงเก็บผล Web แยกไว้ที่: " + recovery)
+        temp_path = None
+        try:
+            fd, temp_path = tempfile.mkstemp(dir=os.path.dirname(os.path.abspath(self.output_csv)), suffix='.tmp')
+            with os.fdopen(fd, 'w', encoding='utf-8-sig', newline='') as handle:
+                writer = csv.writer(handle)
+                writer.writerow(headers)
+                writer.writerows(rows)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temp_path, self.output_csv)
+            if is_web(self.config):
+                self._web_disk_signature = self._disk_signature()
+            return True
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.unlink(temp_path)
 
     def enforce_arabic_numerals(self, text):
         import unicodedata
@@ -97,38 +325,72 @@ class TRunWorker(QRunnable):
                 res.append(c)
         return "".join(res)
 
-    def _inject_glossary_to_prompt(self, prompt, source_text_batch):
-        # Fix 1: Fallback injection — works even if [GLOSSARY TO USE] is absent from prompt
+    def _get_dynamic_glossary(self, source_text_batch):
         glossary = self.profile.get("glossary", {})
-        if not glossary:
-            return prompt.replace("[GLOSSARY TO USE]", "") if "[GLOSSARY TO USE]" in prompt else prompt
-
+        if not glossary or not isinstance(glossary, dict): return ""
         matched_terms = []
-        source_lower = source_text_batch.lower()
+        source_raw = str(source_text_batch or "")
+        source_lower = source_raw.lower()
+        from tstudio_core import TStudioCore
 
-        for eng, val in glossary.items():
-            eng_str = eng.strip()
+        # Try to import common generic words helper if available
+        try:
+            from tstudio_tlm_studio import is_common_generic_english_word
+        except ImportError:
+            is_common_generic_english_word = None
+
+        matched_compounds = []  # To prevent sub-tokens of matched compounds from triggering
+        sorted_terms = sorted(glossary.items(), key=lambda x: len(str(x[0])), reverse=True)
+        for eng, val in sorted_terms:
+            eng_str = str(eng).strip()
             if not eng_str: continue
-            if _re_module.search(r'\b' + _re_module.escape(eng_str.lower()) + r'\b', source_lower):
-                if isinstance(val, list):
-                    term_info = f"- {eng_str} = {val[0]}"
-                    if len(val) > 1 and val[1]:
-                        term_info += f" ({val[1]})"
-                    matched_terms.append(term_info)
+            thai = val[0] if (isinstance(val, list) and len(val) > 0) else val
+            thai_str = str(thai or "").strip()
+            if not thai_str: continue
+
+            # If it's a common generic dictionary word and a single word:
+            if is_common_generic_english_word and is_common_generic_english_word(eng_str):
+                # Common dictionary words should only match if capitalized in source text (proper noun context)
+                if not _re_module.search(r'\b' + _re_module.escape(eng_str) + r'\b', source_raw):
+                    continue
+
+            term_lower = eng_str.lower()
+            if TStudioCore.has_cjk_or_kana(eng_str):
+                is_matched = term_lower in source_lower
+            else:
+                prefix = r'\b' if _re_module.match(r'^\w', eng_str) else r''
+                suffix = r'(?:s|es|\'s)?\b' if _re_module.search(r'\w$', eng_str) else r''
+                # If single word and starts with uppercase in glossary, require case match in source to avoid lowercase false positives
+                if ' ' not in eng_str and eng_str[0].isupper() and eng_str[1:].islower():
+                    pattern_cs = prefix + _re_module.escape(eng_str) + suffix
+                    is_matched = bool(_re_module.search(pattern_cs, source_raw))
                 else:
-                    matched_terms.append(f"- {eng_str} = {val}")
+                    pattern = prefix + _re_module.escape(term_lower) + suffix
+                    is_matched = bool(_re_module.search(pattern, source_lower))
 
-        glossary_section = ""
+            if is_matched:
+                # Substring deduplication: if this term is a single word and is already part of a matched compound (e.g. 'Flight' inside 'Joker Flight'), skip it!
+                if ' ' not in eng_str and any(term_lower in m_comp for m_comp in matched_compounds):
+                    continue
+
+                if ' ' in eng_str:
+                    matched_compounds.append(term_lower)
+
+                cat = val[1] if (isinstance(val, list) and len(val) > 1) else "Term"
+                matched_terms.append(f"- \"{eng_str}\" ➔ \"{thai_str}\" ({cat})")
+
+                # Cost-Guard: cap maximum injected glossary terms per batch to prevent token explosion
+                if len(matched_terms) >= 15:
+                    break
+
         if matched_terms:
-            glossary_section = "GLOSSARY FOR THIS BATCH:\n" + "\n".join(matched_terms)
-
-        if "[GLOSSARY TO USE]" in prompt:
-            return prompt.replace("[GLOSSARY TO USE]", glossary_section)
-        else:
-            # Fallback: append glossary section even when placeholder is missing
-            if glossary_section:
-                return prompt + "\n\n" + glossary_section
-            return prompt
+            return (
+                "CRITICAL TERMINOLOGY RULES (MANDATORY LOCALIZATION GLOSSARY):\n"
+                "You MUST strictly translate the following recognized terms using their exact specified Thai translations:\n"
+                + "\n".join(matched_terms)
+                + "\n(DO NOT translate these terms into alternative synonyms. Follow the glossary strictly.)"
+            )
+        return ""
 
     def stop(self):
         self._is_killed = True
@@ -208,35 +470,66 @@ class TRunWorker(QRunnable):
                 break
 
     def run(self):
-        import csv, time, re, os
-        self.signals.log.emit(_("log_loading_csv"), "#89b4fa")
+        try:
+            self._run_impl()
+        except Exception as e:
+            import traceback
+            with open('GUI_CRASH_LOG.txt', 'a') as f:
+                f.write('CRASH IN TRunWorker.run\n')
+                f.write(traceback.format_exc())
+            print('WORKER CRASH:', e)
+            self.signals.error.emit(str(e))
+            self.signals.finished.emit()
+            
+    def _run_impl(self):
+        import csv, time, re, os, concurrent.futures
+        if is_web(self.config):
+            self.signals.log.emit("ChatGPT Web | " + self.config["_translation_route"]["model"] + " | background", "#89b4fa")
+        self.signals.log.emit(_("log_loading_csv") if '_' in globals() else "Loading CSV...", "#89b4fa")
         rows = []
         headers = []
         try:
-            with open(self.input_csv, 'r', encoding='utf-8-sig') as f:
-                reader = csv.reader(f)
+            with open(self.input_csv, 'r', encoding='utf-8-sig', newline='') as f:
+                reader = csv.reader(f, strict=True)
                 headers = next(reader)
                 rows = list(reader)
+                if len(headers) < 3 or any(len(row) != len(headers) for row in rows):
+                    raise ValueError('CSV row width differs from header; restore canonical metadata before translation')
+                keys = [row[0] for row in rows]
+                if not all(keys) or len(keys) != len(set(keys)):
+                    raise ValueError('CSV requires nonempty unique keys for safe reply matching')
                 
-            # --- Smart Resume Logic ---
             if os.path.exists(self.output_csv):
                 self.signals.log.emit("Found existing output file. Restoring previous translations...", "#f9e2af")
                 try:
-                    with open(self.output_csv, 'r', encoding='utf-8-sig') as f_out:
-                        reader_out = csv.reader(f_out)
-                        next(reader_out, None) # skip headers
+                    with open(self.output_csv, 'r', encoding='utf-8-sig', newline='') as f_out:
+                        reader_out = csv.reader(f_out, strict=True)
+                        next(reader_out, None) 
                         out_dict = {}
                         for r in reader_out:
-                            if len(r) > 2 and self.is_translated(r[2]):
-                                out_dict[r[0]] = r[2]
+                            gid = r[0] if len(r) > 0 else ""
+                            src = r[1] if len(r) > 1 else ""
+                            trans = r[2] if len(r) > 2 else ""
+                            if not gid: continue
+                            if trans:
+                                is_engine_junk = self.auto_filter_engine and self.is_non_translatable_engine_string(src)
+                                if is_engine_junk or (self.is_translated(trans) and self._translation_valid(src, trans, gid)):
+                                    out_dict[gid] = (src, trans)
                                 
                     restored = 0
-                    for row in rows:
+                    for row_idx, row in enumerate(rows):
                         if len(row) > 0 and row[0] in out_dict:
-                            while len(row) <= 2:
-                                row.append("")
-                            row[2] = out_dict[row[0]]
-                            restored += 1
+                            # If selected_row_indices is set, do not restore previous translations for target rows so they get re-translated
+                            if self.selected_row_indices is not None and row_idx in self.selected_row_indices:
+                                continue
+                            prev_src, prev_trans = out_dict[row[0]]
+                            curr_src = row[1] if len(row) > 1 else ""
+                            # Only restore if source matches (fingerprint verification)
+                            if prev_src == curr_src:
+                                while len(row) <= 2:
+                                    row.append("")
+                                row[2] = prev_trans
+                                restored += 1
                     
                     if restored > 0:
                         self.signals.log.emit(f"Successfully restored {restored} translated rows! Continuing from where it left off...", "#a6e3a1")
@@ -244,260 +537,530 @@ class TRunWorker(QRunnable):
                     self.signals.log.emit(f"Could not read previous output file for resume: {resume_err}", "#f38ba8")
                     self.signals.error.emit(f"Failed to resume from existing output: {resume_err}")
                     return
-            # --------------------------
             
         except Exception as e:
             self.signals.error.emit(f"Failed to read CSV: {e}")
             return
 
         total_rows = len(rows)
-        self.signals.log.emit(_("log_found_rows"), "#a6e3a1")
+        self.signals.log.emit(_("log_found_rows") if '_' in globals() else f"Found {total_rows} total rows", "#a6e3a1")
         
-        # Determine columns
         col_id = 0
         col_source = 1
         col_trans = 2
+        self._input_ids = frozenset(row[0] for row in rows if row)
         
-        # Filter untranslated
         untranslated = []
+        auto_skipped_count = 0
         for i, row in enumerate(rows):
-            if len(row) > col_trans:
-                if not self.is_translated(row[col_trans]):
-                    untranslated.append((i, row))
-            elif len(row) > col_source:
+            while len(row) <= col_trans:
                 row.append("")
-                untranslated.append((i, row))
-                
-        self.signals.log.emit(f"Found {len(untranslated)} untranslated rows.", "#f9e2af")
-        
-        system_prompt = self.profile.get("batch", "")
-        # Replace {source_text} with rules in batch mode if the user didn't modify it properly
-        if "{source_text}" in system_prompt:
-            system_prompt = system_prompt.replace("{source_text}", "the user prompt text")
+            src = row[col_source] if len(row) > col_source else ""
 
-        # Optimized FORMAT RULE — concise but effective (~87 tokens instead of ~171)
-        system_prompt += (
-            "\n\nFORMAT: Reply ONLY as tab-separated lines, no headers/explanation/markdown.\n"
-            "Each line: ORIGINAL_ID[TAB]THAI_TRANSLATION\n"
-            "Copy ORIGINAL_ID exactly (same case, punctuation, {M}/{F} suffix). "
-            "Preserve [TAG_N] placeholders. Use real tab, not spaces.\n"
-            "Example: #Grenadier{M}\tมือระเบิด{ชาย}"
-        )
+            # Selected rows mode: ONLY translate specified row indices and always re-translate them
+            if self.selected_row_indices is not None:
+                if i not in self.selected_row_indices:
+                    continue
+                if self.auto_filter_engine and self.is_non_translatable_engine_string(src):
+                    if not row[col_trans]:
+                        row[col_trans] = src
+                        self.signals.row_translated.emit(i, row[col_id], src)
+                    auto_skipped_count += 1
+                    continue
+                untranslated.append((i, row))
+                continue
+
+            # Engine Junk Auto-Filter: prevent non-translatable engine scripts & control tags from burning tokens
+            if self.auto_filter_engine and self.is_non_translatable_engine_string(src):
+                if not row[col_trans]:
+                    row[col_trans] = src  # Pass-through original engine string to preserve game engine scripts
+                    self.signals.row_translated.emit(i, row[col_id], src)
+                auto_skipped_count += 1
+                continue
+
+            if not self.is_translated(row[col_trans]) or not self._translation_valid(src, row[col_trans], row[col_id]):
+                untranslated.append((i, row))
+
+        if auto_skipped_count > 0:
+            self.signals.log.emit(f"🛡️ Auto-filtered {auto_skipped_count} engine internal scripts/tags (skipped AI translation to save tokens).", "#a6e3a1")
+
+        if self.selected_row_indices is not None:
+            self.signals.log.emit(f"🎯 Target Mode: Translating {len(untranslated)} SELECTED rows (Re-translating in Batch Mode)...", "#cba6f7")
+        else:
+            self.signals.log.emit(f"Found {len(untranslated)} untranslated rows.", "#f9e2af")
         
-        batches = [untranslated[i:i + self.batch_size] for i in range(0, len(untranslated), self.batch_size)]
-        total_batches = len(batches)
-        
-        processed_count = 0
-        total_untrans = len(untranslated)
-        
+        if len(untranslated) == 0:
+            if auto_skipped_count > 0:
+                self._write_atomic(headers, rows)
+                self.signals.log.emit(f"✅ Auto-filtered {auto_skipped_count} engine rows and saved to file.", "#a6e3a1")
+            self.signals.log.emit("All rows are already translated!", "#a6e3a1")
+            self.processed_count = 0
+            self.total_untrans = 0
+            self.result_summary = dict(accepted=0, failed=0, save_ok=True)
+            self.signals.finished.emit()
+            return
+
         is_local = (self.config.get("provider", "") == "Local LLM" or self.config.get("model", "") == "custom-local-llm")
         
         tpua = None
         if self.use_pua:
-            self.signals.log.emit(_("log_init_tpua"), "#f9e2af")
+            self.signals.log.emit(_("log_init_tpua") if '_' in globals() else "Initializing TPUA...", "#f9e2af")
+            from tpua_engine import TPUAEngine
             tpua = TPUAEngine()
+            
+        row_snippets = {}
+        for i, row in untranslated:
+            src = row[col_source]
+            row_snippets[row[col_id]] = src[:40].replace("\n", " ") + ("..." if len(src) > 40 else "")
+
+        self.processed_count = 0
+        self.total_untrans = len(untranslated)
+
+        # Prepare deduplication map if enabled
+        source_to_indices = {}
+        if self.use_dedup:
+            for i, row in untranslated:
+                src = row[col_source]
+                if src not in source_to_indices:
+                    source_to_indices[src] = []
+                source_to_indices[src].append((i, row))
+            unique_tasks = [indices[0] for indices in source_to_indices.values()]
+            saved_duplicate_count = len(untranslated) - len(unique_tasks)
+            self.signals.log.emit(f"⚡ Deduplication active: {len(untranslated)} rows reduced to {len(unique_tasks)} unique strings (saved {saved_duplicate_count} duplicate AI requests).", "#89b4fa")
+            tasks_to_process = unique_tasks
+        else:
+            source_to_indices = None
+            tasks_to_process = untranslated
         
-        for batch_idx, batch in enumerate(batches):
-            self.signals.batch_progress.emit(batch_idx + 1, total_batches)
+        if self.token_burner:
+            self.signals.log.emit("⚡ TOKEN BURNER MODE ACTIVE ⚡. Processing single rows in parallel.", "#f9e2af")
+            system_prompt = self.profile.get("single", "")
+            if not system_prompt:
+                system_prompt = "Translate the following text to Thai. Preserve all tags.\nOriginal text: {source_text}"
             
-            self._check_peak_hour()
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+                futures = []
+                for task_idx, (i, row) in enumerate(tasks_to_process):
+                    if self._is_killed: break
+                    futures.append(
+                        executor.submit(self._process_single, task_idx, len(tasks_to_process), i, row[col_id], row[col_source], system_prompt, is_local, tpua, rows, headers, row_snippets, source_to_indices)
+                    )
+                
+                for future in concurrent.futures.as_completed(futures):
+                    if self._is_killed: break
+                    try:
+                        future.result()
+                    except Exception as e_fut:
+                        self.signals.log.emit(f'[Error] Thread encountered a fatal error: {e_fut}', '#f38ba8') 
+        else:
+            system_prompt = self.profile.get("batch", "")
+            if "{source_text}" in system_prompt:
+                system_prompt = system_prompt.replace("{source_text}", "the user prompt text")
+
+            batches = [tasks_to_process[i:i + self.batch_size] for i in range(0, len(tasks_to_process), self.batch_size)]
             
-            if self._is_killed:
-                self.signals.log.emit(_("log_emergency_stop") if '_' in globals() else "Emergency Stop", "#f38ba8")
-                break
-                
-            self.signals.log.emit(f"Processing Batch {batch_idx+1}/{len(batches)} ({len(batch)} items)...", "#89b4fa")
+            self.signals.log.emit(f"Processing {len(batches)} batches ({len(tasks_to_process)} unique rows) using {self.threads} concurrent workers...", "#f9e2af")
             
-            # Build lines — use simple tab-only format (no outer quotes)
-            # This avoids breaking when game_id or source contains " characters
-            batch_tasks = []
-            lines_to_send = []
-            row_snippets = {}  # store snippets for post-result logging
-            for i, row in batch:
-                game_id = row[col_id]
-                source_text = row[col_source]
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.threads) as executor:
+                futures = []
+                for batch_idx, batch in enumerate(batches):
+                    if self._is_killed: break
+                    futures.append(
+                        executor.submit(self._process_batch, batch_idx, len(batches), batch, system_prompt, is_local, tpua, rows, headers, row_snippets, source_to_indices)
+                    )
                 
-                snippet = source_text[:40].replace("\\n", " ") + ("..." if len(source_text) > 40 else "")
-                row_snippets[game_id] = snippet
-                
-                if self.use_mask:
-                    masked, placeholders = self.mask_tags(source_text)
-                else:
-                    masked, placeholders = source_text, {}
+                for future in concurrent.futures.as_completed(futures):
+                    if self._is_killed: break
+                    try:
+                        future.result()
+                    except Exception as e_fut:
+                        self.signals.log.emit(f'[Error] Thread encountered a fatal error: {e_fut}', '#f38ba8')
                     
-                batch_tasks.append((i, game_id, placeholders))
-                # No outer quotes — avoids conflicts with content that has " chars
-                lines_to_send.append(f'{game_id}\t{masked}')
-                
-            if not lines_to_send:
-                # Entire batch was resolved by TM, skip AI call
-                continue
-                
-            combined_source = " ".join([row[col_source] for i, row in batch])
-            batch_system_prompt = self._inject_glossary_to_prompt(system_prompt, combined_source)
-            
-            user_prompt = "Translate these entries:\n" + "\n".join(lines_to_send)
-            full_prompt = batch_system_prompt + "\n\n" + user_prompt
-            
-            # API Call
-            success = False
-            for attempt in range(1, self.max_retries + 1):
-                if self._is_killed: break
-                try:
-                    self.signals.log.emit(f"  Attempt {attempt}/{self.max_retries}...", "#a6adc8")
-                    reply = CoreAI.generate_content(self.config, full_prompt, is_local=is_local)
-                    
-                    # Parse TSV reply — strip markdown fences
-                    reply = self._RE_CODE_FENCE_START.sub('', reply.strip())
-                    reply = self._RE_CODE_FENCE_END.sub('', reply)
-
-                    results = {}
-                    current_id = None
-                    valid_ids = {game_id for _, game_id, _ in batch_tasks}
-                    # Case-insensitive fallback: maps lowercased ID → original ID
-                    # Handles AI returning {m} instead of {M}, etc.
-                    valid_ids_ci = {gid.lower(): gid for _, gid, _ in batch_tasks}
-
-                    for line in reply.split('\n'):
-                        stripped = line.strip()
-                        if not stripped:
-                            continue  # skip blank lines entirely
-
-                        if '\t' in stripped:
-                            # Split on first tab — robust to IDs with quotes or special chars
-                            tab_pos = stripped.index('\t')
-                            candidate_id = stripped[:tab_pos].strip()
-                            candidate_id = self._strip_outer_quotes(candidate_id)
-                            
-                            candidate_val = stripped[tab_pos + 1:].strip()
-                            candidate_val = self._strip_outer_quotes(candidate_val)
-                                
-                            # 1) Exact match
-                            if candidate_id in valid_ids:
-                                current_id = candidate_id
-                                results[current_id] = candidate_val
-                            # 2) Case-insensitive fallback (AI changed {M}->{m} etc.)
-                            elif candidate_id.lower() in valid_ids_ci:
-                                current_id = valid_ids_ci[candidate_id.lower()]
-                                results[current_id] = candidate_val
-                            else:
-                                # 3) Robust alphanumeric prefix match (AI stripped punctuation like # or truncated long text)
-                                norm_candidate = self._normalize_id(candidate_id)
-                                matching_ids = []
-                                if len(norm_candidate) >= 3:
-                                    matching_ids = [gid for gid in valid_ids if self._normalize_id(gid).startswith(norm_candidate)]
-                                    
-                                if len(matching_ids) == 1:
-                                    current_id = matching_ids[0]
-                                    results[current_id] = candidate_val
-                                elif current_id is not None:
-                                    # Line has tab but unknown ID: treat as continuation
-                                    results[current_id] += '\n' + self._strip_outer_quotes(stripped)
-                        elif current_id is not None:
-                            # No tab — continuation of previous multi-line entry
-                            results[current_id] += '\n' + self._strip_outer_quotes(stripped)
-                        
-                    # Apply results
-                    remaining_tasks = []
-                    remaining_lines = []
-                    for idx_zip, (i, game_id, placeholders) in enumerate(batch_tasks):
-                        if game_id in results:
-                            translated = results[game_id]
-                            # Bug A Fix: Convert literal \n escape sequences to real newlines
-                            translated = translated.replace('\\n', '\n')
-                            if self.use_mask:
-                                translated = self.unmask_tags(translated, placeholders)
-                            if self.use_glossary:
-                                translated = self.enforce_glossary(translated)
-                            # Always enforce Arabic numerals for all languages
-                            translated = self.enforce_arabic_numerals(translated)
-                            if self.use_pua and tpua:
-                                translated = tpua.encode(translated)
-                            rows[i][col_trans] = translated
-                            processed_count += 1
-
-                            # Fix 4: Log after result (with source snippet for context)
-                            src_snip = row_snippets.get(game_id, game_id)
-                            tsnippet = translated[:40].replace('\n', ' ') + ("..." if len(translated) > 40 else "")
-                            self.signals.log.emit(f"  ✅ [{game_id}] {src_snip} → {tsnippet}", "#a6e3a1")
-                        else:
-                            self.signals.log.emit(f"  [Warning] Missing ID in response: {game_id}", "#f38ba8")
-                            remaining_tasks.append((i, game_id, placeholders))
-                            remaining_lines.append(lines_to_send[idx_zip])
-
-                    batch_tasks = remaining_tasks
-                    lines_to_send = remaining_lines
-
-                    if len(batch_tasks) == 0:
-                        success = True
-                        break
-                    elif len(results) == 0:
-                        # Exponential backoff — interruptible so Stop responds immediately
-                        wait_sec = min(2 ** attempt, 30)
-                        self.signals.log.emit(f"  [Warning] No results parsed (attempt {attempt}). Waiting {wait_sec}s...", "#f38ba8")
-                        self._interruptible_sleep(wait_sec)
-                    else:
-                        self.signals.log.emit(f"  [Warning] Partial success. Retrying {len(batch_tasks)} missing lines (attempt {attempt})...", "#f9e2af")
-                        user_prompt = "Translate these entries:\n" + "\n".join(lines_to_send)
-                        full_prompt = batch_system_prompt + "\n\n" + user_prompt
-
-                except Exception as e:
-                    err_str = str(e).lower()
-                    if "429" in err_str or "quota" in err_str or "exhausted" in err_str:
-                        wait_sec = 65
-                        self.signals.log.emit(f"  [Rate Limit] API Quota exceeded. Waiting 65s for reset...", "#f9e2af")
-                    else:
-                        wait_sec = min(2 ** attempt, 30)
-                        self.signals.log.emit(f"  [Error] {e} — Waiting {wait_sec}s...", "#f38ba8")
-                    
-                    self._interruptible_sleep(wait_sec)
-                    
-            if not success and not self._is_killed:
-                self.signals.log.emit(f"Batch {batch_idx+1} failed after {self.max_retries} retries. Skipping...", "#f38ba8")
-                
-            # Intermediate Save
-            try:
-                temp_csv = self.output_csv + ".tmp"
-                with open(temp_csv, 'w', encoding='utf-8-sig', newline='') as f:
-                    writer = csv.writer(f)
-                    writer.writerow(headers)
-                    writer.writerows(rows)
-                os.replace(temp_csv, self.output_csv)
-            except Exception as e:
-                self.signals.log.emit(f"Failed to save intermediate: {e}", "#f38ba8")
-                
-            self.signals.progress.emit(processed_count, total_untrans)
-            # Inter-batch delay — interruptible so Stop responds immediately
-            self._interruptible_sleep(self.delay_ms / 1000.0)
-
-        # After batch loop: emit appropriate signal based on stop state
-        if self._is_killed:
-            # User-requested stop: save partial progress then signal stopped
-            try:
-                with open(self.output_csv, 'w', encoding='utf-8-sig', newline='') as f_stop:
-                    writer_stop = csv.writer(f_stop)
-                    writer_stop.writerow(headers)
-                    writer_stop.writerows(rows)
-                self.signals.log.emit("⏹ Stopped. Partial progress saved.", "#f9e2af")
-            except Exception as e_stop:
-                self.signals.log.emit(f"[Warning] Could not save partial progress: {e_stop}", "#f38ba8")
-            self.signals.stopped.emit()
-            time.sleep(0.2)  # Allow pending signals to be processed before QRunnable is deleted
+        if self._transport_error:
+            self._save_intermediate(headers, rows, force=True)
+            self.signals.error.emit(self._transport_error)
             return
 
-        # Bug B Fix: Final save after all batches done (ensures last batch is always persisted)
+        if self._is_killed:
+            self._save_intermediate(headers, rows, force=True)
+            self.signals.log.emit("⏹ Stopped. Partial progress saved.", "#f9e2af")
+            self.signals.stopped.emit()
+            time.sleep(0.2)
+            return
+
         try:
-            with open(self.output_csv, 'w', encoding='utf-8-sig', newline='') as f_final:
-                writer_final = csv.writer(f_final)
-                writer_final.writerow(headers)
-                writer_final.writerows(rows)
+            self._write_atomic(headers, rows)
             self.signals.log.emit("✅ Final save complete.", "#a6e3a1")
         except Exception as e_final:
-            self.signals.log.emit(f"[Warning] Final save failed: {e_final}", "#f38ba8")
-
-        self.signals.log.emit(_("log_translation_finished"), "#a6e3a1")
+            self.result_summary = dict(accepted=self.processed_count, failed=self.total_untrans-self.processed_count, save_ok=False)
+            self.signals.error.emit(f"Final save failed; previous CSV preserved: {e_final}")
+            return
+        
+        self.signals.progress.emit(self.processed_count, self.total_untrans)
+        if self.processed_count < self.total_untrans:
+            failed_count = self.total_untrans - self.processed_count
+            self.signals.log.emit(f"⚠️ Completed with {failed_count} uncompleted/failed rows.", "#fab387")
+        else:
+            self.signals.log.emit(_("log_translation_finished") if '_' in globals() else "Translation finished", "#a6e3a1")
+        self.result_summary = dict(accepted=self.processed_count, failed=self.total_untrans-self.processed_count, save_ok=True)
         self.signals.finished.emit()
-        time.sleep(0.2)  # Allow pending signals to be processed before QRunnable is deleted
+        time.sleep(0.2)
+
+    def _save_intermediate(self, headers, rows, force=False):
+        import csv, os, time
+        now = time.time()
+        if not force:
+            last_save = getattr(self, '_last_save_time', 0.0)
+            if now - last_save < 15.0:  # Throttle full CSV writes to at most once per 15 seconds
+                return
+        with self.save_lock:
+            if not force:
+                last_save = getattr(self, '_last_save_time', 0.0)
+                if now - last_save < 15.0:
+                    return
+            self._last_save_time = time.time()
+            try:
+                self._write_atomic(headers, rows)
+            except Exception as e:
+                self.signals.log.emit(f"Failed to save intermediate: {e}", "#f38ba8")
+
+    def _update_progress(self, count=1):
+        with self.save_lock:
+            self.processed_count += count
+            self.signals.progress.emit(self.processed_count, self.total_untrans)
+
+    def _process_single(self, task_idx, total_tasks, row_idx, game_id, source_text, system_prompt, is_local, tpua, rows, headers, row_snippets, source_to_indices=None):
+        if self._is_killed: return False
+        self._check_peak_hour()
+        from tstudio_core import CoreAI
+        import re
+        
+        if self.use_mask:
+            masked, placeholders = self.mask_tags(source_text)
+        else:
+            masked, placeholders = source_text, {}
+            
+        full_prompt = system_prompt.replace("{id}", game_id).replace("{source_text}", masked)
+        if is_web(self.config):
+            glossary = self._get_dynamic_glossary(source_text)
+            if "[GLOSSARY TO USE]" in full_prompt:
+                full_prompt = full_prompt.replace("[GLOSSARY TO USE]", glossary)
+            elif glossary:
+                full_prompt = glossary + "\n\n" + full_prompt
+        
+        success = False
+        target_rows = [(row_idx, game_id)]
+        for attempt in range(1, self.max_retries + 1):
+            if self._is_killed: break
+            try:
+                reply = self._generate_translation(full_prompt, is_local)
+                translated = reply.strip()
+                translated = self._RE_CODE_FENCE_START.sub('', translated)
+                translated = self._RE_CODE_FENCE_END.sub('', translated)
+                
+                translated = translated.replace('\\n', '\n')
+                if self.use_mask and not self._placeholders_valid(translated, placeholders):
+                    self.signals.log.emit(f"[Rejected] {game_id}: placeholder count/order mismatch", "#fab387")
+                    continue
+                if self.use_glossary: translated = self.enforce_glossary(translated)
+                # Normalize prose while protected tokens are still masked.
+                translated = self.enforce_arabic_numerals(translated)
+                if self.use_mask: translated = self.unmask_tags(translated, placeholders)
+                try:
+                    translated, _ = TStudioCore.retrofit_military_text(source_text, translated)
+                except Exception:
+                    pass
+                if self.use_cjk_filter: translated = TStudioCore.clean_cjk_leak(translated)
+                if not self._translation_valid(source_text, translated, game_id):
+                    self.signals.log.emit(f"[Rejected] {game_id}: unsafe translation; retrying", "#fab387")
+                    continue
+
+                if self.use_pua and tpua: translated = tpua.encode(translated)
+                
+                if source_to_indices and source_text in source_to_indices:
+                    target_rows = [(dup_i, dup_row[0]) for dup_i, dup_row in source_to_indices[source_text]]
+
+                with self.save_lock:
+                    for t_idx, t_gid in target_rows:
+                        rows[t_idx][2] = translated
+                for t_idx, t_gid in target_rows:
+                    self.signals.row_translated.emit(t_idx, t_gid, translated)
+                    
+                src_snip = row_snippets.get(game_id, game_id)
+                tsnippet = translated[:40].replace('\n', ' ') + ("..." if len(translated) > 40 else "")
+                if len(target_rows) > 1:
+                    self.signals.log.emit(f"  ✅ [⚡ {task_idx+1}/{total_tasks}] Propagated {len(target_rows)} identical rows ({src_snip} → {tsnippet})", "#a6e3a1")
+                else:
+                    self.signals.log.emit(f"  ✅ [⚡ {task_idx+1}/{total_tasks}] {src_snip} → {tsnippet}", "#a6e3a1")
+                
+                success = True
+                break
+            except WebTransportError:
+                return False
+            except Exception as e:
+                err_str = str(e).lower()
+                wait_sec = 65 if ("429" in err_str or "quota" in err_str) else min(2 ** attempt, 30)
+                self.signals.log.emit(f"  [Error] {game_id} — Waiting {wait_sec}s...", "#f38ba8")
+                self._interruptible_sleep(wait_sec)
+                
+        if success:
+            self._update_progress(len(target_rows))
+            if (task_idx + 1) % max(1, (total_tasks // 20)) == 0:
+                self._save_intermediate(headers, rows)
+                
+        return success
+
+    def _process_batch(self, batch_idx, total_batches, batch, batch_system_prompt_base, is_local, tpua, rows, headers, row_snippets, source_to_indices=None):
+        if self._is_killed: return False
+        self._check_peak_hour()
+        from tstudio_core import CoreAI
+        import re
+        
+        self.signals.batch_progress.emit(batch_idx + 1, total_batches)
+        
+        batch_tasks = []
+        lines_to_send = []
+        for i, row in batch:
+            game_id = row[0]
+            source_text = row[1]
+            if self.use_mask:
+                masked, placeholders = self.mask_tags(source_text)
+            else:
+                masked, placeholders = source_text, {}
+            batch_tasks.append((i, game_id, placeholders))
+            lines_to_send.append(f'{game_id}	{masked}')
+            
+        combined_source = " ".join([row[1] for i, row in batch])
+        dyn_glossary = self._get_dynamic_glossary(combined_source)
+        
+        # Sanitize single-line specific instructions from batch system prompt
+        clean_batch_prompt = batch_system_prompt_base
+        clean_batch_prompt = clean_batch_prompt.replace("ID: '{id}'.", "")
+        clean_batch_prompt = clean_batch_prompt.replace("ID: \"{id}\".", "")
+        clean_batch_prompt = clean_batch_prompt.replace("ID: {id}.", "")
+        clean_batch_prompt = clean_batch_prompt.replace("{id}", "")
+        clean_batch_prompt = re.sub(r'do NOT (?:translate or )?include the Context ID[^\.\n]*[\.\n]?', '', clean_batch_prompt, flags=re.IGNORECASE)
+        clean_batch_prompt = clean_batch_prompt.replace("Translate this line.", "Translate each line.")
+        clean_batch_prompt = clean_batch_prompt.replace("Return ONLY the pure Thai string, no quotes, no explanations.", "")
+        clean_batch_prompt = clean_batch_prompt.replace("Return ONLY the pure Thai string", "")
+        clean_batch_prompt = re.sub(r'CRITICAL:\s*If the text is short[^\.\n]*ONLY return the direct translation\.[^\n]*', '', clean_batch_prompt, flags=re.IGNORECASE)
+        clean_batch_prompt = clean_batch_prompt.replace("ONLY return the direct translation.", "")
+        
+        if "[GLOSSARY TO USE]" in clean_batch_prompt:
+            batch_system_prompt = clean_batch_prompt.replace("[GLOSSARY TO USE]", dyn_glossary if dyn_glossary else "")
+        else:
+            batch_system_prompt = clean_batch_prompt
+            if dyn_glossary:
+                batch_system_prompt = dyn_glossary + "\n\n" + batch_system_prompt
+        
+        batch_system_prompt += (
+            "\n\nCRITICAL FORMAT & PURITY RULES (MUST FOLLOW):\n"
+            "1. Reply ONLY with the translations, one per line. No conversational text.\n"
+            "2. Each line MUST be formatted exactly as: ID\tTRANSLATION (Do NOT omit the ID prefix or the tab!).\n"
+            "3. Do NOT use spaces instead of tabs. Do NOT output markdown tables.\n"
+            "4. STRICT THAI ONLY (ZERO ENGLISH LEAKAGE): Translate or phonetically transliterate English words into Thai (e.g. 'Quest' -> 'เควสต์', 'Inventory' -> 'ช่องเก็บของ', 'Attack' -> 'โจมตี').\n"
+            "   CRITICAL EXCEPTIONS (KEEP IN ORIGINAL LATIN SCRIPT):\n"
+            "   - Keyboard Keys, Mouse & Gamepad: 'Spacebar'/'Space' (NEVER 'สเปคบรา'/'เว้นวรรค'), 'Enter' (NEVER 'เอ็นเทอ'/'ป้อน'), 'Shift', 'Ctrl', 'Alt', 'Tab', 'Esc', 'Backspace', 'Delete', 'Insert', 'Num Lock', 'Page Up', 'Page Down', 'WASD', 'LMB', 'RMB'.\n"
+            "   - Firearms, Military & Vehicles: 'M16', 'AK-47', 'RPG-7', 'SMG', 'LMG', 'DMR', 'Humvee', 'APC', '9mm', '5.56mm'.\n"
+            "   - Game variables & tags: {0}, %s, <tag>, [KEY].\n"
+            "5. STRICT LANGUAGE PURITY: NEVER output Chinese characters (汉字), Japanese Kana, or Chinese commentary.\n"
+            "6. Example output line:\n"
+            "MyStringID\tคำแปลของฉัน"
+        )
+        
+        success = False
+        batch_processed_count = 0
+        
+        for attempt in range(1, self.max_retries + 1):
+            if self._is_killed: break
+            user_prompt = (dyn_glossary + "\n\n" if (dyn_glossary and "[GLOSSARY TO USE]" not in clean_batch_prompt) else "") + "Translate these entries:\n" + "\n".join(lines_to_send)
+            full_prompt = batch_system_prompt + "\n\n" + user_prompt
+
+            if is_web(self.config):
+                # Browser Markdown collapses TSV tabs and escapes plain-text underscores.
+                # A fenced JSON payload preserves exact IDs and masked game placeholders.
+                import json
+                entries = [{'id': line.partition('\t')[0], 'source': line.partition('\t')[2]}
+                           for line in lines_to_send]
+                web_rules = (
+                    '\n\nWEB TRANSPORT OUTPUT CONTRACT (replaces earlier TSV/TAB output rules):\n'
+                    'Reply with exactly one fenced json code block containing a JSON array. '
+                    'Each object must have exactly "id" and "translation" string fields. '
+                    'Copy every id exactly. Preserve all game tags and [TAG_0] style placeholders exactly. '
+                    'Do not output a Markdown table or TSV. Do not escape underscores or brackets '
+                    'as Markdown inside JSON strings. Return only that JSON code block.\n'
+                    'Example: [{"id":"example_key","translation":"คำแปล"}]\n\nENTRIES:\n'
+                )
+                full_prompt = (batch_system_prompt.split('\n\nCRITICAL FORMAT & PURITY RULES (MUST FOLLOW):')[0]
+                               + web_rules + json.dumps(entries, ensure_ascii=False))
+
+            
+            try:
+                reply = self._generate_translation(full_prompt, is_local)
+                if is_web(self.config):
+                    try:
+                        reply = TranslationGateway.strict_batch_reply(reply, [gid for _, gid, _ in batch_tasks])
+                    except WebTransportError as error:
+                        self._transport_error = str(error)
+                        self._is_killed = True
+                        return False
+                reply = self._RE_CODE_FENCE_START.sub('', reply.strip())
+                reply = self._RE_CODE_FENCE_END.sub('', reply)
+                
+                results = {}
+                seen_ids = set()
+                duplicate_ids = set()
+                current_id = None
+                valid_ids = {game_id for _, game_id, _ in batch_tasks}
+                valid_ids_ci = {gid.lower(): gid for _, gid, _ in batch_tasks}
+                suffix_map = {}
+                for _, gid, _ in batch_tasks:
+                    if "::" in gid:
+                        sfx = gid.split("::")[-1].strip().lower()
+                        suffix_map[sfx] = gid
+                    elif "/" in gid:
+                        sfx = gid.split("/")[-1].strip().lower()
+                        suffix_map[sfx] = gid
+                
+                for line in reply.split('\n'):
+                    stripped = line.strip()
+                    if not stripped: continue
+                    
+                    if '\t' in stripped:
+                        tab_pos = stripped.index('\t')
+                        candidate_id = self._strip_outer_quotes(stripped[:tab_pos].strip())
+                        candidate_val = self._strip_outer_quotes(stripped[tab_pos + 1:].strip())
+                        
+                        matched_id = None
+                        if candidate_id in valid_ids:
+                            matched_id = candidate_id
+                        elif candidate_id.lower() in valid_ids_ci:
+                            matched_id = valid_ids_ci[candidate_id.lower()]
+                        elif candidate_id.lower() in suffix_map:
+                            matched_id = suffix_map[candidate_id.lower()]
+                        
+                        if matched_id is not None:
+                            if matched_id in seen_ids:
+                                # Duplicate ID detected! Mark duplicate and do not overwrite
+                                duplicate_ids.add(matched_id)
+                                current_id = None
+                            else:
+                                seen_ids.add(matched_id)
+                                current_id = matched_id
+                                results[current_id] = candidate_val
+                        else:
+                            # Unknown ID with tab: DO NOT attach to previous ID!
+                            current_id = None
+                    elif current_id is not None:
+                        # An unframed line invalidates the preceding record.
+                        duplicate_ids.add(current_id)
+                        current_id = None
+                        
+                # Auto-recovery fallback:
+                # If no valid IDs were matched or some are missing, check if the LLM outputted
+                # lines in the exact 1:1 sequence corresponding to batch_tasks.
+                clean_reply_lines = [
+                    l.strip() for l in reply.split('\n')
+                    if l.strip() and not l.strip().startswith('```')
+                ]
+                if len(clean_reply_lines) == len(batch_tasks) + 1 and clean_reply_lines[0].lower().startswith(('here is', 'here are', 'translations:', 'sure', 'certainly')):
+                    clean_reply_lines = clean_reply_lines[1:]
+
+                if len(results) < len(batch_tasks) and len(clean_reply_lines) == len(batch_tasks):
+                    for idx_seq, (t_i, t_gid, t_ph) in enumerate(batch_tasks):
+                        if t_gid not in results:
+                            line_val = clean_reply_lines[idx_seq]
+                            if '\t' in line_val:
+                                line_val = line_val.split('\t', 1)[1].strip()
+                            else:
+                                line_val = re.sub(r'^\d+[\.\)]\s*', '', line_val)
+                            results[t_gid] = self._strip_outer_quotes(line_val.strip())
+                        
+                remaining_tasks = []
+                remaining_lines = []
+                
+                for idx_zip, (i, game_id, placeholders) in enumerate(batch_tasks):
+                    if game_id in results and game_id not in duplicate_ids:
+                        translated = results[game_id]
+                        translated = translated.replace('\\n', '\n')
+                        
+                        source_text = rows[i][1]
+                        valid_placeholders = not self.use_mask or self._placeholders_valid(translated, placeholders)
+                        if valid_placeholders:
+                            if self.use_glossary: translated = self.enforce_glossary(translated)
+                            translated = self.enforce_arabic_numerals(translated)
+                            if self.use_mask: translated = self.unmask_tags(translated, placeholders)
+                            try:
+                                translated, _ = TStudioCore.retrofit_military_text(source_text, translated)
+                            except Exception:
+                                pass
+                            if self.use_cjk_filter: translated = TStudioCore.clean_cjk_leak(translated)
+                        if not valid_placeholders or not self._translation_valid(source_text, translated, game_id):
+                            self.signals.log.emit(f"[Rejected] {game_id}: unsafe translation; retrying", "#fab387")
+                            remaining_tasks.append((i, game_id, placeholders))
+                            remaining_lines.append(lines_to_send[idx_zip])
+                            continue
+
+                        if self.use_pua and tpua: translated = tpua.encode(translated)
+                        
+                        target_rows = [(i, game_id)]
+                        if source_to_indices and source_text in source_to_indices:
+                            target_rows = [(dup_i, dup_row[0]) for dup_i, dup_row in source_to_indices[source_text]]
+
+                        with self.save_lock:
+                            for t_idx, t_gid in target_rows:
+                                rows[t_idx][2] = translated
+                                
+                        for t_idx, t_gid in target_rows:
+                            self.signals.row_translated.emit(t_idx, t_gid, translated)
+                            
+                        batch_processed_count += len(target_rows)
+                        last_src_snip = row_snippets.get(game_id, game_id)
+                        last_tsnippet = translated[:40].replace('\n', ' ') + ("..." if len(translated) > 40 else "")
+                    else:
+                        remaining_tasks.append((i, game_id, placeholders))
+                        remaining_lines.append(lines_to_send[idx_zip])
+                        
+                batch_tasks = remaining_tasks
+                lines_to_send = remaining_lines
+                
+                if batch_processed_count > 0:
+                    if batch_processed_count == 1:
+                        self.signals.log.emit(f"  ✅ [Batch {batch_idx+1}/{total_batches}] {last_src_snip} → {last_tsnippet}", "#a6e3a1")
+                    else:
+                        self.signals.log.emit(f"  ✅ [Batch {batch_idx+1}/{total_batches}] Translated {batch_processed_count} rows ({last_src_snip} → {last_tsnippet})", "#a6e3a1")
+                
+                if len(batch_tasks) == 0:
+                    success = True
+                    break
+                elif len(results) == 0:
+                    try:
+                        with open(rf"E:\Mod_Workspace\Modder_project\modder-hub\tools\flagship\TRun\batch_{batch_idx+1}_debug.txt", "w", encoding="utf-8") as f:
+                            f.write("PROMPT:\n" + full_prompt + "\n\nREPLY:\n" + reply)
+                    except: pass
+                    wait_sec = min(2 ** attempt, 30)
+                    self.signals.log.emit(f"  [Warning] Batch {batch_idx+1} no results (attempt {attempt}). Waiting {wait_sec}s...", "#f38ba8")
+                    self._interruptible_sleep(wait_sec)
+                else:
+                    self.signals.log.emit(f"  [Warning] Batch {batch_idx+1} partial. Retrying {len(batch_tasks)} missing lines...", "#f9e2af")
+                    
+            except WebTransportError:
+                return False
+            except Exception as e:
+                err_str = str(e).lower()
+                wait_sec = 65 if ("429" in err_str or "quota" in err_str) else min(2 ** attempt, 30)
+                self.signals.log.emit(f"  [Error] Batch {batch_idx+1} - {e} — Waiting {wait_sec}s...", "#f38ba8")
+                self._interruptible_sleep(wait_sec)
+                
+        if not success and not self._is_killed:
+            self.signals.log.emit(f"Batch {batch_idx+1} failed after {self.max_retries} retries. Skipping...", "#f38ba8")
+            
+        if batch_processed_count > 0:
+            self._update_progress(batch_processed_count)
+            self._save_intermediate(headers, rows)
+            
+        self._interruptible_sleep(self.delay_ms / 1000.0)
+        return success
 
 
 from tstudio_ui_shared import SettingsDialog, PromptSettingsDialog, GlossaryWidget
@@ -546,7 +1109,9 @@ class TRunApp(QMainWindow):
         self.resize(1100, 750)
         self.setStyleSheet(DARK_SS)
         
-        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TRun.png"))
+        logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TRun.ico"))
+        if not os.path.exists(logo_path):
+            logo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TRun.png"))
         if os.path.exists(logo_path):
             self.setWindowIcon(QIcon(logo_path))
         
@@ -555,6 +1120,12 @@ class TRunApp(QMainWindow):
         self.is_running = False
         self._workers = []  # Keep ApiWorker references alive until QThreadPool finishes
         
+        # High-performance async log buffering
+        self._log_queue = []
+        self._log_timer = QTimer(self)
+        self._log_timer.setInterval(50)  # Flush batched logs every 50ms
+        self._log_timer.timeout.connect(self._flush_logs)
+
         self.init_ui()
         self.refresh_profiles_combo()
 
@@ -565,6 +1136,8 @@ class TRunApp(QMainWindow):
         
         # --- HEADER: Profiles & Settings ---
         header_layout = QHBoxLayout()
+        self.translation_channel = TranslationChannelWidget(self)
+        header_layout.addWidget(self.translation_channel)
         header_layout.addWidget(QLabel("📂 Active Profile:"))
         self.cbo_preset = QComboBox()
         self.cbo_preset.currentTextChanged.connect(self.on_preset_changed)
@@ -705,6 +1278,20 @@ class TRunApp(QMainWindow):
         h_retry.addWidget(self.spin_retry)
         l_engine.addLayout(h_retry)
         
+        # New: Concurrent Workers
+        h_threads = QHBoxLayout()
+        h_threads.addWidget(QLabel("Concurrent Workers (Threads):" if '_' not in globals() else _("lbl_threads")))
+        self.spin_threads = QSpinBox()
+        self.spin_threads.setRange(1, 100)
+        self.spin_threads.setValue(32) # Default 32 for fast mode
+        h_threads.addWidget(self.spin_threads)
+        
+        self.chk_token_burner = QCheckBox("⚡ Token Burner Mode (Fast, 1 API call per row)" if '_' not in globals() else _("chk_token_burner"))
+        self.chk_token_burner.setStyleSheet("color: #f9e2af; font-weight: bold;")
+        self.chk_token_burner.toggled.connect(self.on_token_burner_toggled)
+        h_threads.addWidget(self.chk_token_burner)
+        l_engine.addLayout(h_threads)
+        
         self.lbl_preview = QLabel(_("lbl_preview_default"))
         self.lbl_preview.setStyleSheet("color: #a6e3a1; font-weight: normal; margin-top: 10px; padding: 6px; border: 1px solid #45475a; border-radius: 4px; background: #181825;")
         self.lbl_preview.setWordWrap(True)
@@ -721,9 +1308,27 @@ class TRunApp(QMainWindow):
         self.chk_glossary.setChecked(True)
         self.chk_pua = QCheckBox(_("chk_auto_pua"))
         self.chk_pua.setChecked(False) # Will implement TPUA next phase
+        self.chk_cjk_filter = QCheckBox(_("chk_cjk_filter") if '_' in globals() else "🇨🇳 กรอง/ล้างภาษาจีนที่หลุดมา (CJK Leak Filter)")
+        self.chk_cjk_filter.setChecked(True)
+        self.chk_cjk_filter.setToolTip("ตรวจจับและป้องกันข้อความภาษาจีนหรือคอมเมนต์ AI จาก DeepSeek หลุดเข้าไปในคำแปล")
+        self.chk_eng_filter = QCheckBox(_("chk_eng_filter") if '_' in globals() else "🇬🇧 กรอง/แปลซ้ำภาษาอังกฤษตกค้าง (English Leak Filter)")
+        self.chk_eng_filter.setChecked(True)
+        self.chk_eng_filter.setToolTip("ตรวจจับคำภาษาอังกฤษที่ยังไม่ได้แปล (นอกเหนือจากแท็กเกม) และส่งคำสั่งแปลซ้ำเป็นภาษาไทยล้วนให้อัตโนมัติ")
+        self.chk_dedup = QCheckBox(_("chk_dedup") if '_' in globals() else "⚡ แปลเฉพาะข้อความไม่ซ้ำ (Deduplication & Auto-Propagate)")
+        self.chk_dedup.setChecked(True)
+        self.chk_dedup.setStyleSheet("color: #a6e3a1; font-weight: bold;")
+        self.chk_dedup.setToolTip("รวมข้อความที่เหมือนกันให้แปลเพียงครั้งเดียว แล้วกระจายผลลัพธ์ไปยังทุกแถวอัตโนมัติ ประหยัดโทเค็นได้ 50-80%")
+        self.chk_engine_filter = QCheckBox(_("chk_engine_filter") if '_' in globals() else "🛡️ กรองคำสั่งเอนจิน/แท็กล้วน ไม่ส่ง AI (Engine Junk Filter)")
+        self.chk_engine_filter.setChecked(True)
+        self.chk_engine_filter.setStyleSheet("color: #f9e2af; font-weight: bold;")
+        self.chk_engine_filter.setToolTip("กรองคำสั่งสคริปต์ภายในเอนจิน (เช่น ■... ใน WOLF RPG) หรือแท็กตัวแปรล้วน ไม่ส่งไป AI เพื่อป้องกันโทเค็นรั่วไหล")
         l_opts.addWidget(self.chk_mask)
         l_opts.addWidget(self.chk_glossary)
         l_opts.addWidget(self.chk_pua)
+        l_opts.addWidget(self.chk_cjk_filter)
+        l_opts.addWidget(self.chk_eng_filter)
+        l_opts.addWidget(self.chk_dedup)
+        l_opts.addWidget(self.chk_engine_filter)
         left_layout.addWidget(grp_opts)
         
         # --- Scheduling & Peak-Hour ---
@@ -854,6 +1459,7 @@ class TRunApp(QMainWindow):
         # Terminal Log Tab
         self.txt_log = QTextEdit()
         self.txt_log.setReadOnly(True)
+        self.txt_log.document().setMaximumBlockCount(1000)
         self.txt_log.setStyleSheet("background: #181825; color: #a6adc8; font-family: Consolas, monospace;")
         self.tab_right.addTab(self.txt_log, _("tab_terminal_log") if '_' in globals() else "💻 Terminal Log")
         
@@ -926,7 +1532,22 @@ class TRunApp(QMainWindow):
         if not text or not isinstance(text, str): return False
         return bool(re.search(r'[฀-๿]', text))
 
+    def on_token_burner_toggled(self, checked):
+        if checked:
+            self.spin_threads.setValue(10)
+            self.slider_batch.setEnabled(False)
+            self.spin_batch_val.setEnabled(False)
+            self.lbl_preview.setText(_("lbl_token_burner_active") if "_" in globals() else "⚡ Token Burner Mode ACTIVE. Batching disabled. Each row will be sent as an individual API call in parallel. Fast but costs more tokens.")
+        else:
+            self.spin_threads.setValue(32)
+            self.slider_batch.setEnabled(True)
+            self.spin_batch_val.setEnabled(True)
+            self.update_preview()
+
     def update_preview(self, *args):
+        if hasattr(self, 'chk_token_burner') and self.chk_token_burner.isChecked():
+            return
+            
         input_file = ""
         if self.tbl_input.rowCount() > 0:
             item = self.tbl_input.item(0, 0)
@@ -972,8 +1593,29 @@ class TRunApp(QMainWindow):
         self.lbl_preview.setText(f"ℹ️ Preview: {untranslated:,} untranslated lines\n📦 Will process in {batches:,} batches\n⏱️ Est. Time: {eta_str} {note}")
 
     def log(self, text, color="#cdd6f4"):
-        self.txt_log.append(f'<span style="color:{color};">{text}</span>')
-        self.txt_log.verticalScrollBar().setValue(self.txt_log.verticalScrollBar().maximum())
+        html = f'<span style="color:{color};">{text}</span>'
+        self._log_queue.append(html)
+        if not self._log_timer.isActive():
+            self._log_timer.start()
+
+    def _flush_logs(self):
+        if not self._log_queue:
+            self._log_timer.stop()
+            return
+        batch = self._log_queue[:]
+        self._log_queue.clear()
+
+        cursor = self.txt_log.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        # Using <p style='margin:0; padding:0;'> creates distinct QTextBlocks.
+        # This enables Qt's setMaximumBlockCount to discard old blocks in O(1) time
+        # and prevents monolithic DOM layout freezes on the Main GUI thread.
+        html_chunk = "".join([f"<p style='margin:0; padding:0; line-height:1.2;'>{item}</p>" for item in batch])
+        cursor.insertHtml(html_chunk)
+
+        scrollbar = self.txt_log.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
+        QApplication.processEvents()
 
     def refresh_profiles_combo(self):
         self.cbo_preset.blockSignals(True)
@@ -1127,7 +1769,12 @@ class TRunApp(QMainWindow):
             self.refresh_profiles_combo()
             
     def browse_input(self):
-        paths, _ext = QFileDialog.getOpenFileNames(self, _("Select Input CSV"), "", "Supported Files (*.csv *.bundle *.txt *.pak *.*);;CSV Files (*.csv);;Unity Bundles (*.bundle *.txt *.*);;PAK Files (*.pak);;All Files (*.*)")
+        from tstudio_core import TStudioCore
+        target_dir = TStudioCore.get_translation_workspace_dir(
+            hint_path=getattr(self, 'project_path', None),
+            profile_name=getattr(self, 'current_profile_name', None) or (self.cbo_profile.currentText() if hasattr(self, 'cbo_profile') else None)
+        )
+        paths, _ext = QFileDialog.getOpenFileNames(self, _("Select Input CSV"), target_dir, "Supported Files (*.csv *.bundle *.txt *.pak *.*);;CSV Files (*.csv);;Unity Bundles (*.bundle *.txt *.*);;PAK Files (*.pak);;All Files (*.*)")
         if paths:
             for path in paths:
                 def do_work(p=path):
@@ -1163,7 +1810,12 @@ class TRunApp(QMainWindow):
                 QThreadPool.globalInstance().start(worker)
 
     def browse_input_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "Select Input Folder (Contains CSVs)")
+        from tstudio_core import TStudioCore
+        target_dir = TStudioCore.get_translation_workspace_dir(
+            hint_path=getattr(self, 'project_path', None),
+            profile_name=getattr(self, 'current_profile_name', None) or (self.cbo_profile.currentText() if hasattr(self, 'cbo_profile') else None)
+        )
+        folder = QFileDialog.getExistingDirectory(self, "Select Input Folder (Contains CSVs)", target_dir)
         if folder:
             import glob, os
             csv_files = glob.glob(os.path.join(folder, "*.csv"))
@@ -1319,6 +1971,15 @@ class TRunApp(QMainWindow):
         QMessageBox.information(self, "Deploy Complete", f"Batch Deploy finished.\nSuccess: {success_count}\nFailed: {fail_count}")
 
     def start_translation(self):
+        try:
+            self._start_translation_impl()
+        except Exception as e:
+            import traceback
+            with open('GUI_CRASH_LOG.txt', 'w') as f:
+                f.write(traceback.format_exc())
+            raise
+    
+    def _start_translation_impl(self):
         if self.tbl_input.rowCount() == 0:
             QMessageBox.warning(self, _("warn_select_io_title") if '_' in globals() else "Warning", _("warn_select_io_msg") if '_' in globals() else "Please add files or folders to translate.")
             return
@@ -1376,7 +2037,12 @@ class TRunApp(QMainWindow):
         self._do_start_translation()
         
     def _do_start_translation(self):
-        self._run_next_in_queue()
+        try:
+            self._run_next_in_queue()
+        except Exception as e:
+            import traceback
+            with open('crash_log.txt', 'w') as f:
+                f.write(traceback.format_exc())
         
     def _set_queue_status(self, filename, status):
         from PyQt6.QtCore import Qt
@@ -1398,6 +2064,19 @@ class TRunApp(QMainWindow):
                 break
 
     def _run_next_in_queue(self):
+        try:
+            self._run_next_in_queue_impl()
+        except Exception as e:
+            import traceback
+            with open('GUI_CRASH_LOG.txt', 'a') as f:
+                f.write('CRASH IN _run_next_in_queue\n')
+                f.write(traceback.format_exc())
+            self.log(f'[Fatal Error] Worker failed to initialize: {e}', '#f38ba8')
+            self.is_running = False
+            self.btn_start.setEnabled(True)
+            self.btn_stop.setEnabled(False)
+            
+    def _run_next_in_queue_impl(self):
         if not self.queue:
             self.on_all_queue_finished()
             return
@@ -1441,6 +2120,7 @@ class TRunApp(QMainWindow):
             }
             
         self.worker = TRunWorker(
+            route_config=self.translation_channel.route(),
             config=cfg,
             profile=profile,
             input_csv=self.current_in_file,
@@ -1451,7 +2131,13 @@ class TRunApp(QMainWindow):
             use_mask=self.chk_mask.isChecked(),
             use_glossary=self.chk_glossary.isChecked(),
             use_pua=self.chk_pua.isChecked(),
-            peak_config=peak_config
+            peak_config=peak_config,
+            threads=self.spin_threads.value() if hasattr(self, 'spin_threads') else 1,
+            token_burner=self.chk_token_burner.isChecked() if hasattr(self, 'chk_token_burner') else False,
+            use_cjk_filter=self.chk_cjk_filter.isChecked() if hasattr(self, 'chk_cjk_filter') else True,
+            use_eng_filter=self.chk_eng_filter.isChecked() if hasattr(self, 'chk_eng_filter') else True,
+            auto_filter_engine=self.chk_engine_filter.isChecked() if hasattr(self, 'chk_engine_filter') else True,
+            use_dedup=self.chk_dedup.isChecked() if hasattr(self, 'chk_dedup') else True
         )
         
         # Prevent QObject destruction race condition when QRunnable finishes
@@ -1483,22 +2169,26 @@ class TRunApp(QMainWindow):
             self.progress_bar.setValue(pct)
             self.lbl_progress.setText(f"Lines: {current} / {total} ({pct}%)")
             
-            # ETA Calculation
+            # ETA Calculation (throttled to at most every 200ms)
             import time
-            if hasattr(self, 'current_job_start_time') and current > 0:
-                elapsed = time.time() - self.current_job_start_time
-                lines_per_sec = current / elapsed if elapsed > 0 else 0
-                if lines_per_sec > 0:
-                    remaining_lines = total - current
-                    eta_sec = remaining_lines / lines_per_sec
-                    m, s = divmod(int(eta_sec), 60)
-                    h, m = divmod(m, 60)
-                    eta_str = f"{h}h {m}m {s}s" if h > 0 else f"{m}m {s}s"
-                    self.lbl_eta.setText(f"ETA: {eta_str}")
-                else:
-                    self.lbl_eta.setText("ETA: Calculating...")
+            now = time.time()
+            if not hasattr(self, '_last_eta_update') or (now - self._last_eta_update >= 0.2):
+                self._last_eta_update = now
+                if hasattr(self, 'current_job_start_time') and current > 0:
+                    elapsed = now - self.current_job_start_time
+                    lines_per_sec = current / elapsed if elapsed > 0 else 0
+                    if lines_per_sec > 0:
+                        remaining_lines = total - current
+                        eta_sec = remaining_lines / lines_per_sec
+                        m, s = divmod(int(eta_sec), 60)
+                        h, m = divmod(m, 60)
+                        eta_str = f"{h}h {m}m {s}s" if h > 0 else f"{m}m {s}s"
+                        self.lbl_eta.setText(f"ETA: {eta_str}")
+                    else:
+                        self.lbl_eta.setText("ETA: Calculating...")
             
     def on_file_finished(self):
+        self._flush_logs()
         base_name = os.path.basename(self.current_in_file)
         self.log(f"Finished processing: {base_name}", "#a6e3a1")
         self._set_queue_status(base_name, "Completed ✅")
@@ -1507,6 +2197,7 @@ class TRunApp(QMainWindow):
 
     def on_worker_stopped(self):
         """Called when user pressed Stop — resets UI without starting next file."""
+        self._flush_logs()
         self.is_running = False
         self.queue = []  # Cancel remaining queue
         self.btn_start.setEnabled(True)
@@ -1581,6 +2272,7 @@ class TRunApp(QMainWindow):
         pass # Replaced by on_file_finished / on_all_queue_finished
 
     def on_error(self, err):
+        self._flush_logs()
         self.is_running = False
         if hasattr(self, 'current_in_file'):
             self._set_queue_status(os.path.basename(self.current_in_file), "Failed ❌")
@@ -1618,11 +2310,35 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("project", nargs="?", type=str, help="Path to THub project", default=None)
+    parser.add_argument("--standalone", action="store_true", help="Run standalone legacy TRun window")
     args, unknown = parser.parse_known_args()
     
     TStudioCore.set_project_path(args.project)
     
+    if sys.platform == "win32":
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('flagship.trun.batch.1.0')
+        except Exception:
+            pass
+
     app = QApplication(sys.argv)
-    window = TRunApp(project_path=args.project)
+    trun_ico = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TRun.ico"))
+    if not os.path.exists(trun_ico):
+        trun_ico = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "assets", "TRun.png"))
+    if os.path.exists(trun_ico):
+        app.setWindowIcon(QIcon(trun_ico))
+
+    if args.standalone:
+        window = TRunApp(project_path=args.project)
+    else:
+        try:
+            from tstudio_app import TranslationStudio
+            window = TranslationStudio(project_path=args.project, default_mode="trun")
+        except Exception as e:
+            print(f"Failed to launch unified TStudio in TRun mode: {e}")
+            window = TRunApp(project_path=args.project)
+            
     window.show()
     sys.exit(app.exec())
+

@@ -1,0 +1,17 @@
+{
+  "format": "thai-font-pua-mapping/v1",
+  "encoding": "UTF-8",
+  "mapping_file": "Mapping.json",
+  "character_file": "Char.txt",
+  "replacement_policy": "longest-match-first",
+  "normalization": [
+    "Unicode NFC",
+    "Replace U+0E4D U+0E32 with U+0E33 before mapping"
+  ],
+  "pua_output_range": "U+F000-U+F89F",
+  "mapping_entry_count": 2208,
+  "notes": [
+    "Do not use Mapping.json object order as replacement order.",
+    "After mapping, all PUA output glyphs must exist in the game font."
+  ]
+}

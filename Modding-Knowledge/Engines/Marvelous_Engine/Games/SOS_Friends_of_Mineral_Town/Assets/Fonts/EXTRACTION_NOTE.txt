@@ -1,0 +1,3 @@
+No installable TTF/OTF is present in this mod.
+
+font_data.lzs is a proprietary compressed font package (29,014,002 B; magic 94 4B B1 07 FF 18 00 1E). The font data is documented as DDS atlas pages plus metrics, so the original vector font is not available to carve. The verified raw LZS is retained in ../Raw/ for research/repacking.

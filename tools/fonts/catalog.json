@@ -1,0 +1,481 @@
+[
+  {
+    "id": "prompt",
+    "name_en": "Prompt",
+    "name_th": "พร้อม",
+    "folder": "Prompt",
+    "primary_file": "Prompt-Bold_PUA.ttf",
+    "regular_file": "Prompt-Regular_PUA.ttf",
+    "category": "Modern Loopless Sans",
+    "description_th": "ฟอนต์ไร้หัวทรงเรขาคณิต คมชัดบนจอภาพ เหมาะที่สุดสำหรับ UI เกมสมัยใหม่และ Unreal Engine",
+    "description_en": "Modern geometric loopless sans-serif with exceptional screen readability for AAA UI.",
+    "engines": {
+      "Unreal Engine": 100,
+      "Unity": 95,
+      "RE Engine": 90,
+      "Godot Engine": 90,
+      "C_Engine": 85,
+      "Custom": 85
+    },
+    "best_for": "Unreal Engine (Slate/UMG), Sci-Fi, Modern Action, AAA Menus",
+    "tone": "Modern / Professional",
+    "preview_image": "previews/prompt_preview.png"
+  },
+  {
+    "id": "kanit",
+    "name_en": "Kanit",
+    "name_th": "คณิต",
+    "folder": "Kanit",
+    "primary_file": "Kanit-Bold_PUA.ttf",
+    "regular_file": "Kanit-Regular_PUA.ttf",
+    "category": "Athletic Geometric Sans",
+    "description_th": "ฟอนต์ยอดนิยมอันดับ 1 สำหรับเกมแอ็กชัน Capcom และ RE Engine ตัวหนาอ่านง่ายในสนามรบ",
+    "description_en": "#1 choice for Action, Capcom/RE Engine titles. Bold, athletic, and punchy.",
+    "engines": {
+      "RE Engine": 100,
+      "Unity": 95,
+      "Unreal Engine": 95,
+      "C_Engine": 90,
+      "Custom": 90,
+      "MT Framework": 95
+    },
+    "best_for": "RE Engine, Unity TextMeshPro, Action, FPS, Sports, Capcom UI",
+    "tone": "Athletic / Bold / Punchy",
+    "preview_image": "previews/kanit_preview.png"
+  },
+  {
+    "id": "bai_jamjuree",
+    "name_en": "Bai Jamjuree",
+    "name_th": "ใบจามจุรี",
+    "folder": "Bai_Jamjuree",
+    "primary_file": "BaiJamjuree-Bold_PUA.ttf",
+    "regular_file": "BaiJamjuree-Regular_PUA.ttf",
+    "category": "Square Terminal Sans",
+    "description_th": "ฟอนต์ทรงเหลี่ยมมน สไตล์ไฮเทค ไซไฟ แข็งแกร่ง อ่านสบายตาในกล่องข้อความยาว",
+    "description_en": "Square terminal sans with a sleek high-tech sci-fi vibe, great for dialogs and HUD.",
+    "engines": {
+      "Unreal Engine": 95,
+      "Unity": 90,
+      "RE Engine": 90,
+      "Godot Engine": 85,
+      "C_Engine": 80
+    },
+    "best_for": "Sci-Fi, Cyberpunk, Tactical RPG, Unreal Engine Slate UI",
+    "tone": "High-Tech / Futuristic",
+    "preview_image": "previews/bai_jamjuree_preview.png"
+  },
+  {
+    "id": "google_sans",
+    "name_en": "Google Sans",
+    "name_th": "กูเกิล แซนส์",
+    "folder": "Google_Sans",
+    "primary_file": "static/GoogleSans-Bold_PUA.ttf",
+    "regular_file": "static/GoogleSans-Regular_PUA.ttf",
+    "category": "Geometric Product Sans",
+    "description_th": "ฟอนต์คลีนระดับสากล สัดส่วนสมบูรณ์แบบ ให้ความรู้สึกพรีเมียมและอ่านง่ายสูงสุดในทุกความละเอียด",
+    "description_en": "Ultra-clean premium geometric sans. Perfect balance and legibility across all resolutions.",
+    "engines": {
+      "Unreal Engine": 95,
+      "Unity": 90,
+      "RE Engine": 85,
+      "Godot Engine": 90,
+      "Custom": 85
+    },
+    "best_for": "Clean UI, Story Narrative, Minimalist Games, Modern Menus",
+    "tone": "Clean / Elegant / Universal",
+    "preview_image": "previews/google_sans_preview.png"
+  },
+  {
+    "id": "line_seed_sans_th",
+    "name_en": "LINE Seed Sans TH",
+    "name_th": "ไลน์ ซี้ด แซนส์",
+    "folder": "LINE_Seed_Sans_TH",
+    "primary_file": "LINESeedSansTH-Bold_PUA.ttf",
+    "regular_file": "LINESeedSansTH-Regular_PUA.ttf",
+    "category": "Friendly Modern Geometric Sans",
+    "description_th": "ฟอนต์ทางการจาก LINE ดีไซน์โค้งมนเป็นมิตร สไตล์เรขาคณิต อ่านง่ายคมชัดสูง ปรับระดับความสูงวรรณยุกต์ขึ้น +140 หน่วย เพื่อให้อ่านง่ายไม่ซ้อนทับสระบน พร้อมรองรับ PUA เหมาะกับ UI ทุกเอนจิ้น",
+    "description_en": "Official LINE geometric sans-serif typeface with friendly rounded terminals, optimized +140 units elevated tone mark clearance, and full PUA support for game UI.",
+    "engines": {
+      "Unity": 100,
+      "Unreal Engine": 95,
+      "Godot Engine": 95,
+      "RE Engine": 90,
+      "C_Engine": 90,
+      "Custom": 90
+    },
+    "best_for": "Modern Game UI, Unity TMP, Unreal Engine, Casual, Anime, RPG, Subtitles",
+    "tone": "Friendly / Clean / Modern",
+    "preview_image": "previews/line_seed_sans_th_preview.png"
+  },
+  {
+    "id": "ibm_plex_sans_thai",
+    "name_en": "IBM Plex Sans Thai",
+    "name_th": "ไอบีเอ็ม เพล็กซ์",
+    "folder": "IBM_Plex_Sans_Thai",
+    "primary_file": "IBMPlexSansThai-Bold_PUA.ttf",
+    "regular_file": "IBMPlexSansThai-Regular_PUA.ttf",
+    "category": "Neo-Grotesque Industrial",
+    "description_th": "ฟอนต์วิศวกรรมสไตล์อุตสาหกรรม ชัดเจนในระบบข้อมูล สถิติ และโค้ด",
+    "description_en": "Engineered neo-grotesque type with neutral industrial clarity. Excellent for stats & logs.",
+    "engines": {
+      "Unity": 95,
+      "C_Engine": 95,
+      "Unreal Engine": 90,
+      "Godot Engine": 90,
+      "RE Engine": 85
+    },
+    "best_for": "Unity TextMeshPro, Simulation, Strategy, Military, Inventory UI",
+    "tone": "Technical / Industrial",
+    "preview_image": "previews/ibm_plex_sans_thai_preview.png"
+  },
+  {
+    "id": "noto_sans_thai",
+    "name_en": "Noto Sans Thai (Loopless)",
+    "name_th": "โนโต แซนส์ (ไร้หัว)",
+    "folder": "Noto_Sans_Thai_Loopless",
+    "primary_file": "NotoSansThai-Bold_PUA.ttf",
+    "regular_file": "NotoSansThai-Regular_PUA.ttf",
+    "category": "Modern Loopless Sans",
+    "description_th": "ฟอนต์ไร้หัวโมเดิร์นคลีน ดีไซน์ทางการจาก Google สไตล์ Google Sans สระวรรณยุกต์สมบูรณ์แบบ เหมาะกับ UI เกมสมัยใหม่และ Unreal/Unity",
+    "description_en": "Google's official modern loopless sans. Sleek Google Sans aesthetic with 100% PUA support for modern game UI.",
+    "engines": {
+      "Unreal Engine": 100,
+      "Unity": 95,
+      "Godot Engine": 95,
+      "RE Engine": 95,
+      "C_Engine": 90,
+      "Custom": 90
+    },
+    "best_for": "Modern Game UI, Unreal Engine Slate/UMG, Unity TMP, Sci-Fi, Action, Minimalist Menus",
+    "tone": "Modern / Clean / Loopless",
+    "preview_image": "previews/noto_sans_thai_preview.png"
+  },
+  {
+    "id": "noto_sans_thai_looped",
+    "name_en": "Noto Sans Thai Looped",
+    "name_th": "โนโต แซนส์ ลูปด์ (มีหัว)",
+    "folder": "Noto_Sans_Thai_Looped",
+    "primary_file": "NotoSansThaiLooped-Bold_PUA.ttf",
+    "regular_file": "NotoSansThaiLooped-Regular_PUA.ttf",
+    "category": "Universal Standard Looped",
+    "description_th": "ฟอนต์มาตรฐานสากลแบบมีหัว (Looped) แท้ ดีไซน์ทางการจาก Google พร้อมชุดอักขระ PUA 2,208 Glyphs ครบทุกสระวรรณยุกต์ อ่านง่ายชัดเจนที่สุดสำหรับ Fallback ทุกเกม",
+    "description_en": "Authentic Google Noto Sans Thai Looped with complete PUA 2,208 glyphs support. The safest, most legible universal fallback for game localization.",
+    "engines": {
+      "Unity": 100,
+      "Unreal Engine": 90,
+      "Godot Engine": 95,
+      "C_Engine": 85,
+      "RE Engine": 80,
+      "Custom": 90
+    },
+    "best_for": "Universal Fallback, Global Localization, Subtitles, Story Dialogues",
+    "tone": "Neutral / Legible / Traditional",
+    "preview_image": "previews/noto_sans_thai_looped_preview.png"
+  },
+  {
+    "id": "sarabun",
+    "name_en": "Sarabun",
+    "name_th": "สารบรรณ",
+    "folder": "Sarabun",
+    "primary_file": "Sarabun-Bold_PUA.ttf",
+    "regular_file": "Sarabun-Regular_PUA.ttf",
+    "category": "Standard Looped Thai",
+    "description_th": "ฟอนต์ทางการมีหัวมาตรฐาน อ่านง่ายที่สุดสำหรับบทสนทนายาวๆ เอกสาร จดหมาย และบันทึกในเกม",
+    "description_en": "Standard looped Thai. Supreme readability for long narrative texts, letters, and lore books.",
+    "engines": {
+      "Unity": 90,
+      "Godot Engine": 90,
+      "Unreal Engine": 85,
+      "Custom": 90,
+      "RE Engine": 75
+    },
+    "best_for": "In-Game Lore, Letters, Visual Novels, RPG Dialogue, Subtitles",
+    "tone": "Readable / Formal / Book",
+    "preview_image": "previews/sarabun_preview.png"
+  },
+  {
+    "id": "pridi",
+    "name_en": "Pridi",
+    "name_th": "ปรีดี",
+    "folder": "Pridi",
+    "primary_file": "Pridi-Bold_PUA.ttf",
+    "regular_file": "Pridi-Regular_PUA.ttf",
+    "category": "Slab Serif Narrative",
+    "description_th": "ฟอนต์สไตล์มีเชิง (Slab-serif) ให้บรรยากาศวรรณกรรม นิยาย คลาสสิก ย้อนยุค หรือแฟนตาซี",
+    "description_en": "Slab-serif with literary weight. Perfect for historical, medieval, mystery, and RPG titles.",
+    "engines": {
+      "Unity": 90,
+      "Unreal Engine": 85,
+      "Godot Engine": 90,
+      "Custom": 85,
+      "C_Engine": 80
+    },
+    "best_for": "Fantasy RPG, Mystery, Historical Fiction, Detective, Lore",
+    "tone": "Classic / Literary / Narrative",
+    "preview_image": "previews/pridi_preview.png"
+  },
+  {
+    "id": "chonburi",
+    "name_en": "Chonburi",
+    "name_th": "ชลบุรี",
+    "folder": "Chonburi",
+    "primary_file": "Chonburi-Regular_PUA.ttf",
+    "regular_file": "Chonburi-Regular_PUA.ttf",
+    "category": "High-Contrast Display Serif",
+    "description_th": "ฟอนต์เส้นหนาตัดบางแบบ Didone หรูหรา อลังการ เหมาะมากสำหรับหน้าไตเติล หัวเรื่อง และป้ายประกาศ",
+    "description_en": "High-contrast Didone display serif. Luxurious and bold for game titles and big headers.",
+    "engines": {
+      "C_Engine": 90,
+      "Unreal Engine": 85,
+      "Unity": 85,
+      "Custom": 85,
+      "RE Engine": 75
+    },
+    "best_for": "Game Logo, Title Screen, Chapter Headers, Vintage Posters",
+    "tone": "Luxurious / Dramatic / Headline",
+    "preview_image": "previews/chonburi_preview.png"
+  },
+  {
+    "id": "itim",
+    "name_en": "Itim",
+    "name_th": "ไอติม",
+    "folder": "Itim",
+    "primary_file": "Itim-Regular_PUA.ttf",
+    "regular_file": "Itim-Regular_PUA.ttf",
+    "category": "Friendly Rounded Casual",
+    "description_th": "ฟอนต์หัวกลมน่ารัก สดใส เป็นมิตร เหมาะสำหรับเกมแนวทำฟาร์ม แคชชวล ปาร์ตี้ หรือ Cozy Game",
+    "description_en": "Friendly rounded casual style. Ideal for farming sims, party games, and cozy indies.",
+    "engines": {
+      "Unity": 90,
+      "Godot Engine": 95,
+      "Unreal Engine": 80,
+      "Custom": 85
+    },
+    "best_for": "Cozy Games, Farming Sims, Animal Crossing style, Casual, Kids",
+    "tone": "Playful / Warm / Cute",
+    "preview_image": "previews/itim_preview.png"
+  },
+  {
+    "id": "sriracha",
+    "name_en": "Sriracha",
+    "name_th": "ศรีราชา",
+    "folder": "Sriracha",
+    "primary_file": "Sriracha-Regular_PUA.ttf",
+    "regular_file": "Sriracha-Regular_PUA.ttf",
+    "category": "Casual Marker Handwriting",
+    "description_th": "ฟอนต์ลายมือปากกาเมจิก ดูเป็นธรรมชาติ มีชีวิตชีวา เหมาะกับไดอารี่ โน้ตแปะ และเกมเอาชีวิตรอด",
+    "description_en": "Casual marker handwriting. Great for survivor journals, sticky notes, and graffiti.",
+    "engines": {
+      "Unity": 85,
+      "Godot Engine": 90,
+      "Unreal Engine": 80,
+      "Custom": 80
+    },
+    "best_for": "Survivor Notes, Journals, Diaries, Post-Apocalyptic, Casual",
+    "tone": "Handwritten / Personal",
+    "preview_image": "previews/sriracha_preview.png"
+  },
+  {
+    "id": "charm",
+    "name_en": "Charm",
+    "name_th": "ชาม",
+    "folder": "Charm",
+    "primary_file": "Charm-Bold_PUA.ttf",
+    "regular_file": "Charm-Regular_PUA.ttf",
+    "category": "Elegant Script Handwriting",
+    "description_th": "ฟอนต์ลายมือปลายพู่กันอ่อนช้อย นุ่มนวล เหมาะสำหรับเกมโรแมนติก แฟนตาซี เวทมนตร์ หรือจดหมายรัก",
+    "description_en": "Graceful brush script. Perfect for romance, fantasy spells, poetry, and love letters.",
+    "engines": {
+      "Unity": 85,
+      "Godot Engine": 85,
+      "Unreal Engine": 80,
+      "Custom": 80
+    },
+    "best_for": "Romance, Otome, Fantasy Magic, Ancient Scrolls",
+    "tone": "Graceful / Poetic / Romantic",
+    "preview_image": "previews/charm_preview.png"
+  },
+  {
+    "id": "charmonman",
+    "name_en": "Charmonman",
+    "name_th": "ชาร์มอนแมน",
+    "folder": "Charmonman",
+    "primary_file": "Charmonman-Bold_PUA.ttf",
+    "regular_file": "Charmonman-Regular_PUA.ttf",
+    "category": "Ornate Calligraphy Script",
+    "description_th": "ฟอนต์ลายมือประดิษฐ์อารมณ์วิกตอเรียน หรูหรา เหมาะกับจดหมายโบราณ คัมภีร์เวทมนตร์ และบทกวี",
+    "description_en": "Ornate Victorian calligraphy. Ideal for ancient scrolls, magic grimoires, and royal edicts.",
+    "engines": {
+      "Unity": 80,
+      "Godot Engine": 85,
+      "Unreal Engine": 75,
+      "Custom": 80
+    },
+    "best_for": "Grimoires, Royal Edicts, Historical Letters, Fantasy Titles",
+    "tone": "Antique / Ornate / Royal",
+    "preview_image": "previews/charmonman_preview.png"
+  },
+  {
+    "id": "cts_rattikal",
+    "name_en": "CTS Rattikal",
+    "name_th": "รัตติกาล",
+    "folder": "CTS-Rattikal",
+    "primary_file": "CTS-Rattikal_PUA.ttf",
+    "regular_file": "CTS-Rattikal_PUA.ttf",
+    "category": "Horror Stylized Gothic",
+    "description_th": "ฟอนต์สไตล์โกธิกหลอน มืดมน ลึกลับ ดุดัน เหมาะกับเกมสยองขวัญ สุสาน และดาร์กแฟนตาซี",
+    "description_en": "Dark stylized gothic horror font. Built for haunted houses, dark fantasy, and occult titles.",
+    "engines": {
+      "Unreal Engine": 85,
+      "Unity": 85,
+      "RE Engine": 85,
+      "Custom": 80
+    },
+    "best_for": "Survival Horror, Dark Fantasy, Occult, Cemetery, Haunted UI",
+    "tone": "Gothic / Creepy / Mysterious",
+    "preview_image": "previews/cts_rattikal_preview.png"
+  },
+  {
+    "id": "niramit",
+    "name_en": "Niramit",
+    "name_th": "นิรมิต",
+    "folder": "Niramit",
+    "primary_file": "Niramit-Bold_PUA.ttf",
+    "regular_file": "Niramit-Regular_PUA.ttf",
+    "category": "Contemporary Looped Editorial",
+    "description_th": "ฟอนต์มีหัวดีไซน์ร่วมสมัย มั่นคง สง่างาม เหมาะกับเกมนักสืบ การเมือง ประวัติศาสตร์ และแฟนตาซีผจญภัย",
+    "description_en": "Contemporary looped serif with dignified poise. Great for detective, political, and adventure lore.",
+    "engines": {
+      "Unreal Engine": 85,
+      "Unity": 85,
+      "Godot Engine": 85,
+      "Custom": 80
+    },
+    "best_for": "Detective, Political Intrigue, Adventure, World Building Lore",
+    "tone": "Dignified / Contemporary",
+    "preview_image": "previews/niramit_preview.png"
+  },
+  {
+    "id": "chakra_petch",
+    "name_en": "Chakra Petch",
+    "name_th": "จักรเพชร",
+    "folder": "Chakra_Petch",
+    "primary_file": "ChakraPetch-SemiBold.ttf",
+    "regular_file": "ChakraPetch-Regular.ttf",
+    "category": "Sci-Fi Square Loopless",
+    "description_th": "ฟอนต์เหลี่ยมตัดสไตล์จักรกล ไฮเทค ไซไฟ (Square Cut / Robotic) คมชัด โดดเด่นในเกมแนวอวกาศ วิทยาศาสตร์ HUD และเกมธีม Cyberpunk",
+    "description_en": "Square cut geometric tech font with mechanical, sci-fi aesthetics. Perfect for HUD, futuristic UI, and cyberpunk titles.",
+    "engines": {
+      "Unreal Engine": 95,
+      "Unity": 95,
+      "Godot Engine": 90,
+      "RE Engine": 85,
+      "C_Engine": 85,
+      "Custom": 90
+    },
+    "best_for": "Sci-Fi, Cyberpunk, HUD Displays, Futuristic Games, Mecha & Space Sim",
+    "tone": "Mechanical / Futuristic / Tech",
+    "preview_image": "previews/chakra_petch_preview.png"
+  },
+  {
+    "id": "mitr",
+    "name_en": "Mitr",
+    "name_th": "มิตร",
+    "folder": "Mitr",
+    "primary_file": "Mitr-Bold_PUA.ttf",
+    "regular_file": "Mitr-Regular_PUA.ttf",
+    "category": "Retro 70s-80s Grotesque",
+    "description_th": "ฟอนต์ทรงแคปซูลโค้งมนสไตล์เรโทร 70s-80s ให้กลิ่นอายป้ายตู้เพลง ปกเทปคาสเซ็ท แสงไฟนีออน และเพลง City Pop ยุค 80s แท้ๆ",
+    "description_en": "Authentic 70s-80s rounded grotesque font with retro synthwave, cassette tape, neon arcade, and city pop aesthetics.",
+    "engines": {
+      "Unity": 95,
+      "Unreal Engine": 95,
+      "Godot Engine": 90,
+      "RE Engine": 85,
+      "Custom": 90
+    },
+    "best_for": "Synthwave, Outrun, Arcade UI, Retro 80s Action, City Pop, Neon Racing",
+    "tone": "Retro 80s / Synthwave / Grotesque",
+    "preview_image": "previews/mitr_preview.png"
+  },
+  {
+    "id": "pattaya",
+    "name_en": "Pattaya",
+    "name_th": "พัทยา",
+    "folder": "Pattaya",
+    "primary_file": "Pattaya-Regular_PUA.ttf",
+    "regular_file": "Pattaya-Regular_PUA.ttf",
+    "category": "Retro Brush Display",
+    "description_th": "ฟอนต์พู่กันประดิษฐ์ตัวหนาเอียง สไตล์ป้ายร้านริมหาดและบาร์เรโทรยุค 70s-80s ให้อารมณ์เกมแนว Vice City, ฮาวาย, แฟชั่นวินเทจ",
+    "description_en": "Bold slanted retro brush display script inspired by 70s-80s coastal resort signage, Vice City vibes, and tropical vintage aesthetics.",
+    "engines": {
+      "Unreal Engine": 90,
+      "Unity": 90,
+      "Godot Engine": 85,
+      "Custom": 85
+    },
+    "best_for": "Title Screens, Retro Beach / Resort, Vice City style, Vintage Signs, Posters",
+    "tone": "Vintage / 70s-80s Beach / Signage",
+    "preview_image": "previews/pattaya_preview.png"
+  },
+  {
+    "id": "fahkwang",
+    "name_en": "Fahkwang",
+    "name_th": "ฟ้ากว้าง",
+    "folder": "Fahkwang",
+    "primary_file": "Fahkwang-Bold_PUA.ttf",
+    "regular_file": "Fahkwang-Regular_PUA.ttf",
+    "category": "Retro Art Deco Display",
+    "description_th": "ฟอนต์เส้นหนาตัดบางสไตล์อาร์ตเดโค (Art Deco) ยุค 80s นิตยสารแฟชั่นคลาสสิก ย้อนยุค หรูหรา เหมาะกับไตเติลและชื่อบทตอน",
+    "description_en": "High-contrast 80s Art Deco display font inspired by vintage fashion editorials and retro classical cinema.",
+    "engines": {
+      "Unreal Engine": 90,
+      "Unity": 90,
+      "Godot Engine": 85,
+      "Custom": 85
+    },
+    "best_for": "Chapter Headers, Title Screens, Retro Mystery, 80s Luxury, Lore Titles",
+    "tone": "Art Deco / Glamorous / Retro",
+    "preview_image": "previews/fahkwang_preview.png"
+  },
+  {
+    "id": "trirong",
+    "name_en": "Trirong",
+    "name_th": "ไตรรงค์",
+    "folder": "Trirong",
+    "primary_file": "Trirong-Bold_PUA.ttf",
+    "regular_file": "Trirong-Regular_PUA.ttf",
+    "category": "Vintage Newspaper Serif",
+    "description_th": "ฟอนต์มีเชิงคมชัด สไตล์หนังสือพิมพ์ยุคปฏิวัติอุตสาหกรรมและต้นศตวรรษที่ 20 คลาสสิก ย้อนยุค เหมาะกับเอกสารคดี ประวัติศาสตร์ และคาวบอย",
+    "description_en": "Classic crisp serif with authentic vintage newspaper and early 20th-century editorial gravitas. Perfect for Westerns, historical lore, and detective cases.",
+    "engines": {
+      "Unity": 95,
+      "Unreal Engine": 90,
+      "Godot Engine": 90,
+      "Custom": 90
+    },
+    "best_for": "Newspapers, Wanted Posters, Historical Lore, Detective / Western, Lore Books",
+    "tone": "Vintage / Editorial / Classic",
+    "preview_image": "previews/trirong_preview.png"
+  },
+  {
+    "id": "sydi_ume_pixel",
+    "name_en": "SyDi Ume Pixel",
+    "name_th": "ไซดิ อูเมะ พิกเซล",
+    "folder": "SyDi_Ume_Pixel",
+    "primary_file": "SyDiUme-Pixel_PUA.ttf",
+    "regular_file": "SyDiUme-Pixel_PUA.ttf",
+    "category": "Retro 8-Bit / 16-Bit Pixel Art",
+    "description_th": "ฟอนต์พิกเซลแท้สำหรับเกมเรโทรยุค Famicom, Game Boy, SNES และ GBA รองรับอักขระไทยครบถ้วน ออกแบบบนกริด 12px คมกริบสำหรับเกมสไตล์พิกเซลอาร์ต",
+    "description_en": "Authentic 12px grid Thai pixel font tailored for 8-bit / 16-bit retro consoles, Game Boy, SNES, GBA, and modern pixel-art RPGs.",
+    "engines": {
+      "Unity": 100,
+      "Godot Engine": 100,
+      "Custom": 95,
+      "Unreal Engine": 85
+    },
+    "best_for": "Pixel Art Games, 8-Bit/16-Bit RPGs, Famicom/GBA Retro, Stardew/Undertale style UI",
+    "tone": "Pixel Art / 8-Bit / Nostalgic",
+    "preview_image": "previews/sydi_ume_pixel_preview.png"
+  }
+]

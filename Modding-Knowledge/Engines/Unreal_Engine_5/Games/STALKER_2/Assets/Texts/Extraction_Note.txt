@@ -1,0 +1,5 @@
+﻿LocalizationDB.uasset + .ubulk are inside TH_P.ucas (IoStore v3, Zlib compressed).
+2,140 compressed blocks, 33.03 MB total.
+This is GSC Game World's proprietary localization database, NOT standard LocRes.
+Requires UnrealPak with IoStore support to extract.
+No fonts included in this mod - text only.

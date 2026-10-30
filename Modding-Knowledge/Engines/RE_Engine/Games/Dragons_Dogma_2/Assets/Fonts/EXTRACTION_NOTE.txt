@@ -1,0 +1,7 @@
+Extracted from `translation_thai.pak` with REtool:
+`natives/stm/gui/ui01/font/fot-prentice.oft.1`
+
+File size: 95,472 B
+Magic: `46 42 46 4F` (`FBFO`)
+
+This is a compiled RE Engine font resource, not a raw TTF/OTF/WOFF file. Preserve its relative path and use a compatible RE Engine font pipeline for replacement; do not rename a TTF to `.oft.1`.

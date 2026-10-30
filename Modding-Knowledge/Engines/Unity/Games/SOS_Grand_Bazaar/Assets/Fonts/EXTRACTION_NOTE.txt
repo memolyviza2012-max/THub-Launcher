@@ -1,0 +1,19 @@
+﻿# Font Extraction Note — STORY OF SEASONS: Grand Bazaar
+
+## Status: TMP SDF FONT ATLASES EXTRACTED (No standalone TTF available)
+
+The game uses TextMeshPro (TMP) with Signed Distance Field (SDF) font atlases.
+The fonts are embedded as TMP FontAsset MonoBehaviours within Unity AssetBundles.
+No standalone TTF/OTF source font is embedded in the bundles.
+
+## Fonts Identified:
+1. **BO-SoftGoStd-DeBold_subset** (Regular) — 2,413 glyphs (87 Thai), 4096x4096 SDF atlas
+2. **BO-SoftGoStd-Heavy_subset** (Regular) — 2,413 glyphs (87 Thai), 4096x4096 SDF atlas
+
+## Font Family: BO-SoftGoStd (Bosco Soft Gothic Standard)
+This is a Japanese commercial font (Bosco Soft Gothic) with CJK coverage.
+The "_subset" suffix indicates the modder created a subset version including Thai glyphs.
+
+## SDF Atlas Images:
+- BO-SoftGoStd-DeBold_SDF_Atlas.png (4096x4096)
+- BO-SoftGoStd-Heavy_SDF_Atlas.png (4096x4096)

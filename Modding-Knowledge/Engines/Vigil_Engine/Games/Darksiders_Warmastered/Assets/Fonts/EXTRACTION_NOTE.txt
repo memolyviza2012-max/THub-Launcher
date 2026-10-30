@@ -1,0 +1,4 @@
+Fonts in Darksiders Warmastered Edition's .oppc / .mnfst archives could not be extracted to TTF/OTF formats.
+1. The game relies on the OBPK proprietary package format.
+2. Fonts are likely stored as texture atlases or proprietary font maps rather than standard vector font formats.
+3. Repacking requires dedicated Darksiders modding tools.

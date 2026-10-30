@@ -1,0 +1,10 @@
+The extraction of TTF/OTF font files from this mod was unsuccessful.
+
+1. Font Format
+The fonts are stored as pre-rendered BMFont format (Binary format version 3). The glyph definitions are inside `Thai.fnt` and the actual pixel data is inside `Thai_0.dds` and `Thai_1.dds` (DDS texture atlases).
+
+2. Why Conversion Failed
+Bitmap fonts are rasterized textures. They contain only pixels representing the letters at a specific resolution, not the original vector curves (like in TTF/OTF files). Therefore, it is impossible to perfectly reconstruct a TrueType font from these textures.
+
+3. Original Font Source
+Based on the metadata inside the `Thai.fnt` header, the original font used to generate this atlas is `PK Pi Mai Medium`. Modders who want to modify this font will need to acquire the `PK Pi Mai Medium` TTF file, and generate a new BMFont + DDS using a tool like BMFont Generator (BMFont by AngelCode).

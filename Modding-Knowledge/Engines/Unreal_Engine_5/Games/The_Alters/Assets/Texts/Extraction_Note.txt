@@ -1,0 +1,6 @@
+﻿P9Playable.locres is inside the PAK (Zlib compressed).
+Mount: ../../../TheAlters/Content/
+Locale: en (English slot override)
+Internal codename: P9Playable
+PAK naming: _P_999 = Patch priority 999 (highest priority override)
+Requires UnrealPak to extract .locres file.

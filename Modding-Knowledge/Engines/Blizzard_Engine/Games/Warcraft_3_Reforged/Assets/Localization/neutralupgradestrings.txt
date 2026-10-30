@@ -1,0 +1,10 @@
+﻿// Non-race-specific upgrades
+// glyph of fortification
+[Rgfo]
+Name=รูนเสรมกำลัง,รูนเสรมกำลัง,รูนเสรมกำลัง
+EditorSuffix= (อัปเกรด 1), (อัปเกรด 2), (อัปเกรด 3)
+
+// glyph of ultravision
+[Rguv]
+Name=อักขระสายตาไกลพิเศษ
+EditorSuffix= (อัปเกรด)

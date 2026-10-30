@@ -1,0 +1,2 @@
+Failed to extract font as TTF/OTF. Font may be stored as TMP SDF Atlas (Texture2D + Material). Original vector data is missing.
+Often in Unity Asset Bundles, TMP Font assets are saved as MonoBehaviours which point to a Texture2D Atlas, which makes TTF extraction impossible directly.

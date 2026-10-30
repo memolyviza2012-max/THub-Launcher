@@ -1,0 +1,24 @@
+﻿# Font Extraction Note — Ghost Recon Wildlands (Scimitar Engine)
+
+## Status: FONTS EMBEDDED IN PROPRIETARY .FORGE CONTAINER — PARTIAL EXTRACTION ONLY
+
+The fonts inside the Scimitar Engine's .forge/.data container use a custom 
+wrapping format where OTF table offsets are relative to the container file, 
+not the font itself. This makes direct extraction non-trivial without
+the QuickBMS script (GRW.bms) provided with the mod.
+
+## Fonts Identified (via CFF table and header string analysis):
+1. 546.data -> DFPHSGothicJapaneseGR-Regular (DynaFont Japanese Gothic)
+2. 6674.data -> DFGHSGothic-W5-Regular (DynaFont Gothic W5 - Full-width)
+3. 6680.data -> DFPHSGothic-W5-Regular (DynaFont Gothic W5 - Proportional)
+4. 9418.data -> DFGHSGothic-W5-Regular + DIN (DynaFont Gothic + DIN for numbers)
+
+## Analysis:
+These are DynaFont (DF) Japanese/CJK gothic fonts — commercial fonts licensed
+by Ubisoft. The modder likely modified these OTF files to include Thai glyph 
+ranges while maintaining the original Japanese/CJK coverage.
+
+## For extraction: Use the provided QuickBMS workflow:
+  quickbms_4gb_files.exe GRW.bms DataPC_patch_02.forge output_folder
+This will extract the raw .data files which contain the OTF fonts with 
+Scimitar container headers (first ~400 bytes).

@@ -1,0 +1,26 @@
+Dragon Quest XI — Font extraction result
+=========================================
+
+Source archive: pakchunk0-WindowsNoEditor_P_TH.pak
+SHA-256: C04D73FD5C7A1CEDAB37CA44063E4E3C88BD287DB8C350DE73EA9F8F6CD5D56C
+
+Result: no installable TTF/OTF was recoverable from the supplied archive.
+
+Evidence:
+- UE PAK v3 parsed successfully with 82 uncompressed entries.
+- RePak and UnrealPak both enumerate the same entries, but their paths are
+  opaque/non-standard byte sequences rather than usable UE asset paths.
+- Every extracted payload was scanned for SFNT signatures (00 01 00 00 and
+  OTTO). A candidate was accepted only when it had a valid table directory
+  (5–45 tables with plausible ASCII table tags). Result: 0 valid SFNT fonts.
+- No raw .ttf, .otf, .ufont, .uasset, or readable font metadata is exposed by
+  this standalone mod PAK.
+
+Interpretation: the Thai-capable font is either retained from the base game,
+stored in an opaque game-specific payload, or supplied by an installation
+component absent from this source folder. Do not rename arbitrary extracted
+payloads to .ttf: they fail the SFNT validation and are not installable fonts.
+
+To continue: obtain the matching installed game PAK directory and compare the
+82 entry offsets/SHA-1 values against the base PAKs; then inspect the matching
+assets with a Dragon Quest XI-compatible Unreal asset parser.

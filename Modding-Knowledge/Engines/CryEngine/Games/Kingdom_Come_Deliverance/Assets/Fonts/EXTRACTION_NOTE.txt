@@ -1,0 +1,7 @@
+No installable TTF/OTF exists in this mod package.
+
+The font resources are Scaleform GFx files, not a container holding a raw TrueType font:
+- gfxfontlib.gfx: 1,755 bytes, magic CFX 08, embedded zlib stream begins at offset 8 (78 DA)
+- gfxfontlib_glyphs.gfx: 22,222,514 bytes, magic CFX 0F, embedded zlib stream begins at offset 8 (78 9C)
+
+These files are compressed Scaleform/SWF font-library and glyph data. They preserve rendered/vector/font-program resources in a proprietary runtime format, not an independently installable font face. Converting them to TTF would not preserve the original font semantics. Original binaries have been retained beside this note for research and repacking.

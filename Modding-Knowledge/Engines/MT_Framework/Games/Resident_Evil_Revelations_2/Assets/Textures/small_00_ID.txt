@@ -1,0 +1,13 @@
+TEX
+Texversion=RE6
+Textype=24
+Version=8349
+Width=1024
+Height=1024
+Mips=1
+ImageDataOffset=20
+Uint1=536879261
+Byte1=1
+Byte2=1
+Byte3=0
+DDSFormat=DXT5

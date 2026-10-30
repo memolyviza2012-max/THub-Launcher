@@ -1,0 +1,3 @@
+No raw TTF/OTF can be extracted from the supplied HITMAN 3 mod without an RPKG-aware resource extractor.
+
+The mod consists of 29 Glacier RPKG patch containers. Every checked container begins GKPR (47 4B 50 52), including chunk0patch5.rpkg. Fonts and text are expected as Glacier resources distributed across these containers, not as loose font files. Use RPKG Tool to identify/extract the relevant font resource and preserve its resource hash/dependencies before attempting a replacement.
